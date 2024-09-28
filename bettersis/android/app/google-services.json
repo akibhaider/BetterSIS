@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "310451748620",
+    "project_id": "bettersis-c967e",
+    "storage_bucket": "bettersis-c967e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:310451748620:android:58c469b2aec8a648775329",
+        "android_client_info": {
+          "package_name": "com.example.bettersis"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdxjD3oEkpigInS-C9dl2W-f4AcYABHms"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
