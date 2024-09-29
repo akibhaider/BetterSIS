@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import '../utis/themes.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'login_page.dart'; 
+import 'login_page.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+  final Map<String, dynamic> userData; 
+
+  const Dashboard({super.key, required this.userData});
 
   @override
   _DashboardState createState() => _DashboardState();
@@ -11,8 +14,7 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  // Logout function
+  // Function to handle logout
   Future<void> _logout() async {
     await _auth.signOut();
     Navigator.pushReplacement(
@@ -23,26 +25,43 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    final user = _auth.currentUser;
+    ThemeData theme = AppTheme.getTheme(widget.userData['dept']);
 
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Welcome, ${user?.email}', // Display user's email
-              style: const TextStyle(fontSize: 24.0),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
+    return Theme(
+      data: theme,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Dashboard'),
+          backgroundColor: theme.primaryColor,
+          shadowColor: theme.secondaryHeaderColor,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              tooltip: 'Logout',
               onPressed: _logout,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 15.0),
-              ),
-              child: const Text('Logout'),
             ),
           ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Name: ${widget.userData['name']}", style: const TextStyle(fontSize: 18)),
+              const SizedBox(height: 10),
+              Text("Email: ${widget.userData['email']}", style: const TextStyle(fontSize: 18)),
+              const SizedBox(height: 10),
+              Text("Dept: ${widget.userData['dept']}", style: const TextStyle(fontSize: 18)),
+              const SizedBox(height: 10),
+              Text("ID: ${widget.userData['id']}", style: const TextStyle(fontSize: 18)),
+              const SizedBox(height: 10),
+              Text("Phone: ${widget.userData['phone']}", style: const TextStyle(fontSize: 18)),
+              const SizedBox(height: 10),
+              Text("Section: ${widget.userData['section']}", style: const TextStyle(fontSize: 18)),
+              const SizedBox(height: 10),
+              Text("Type: ${widget.userData['type']}", style: const TextStyle(fontSize: 18)),
+            ],
+          ),
         ),
       ),
     );
