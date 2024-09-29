@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../utis/themes.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
+import 'lunchtoken.dart';
 
 class Dashboard extends StatefulWidget {
   final Map<String, dynamic> userData; 
@@ -20,6 +21,15 @@ class _DashboardState extends State<Dashboard> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
+  }
+
+  void _navigateToLunchToken() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LunchToken(userId: widget.userData['id']),
+      ),
     );
   }
 
@@ -60,6 +70,11 @@ class _DashboardState extends State<Dashboard> {
               Text("Section: ${widget.userData['section']}", style: const TextStyle(fontSize: 18)),
               const SizedBox(height: 10),
               Text("Type: ${widget.userData['type']}", style: const TextStyle(fontSize: 18)),
+              IconButton(
+                icon: const Icon(Icons.qr_code),
+                tooltip: 'Generate Lunch Token QR',
+                onPressed: _navigateToLunchToken, 
+              ),
             ],
           ),
         ),
