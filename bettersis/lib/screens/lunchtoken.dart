@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../modules/qr_code_widget.dart'; // Import the QrCodeWidget
+import '../modules/qr_code_widget.dart';
+import 'package:intl/intl.dart';
 
 class LunchToken extends StatelessWidget {
   final String userId;
@@ -8,6 +9,13 @@ class LunchToken extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Generate current timestamp and expiry date
+    final currentTimestamp = DateTime.now();
+    final expiryDate = currentTimestamp.add(const Duration(days: 1));
+    
+    // Format the data to be stored in the QR code
+    String qrData = '$userId\n${DateFormat('yyyy-MM-dd HH:mm:ss').format(currentTimestamp)}\n${DateFormat('yyyy-MM-dd HH:mm:ss').format(expiryDate)}';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Lunch Token'),
@@ -16,7 +24,7 @@ class LunchToken extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            QrCodeWidget(userId: userId), 
+            QrCodeWidget(qrData: qrData), 
             const SizedBox(height: 20), 
             ElevatedButton(
               onPressed: () {
