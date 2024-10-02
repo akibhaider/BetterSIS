@@ -3,6 +3,8 @@ import '../utis/themes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
 import 'lunchtoken.dart';
+import '../modules/dashboard_appbar.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class Dashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -16,7 +18,30 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Function to handle logout
+  String imageUrl = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchImageUrl();
+  }
+
+  Future<void> fetchImageUrl() async {
+    try {
+      String userId = widget.userData['id']; 
+      String fileName = '$userId.png';
+      Reference storageRef = FirebaseStorage.instance
+          .ref()
+          .child(fileName);
+      String url = await storageRef.getDownloadURL();
+      setState(() {
+        imageUrl = url;
+      });
+    } catch (e) {
+      print('Error fetching image URL: $e');
+    }
+  }
+
   Future<void> _logout() async {
     await _auth.signOut();
     Navigator.pushReplacement(
@@ -41,50 +66,9 @@ class _DashboardState extends State<Dashboard> {
     return Theme(
       data: theme,
       child: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 100,
-          backgroundColor: theme.primaryColor,
-          automaticallyImplyLeading: false, // To remove the back button
-          title: Padding(
-            padding: const EdgeInsets.only(top: 8.0), // Add padding here
-            child: Column(
-              children: [
-                // 'BetterSIS' Title with rounded borders
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.white),
-                  ),
-                  child: const Text(
-                    'BetterSIS',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                // 'Dashboard' title
-                const Text(
-                  'DASHBOARD',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          centerTitle: true, // Center the title in the AppBar
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.logout),
-              tooltip: 'Logout',
-              onPressed: _logout,
-            ),
-          ],
+        appBar: DashboardAppBar(
+          onLogout: _logout,
+          theme: theme,
         ),
         body: Column(
           children: [
@@ -93,9 +77,23 @@ class _DashboardState extends State<Dashboard> {
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.black, 
+                  Container(
+                    width: 110.0, 
+                    height: 110.0,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white, 
+                        width: 4.0, 
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: NetworkImage(imageUrl),
+                      onBackgroundImageError: (exception, stackTrace) {
+                        print('Error loading image: $exception');
+                      },
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -126,6 +124,14 @@ class _DashboardState extends State<Dashboard> {
                         const SizedBox(height: 4),
                         Text(
                           "Department: ${widget.userData['dept'].toString().toUpperCase()}",
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Program: ${widget.userData['program'].toString().toUpperCase()}",
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 13,
