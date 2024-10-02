@@ -10,7 +10,7 @@ class AppTheme {
         );
       case 'eee':
         return ThemeData(
-          primaryColor: Colors.yellow,
+          primaryColor: Colors.amber,
           secondaryHeaderColor: Colors.amber,
         );
       case 'mpe':

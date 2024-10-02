@@ -3,7 +3,7 @@ import '../utis/themes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
 import 'lunchtoken.dart';
-import '../modules/dashboard_appbar.dart';
+import '../modules/bettersis_appbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class Dashboard extends StatefulWidget {
@@ -54,7 +54,41 @@ class _DashboardState extends State<Dashboard> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => LunchToken(userId: widget.userData['id']),
+        builder: (context) => LunchToken(
+          userId: widget.userData['id'], 
+          userDept: widget.userData['dept'],
+          userName: widget.userData['name'],
+          onLogout: _logout),
+      ),
+    );
+  }
+
+  Widget _buildServiceButton({
+    required IconData icon,
+    required String label,
+    required ThemeData themeData,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 35,
+            backgroundColor: themeData.primaryColor,
+            child: Icon(icon, color: Colors.white, size: 30),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
@@ -66,9 +100,10 @@ class _DashboardState extends State<Dashboard> {
     return Theme(
       data: theme,
       child: Scaffold(
-        appBar: DashboardAppBar(
+        appBar: BetterSISAppBar(
           onLogout: _logout,
           theme: theme,
+          title: 'Dashboard'
         ),
         body: Column(
           children: [
@@ -151,18 +186,112 @@ class _DashboardState extends State<Dashboard> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-            // Generate QR button
-            ElevatedButton.icon(
-              onPressed: _navigateToLunchToken,
-              icon: const Icon(Icons.qr_code),
-              label: const Text('Generate Lunch Token', style: TextStyle(color: Colors.white),),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.primaryColor, 
-                foregroundColor: Colors.white, 
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+            const SizedBox(height: 30),
+            const Center(
+              child: Text(
+                'SERVICES',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 3,  // 3 columns
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 30,
+                children: [
+                  // Result button
+                  _buildServiceButton(
+                    icon: Icons.assignment,
+                    label: "Result",
+                    themeData: theme,
+                    onTap: () {
+                      
+                    },
+                  ),
+                  // Smart Wallet button
+                  _buildServiceButton(
+                    icon: Icons.account_balance_wallet,
+                    label: "Smart Wallet",
+                    themeData: theme,
+                    onTap: () {
+                      
+                    },
+                  ),
+                  // Academics button
+                  _buildServiceButton(
+                    icon: Icons.book,
+                    label: "Academics",
+                    themeData: theme,
+                    onTap: () {
+                      
+                    },
+                  ),
+                  // Meal Token button
+                  _buildServiceButton(
+                    icon: Icons.restaurant_menu,
+                    label: "Meal Token",
+                    themeData: theme,
+                    onTap: _navigateToLunchToken,
+                  ),
+                  // Library button
+                  _buildServiceButton(
+                    icon: Icons.local_library,
+                    label: "Library",
+                    themeData: theme,
+                    onTap: () {
+                      
+                    },
+                  ),
+                  // Transportation button
+                  _buildServiceButton(
+                    icon: Icons.directions_bus,
+                    label: "Transportation",
+                    themeData: theme,
+                    onTap: () {
+                      
+                    },
+                  ),
+                  // Internet button
+                  _buildServiceButton(
+                    icon: Icons.wifi,
+                    label: "Internet",
+                    themeData: theme,
+                    onTap: () {
+                      
+                    },
+                  ),
+                  // Allowance button
+                  _buildServiceButton(
+                    icon: Icons.attach_money,
+                    label: "Allowance",
+                    themeData: theme,
+                    onTap: () {
+
+                    },
+                  ),
+                  // Complain button
+                  _buildServiceButton(
+                    icon: Icons.report_problem,
+                    label: "Complain",
+                    themeData: theme,
+                    onTap: () {
+                      
+                    },
+                  ),
+                ],
+              )
+            ),
+            const Center(
+              child: Text(
+                '2024 @ HafeziCodingBlackEdition',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
                 ),
               ),
             ),

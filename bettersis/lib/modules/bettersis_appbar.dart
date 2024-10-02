@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 
-class DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
+class BetterSISAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onLogout;
   final ThemeData theme;
+  final String title;
 
-  const DashboardAppBar({
+  void _buttonPressed(){
+    return;
+  }
+
+  const BetterSISAppBar({
     Key? key,
     required this.onLogout,
     required this.theme,
+    required this.title
   }) : super(key: key);
 
   @override
@@ -16,6 +22,11 @@ class DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
       toolbarHeight: 100,
       backgroundColor: theme.primaryColor,
       automaticallyImplyLeading: false, 
+      leading: IconButton(
+        icon: const Icon(Icons.menu, color: Colors.white),
+        tooltip: 'Menu',
+        onPressed: _buttonPressed,
+      ),
       title: Padding(
         padding: const EdgeInsets.only(top: 8.0),
         child: Column(
@@ -38,9 +49,9 @@ class DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             const SizedBox(height: 4),
             // 'Dashboard' title
-            const Text(
-              'DASHBOARD',
-              style: TextStyle(
+            Text(
+              title,
+              style: const TextStyle(
                 color: Colors.white70,
                 fontSize: 16,
               ),
@@ -51,7 +62,7 @@ class DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       actions: [
         IconButton(
-          icon: const Icon(Icons.logout),
+          icon: const Icon(Icons.logout, color: Colors.white),
           tooltip: 'Logout',
           onPressed: onLogout,
         ),
