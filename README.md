@@ -74,5 +74,11 @@
       <em>Iut Bus Service Tracker</em>
     </td>
   </tr>
+  <tr>
+    <td align="center">
+      <img src="ui/MealToken.png" alt="Meal Token with QR Code" width="150"/><br/>
+      <em>Meal Token with QR Code</em>
+    </td>
+  </tr>
 </table>
 
