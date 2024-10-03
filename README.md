@@ -7,7 +7,7 @@
 - **Department Themed Interface**: 
 - **Course Registration with Detailed Info**: A modified Course Registration Section where you can see the detailed informations about the course you are about to enrolled.
 - **Enhanced Result Section**: An amazing and user friendly Result Section with some additional features.
-- **Resources with Restricted Access**: 
+- **Resources with Restricted Access**: A fully seperated resource section where you can access your semester resources and resources provided by the library.
 - **Announcements Section**: 
 - **Internet Usage Limit Alerts**: 
 - **Wallet Recharge**:
