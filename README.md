@@ -9,7 +9,7 @@
 - **Enhanced Result Section**: An amazing and user friendly Result Section with some additional features.
 - **Resources with Restricted Access**: A fully seperated resource section where you can access your semester resources and resources provided by the library.
 - **Announcements Section**: 
-- **Internet Usage Limit Alerts**: 
+- **Internet Usage Limit Alerts**: A notifier for the internet usage limit where you can set your own custom limit.
 - **Wallet Recharge**:
 - **Cafeteria Token System**:
 - **IUT Bus Ticket System**:
