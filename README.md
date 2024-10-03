@@ -31,9 +31,9 @@
 - **NON STANDARD SOFTWARES**: ONLINE PAYMENT GATEWAY
 
 ## System Interaction
-<!--
+
 <p align="center">
-  <img src="Battleship_Destroyer_(2_player_strategic_game)/src/main/resources/Home_Window.png" alt="Main Menu" width="337"/>
+  <img src="ui/Academics.png" alt="Main Menu" width="337"/>
    <br/>
   <em>Main Menu</em>
    <br/>
