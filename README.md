@@ -32,17 +32,46 @@
 
 ## System Interaction
 <p align="center">
-  <img src="ui/Home.png" alt="Home Page" width="200"/> 
-  <img src="ui/Dashboard.png" alt="Feature Dashboard" width="200"/> 
-  <img src="ui/Academics.png" alt="Academic Updates and Schedules" width="200"/> 
+  <figure>
+    <img src="ui/Home.png" alt="Home Page" width="200"/>
+    <figcaption>Home Page</figcaption>
+  </figure>
+  <figure>
+    <img src="ui/Dashboard.png" alt="Feature Dashboard" width="200"/>
+    <figcaption>Feature Dashboard</figcaption>
+  </figure>
+  <figure>
+    <img src="ui/Academics.png" alt="Academic Updates and Schedules" width="200"/>
+    <figcaption>Academic Updates and Schedules</figcaption>
+  </figure>
 </p>
+
 <p align="center">
-  <img src="ui/Internet.png" alt="Insternet Usage Tracker" width="200"/> 
-  <img src="ui/Library.png" alt="E-Library and Question Bank" width="200"/> 
-  <img src="ui/Result.png" alt="Semester wise Course Results" width="200"/> 
+  <figure>
+    <img src="ui/Internet.png" alt="Internet Usage Tracker" width="200"/>
+    <figcaption>Internet Usage Tracker</figcaption>
+  </figure>
+  <figure>
+    <img src="ui/Library.png" alt="E-Library and Question Bank" width="200"/>
+    <figcaption>E-Library and Question Bank</figcaption>
+  </figure>
+  <figure>
+    <img src="ui/Result.png" alt="Semester wise Course Results" width="200"/>
+    <figcaption>Semester wise Course Results</figcaption>
+  </figure>
 </p>
+
 <p align="center">
-  <img src="ui/AddMoney.png" alt="E-Banking with AB-Direct" width="200"/> 
-  <img src="ui/SmartWallet.png" alt="Smart Wallet" width="200"/> 
-  <img src="ui/Transportation.png" alt="Iut Bus Service Tracker" width="200"/> 
+  <figure>
+    <img src="ui/AddMoney.png" alt="E-Banking with AB-Direct" width="200"/>
+    <figcaption>E-Banking with AB-Direct</figcaption>
+  </figure>
+  <figure>
+    <img src="ui/SmartWallet.png" alt="Smart Wallet" width="200"/>
+    <figcaption>Smart Wallet</figcaption>
+  </figure>
+  <figure>
+    <img src="ui/Transportation.png" alt="Iut Bus Service Tracker" width="200"/>
+    <figcaption>Iut Bus Service Tracker</figcaption>
+  </figure>
 </p>
