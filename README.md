@@ -31,47 +31,48 @@
 - **NON STANDARD SOFTWARES**: ONLINE PAYMENT GATEWAY
 
 ## System Interaction
-<p align="center">
-  <figure style="display: inline-block; text-align: center; margin: 10px;">
-    <img src="ui/Home.png" alt="Home Page" width="150"/>
-    <figcaption>Home Page</figcaption>
-  </figure>
-  <figure style="display: inline-block; text-align: center; margin: 10px;">
-    <img src="ui/Dashboard.png" alt="Feature Dashboard" width="150"/>
-    <figcaption>Feature Dashboard</figcaption>
-  </figure>
-  <figure style="display: inline-block; text-align: center; margin: 10px;">
-    <img src="ui/Academics.png" alt="Academic Updates and Schedules" width="150"/>
-    <figcaption>Academic Updates and Schedules</figcaption>
-  </figure>
-</p>
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="ui/Home.png" alt="Home Page" width="150"/><br/>
+      <em>Home Page</em>
+    </td>
+    <td align="center">
+      <img src="ui/Dashboard.png" alt="Feature Dashboard" width="150"/><br/>
+      <em>Feature Dashboard</em>
+    </td>
+    <td align="center">
+      <img src="ui/Academics.png" alt="Academic Updates and Schedules" width="150"/><br/>
+      <em>Academic Updates and Schedules</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="ui/Internet.png" alt="Internet Usage Tracker" width="150"/><br/>
+      <em>Internet Usage Tracker</em>
+    </td>
+    <td align="center">
+      <img src="ui/Library.png" alt="E-Library and Question Bank" width="150"/><br/>
+      <em>E-Library and Question Bank</em>
+    </td>
+    <td align="center">
+      <img src="ui/Result.png" alt="Semester wise Course Results" width="150"/><br/>
+      <em>Semester wise Course Results</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="ui/AddMoney.png" alt="E-Banking with AB-Direct" width="150"/><br/>
+      <em>E-Banking with AB-Direct</em>
+    </td>
+    <td align="center">
+      <img src="ui/SmartWallet.png" alt="Smart Wallet" width="150"/><br/>
+      <em>Smart Wallet</em>
+    </td>
+    <td align="center">
+      <img src="ui/Transportation.png" alt="Iut Bus Service Tracker" width="150"/><br/>
+      <em>Iut Bus Service Tracker</em>
+    </td>
+  </tr>
+</table>
 
-<p align="center">
-  <figure style="display: inline-block; text-align: center; margin: 10px;">
-    <img src="ui/Internet.png" alt="Internet Usage Tracker" width="150"/>
-    <figcaption>Internet Usage Tracker</figcaption>
-  </figure>
-  <figure style="display: inline-block; text-align: center; margin: 10px;">
-    <img src="ui/Library.png" alt="E-Library and Question Bank" width="150"/>
-    <figcaption>E-Library and Question Bank</figcaption>
-  </figure>
-  <figure style="display: inline-block; text-align: center; margin: 10px;">
-    <img src="ui/Result.png" alt="Semester wise Course Results" width="150"/>
-    <figcaption>Semester wise Course Results</figcaption>
-  </figure>
-</p>
-
-<p align="center">
-  <figure style="display: inline-block; text-align: center; margin: 10px;">
-    <img src="ui/AddMoney.png" alt="E-Banking with AB-Direct" width="150"/>
-    <figcaption>E-Banking with AB-Direct</figcaption>
-  </figure>
-  <figure style="display: inline-block; text-align: center; margin: 10px;">
-    <img src="ui/SmartWallet.png" alt="Smart Wallet" width="150"/>
-    <figcaption>Smart Wallet</figcaption>
-  </figure>
-  <figure style="display: inline-block; text-align: center; margin: 10px;">
-    <img src="ui/Transportation.png" alt="Iut Bus Service Tracker" width="150"/>
-    <figcaption>Iut Bus Service Tracker</figcaption>
-  </figure>
-</p>
