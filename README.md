@@ -2,18 +2,18 @@
 ![Contributors](https://img.shields.io/github/contributors/akibhaider/BetterSIS?color=darkgreen) ![Forks](https://img.shields.io/github/forks/akibhaider/BetterSIS?style=social) ![Stargazers](https://img.shields.io/github/stars/akibhaider/BetterSIS?style=social) ![Issues](https://img.shields.io/github/issues/akibhaider/BetterSIS?color=brown) 
 
 ## Features
-- **IUT Email Verification**: Play against another player, each with your own grid.
-- **Revamped Dashboard Experience**: Strategically place your battleship, destroyers, and submarines on a 9x9 grid.
-- **Department Themed Interface**: Take turns firing shots to hit and destroy your opponent's pieces.
-- **Course Registration with Detailed Info**: Receive immediate feedback on your shots, indicating hits and misses.
-- **Enhanced Result Section**: The first player to destroy all opponent pieces wins the game.
-- **Resources with Restricted Access**: Play against another player, each with your own grid.
-- **Announcements Section**: Strategically place your battleship, destroyers, and submarines on a 9x9 grid.
-- **Internet Usage Limit Alerts**: Take turns firing shots to hit and destroy your opponent's pieces.
-- **Wallet Recharge**: Receive immediate feedback on your shots, indicating hits and misses.
-- **Cafeteria Token System**: The first player to destroy all opponent pieces wins the game.
-- **IUT Bus Ticket System**
-- **Tution Fees Status**
+- **IUT Email Verification**: 
+- **Revamped Dashboard Experience**: 
+- **Department Themed Interface**: 
+- **Course Registration with Detailed Info**: A modified Course Registration Section where you can see the detailed informations about the course you are about to enrolled.
+- **Enhanced Result Section**: 
+- **Resources with Restricted Access**: 
+- **Announcements Section**: 
+- **Internet Usage Limit Alerts**: 
+- **Wallet Recharge**:
+- **Cafeteria Token System**:
+- **IUT Bus Ticket System**:
+- **Tution Fees Status**:
 
 ## Expected Customers
 - **IUT TEACHERS**
