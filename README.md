@@ -31,16 +31,15 @@
 - **NON STANDARD SOFTWARES**: ONLINE PAYMENT GATEWAY
 
 ## System Interaction
-
-<p align="center">
-  <img src="ui/Internet.png" alt="Insternet Usage Tracker" width="200"/> 
-  <img src="ui/Library.png" alt="E-Library and Question Bank" width="200"/> 
-  <img src="ui/Result.png" alt="Semester wise Course Results" width="200"/> 
-</p>
 <p align="center">
   <img src="ui/Home.png" alt="Home Page" width="200"/> 
   <img src="ui/Dashboard.png" alt="Feature Dashboard" width="200"/> 
   <img src="ui/Academics.png" alt="Academic Updates and Schedules" width="200"/> 
+</p>
+<p align="center">
+  <img src="ui/Internet.png" alt="Insternet Usage Tracker" width="200"/> 
+  <img src="ui/Library.png" alt="E-Library and Question Bank" width="200"/> 
+  <img src="ui/Result.png" alt="Semester wise Course Results" width="200"/> 
 </p>
 <p align="center">
   <img src="ui/AddMoney.png" alt="E-Banking with AB-Direct" width="200"/> 
