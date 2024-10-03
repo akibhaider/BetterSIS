@@ -6,7 +6,7 @@
 - **Revamped Dashboard Experience**: 
 - **Department Themed Interface**: 
 - **Course Registration with Detailed Info**: A modified Course Registration Section where you can see the detailed informations about the course you are about to enrolled.
-- **Enhanced Result Section**: 
+- **Enhanced Result Section**: An amazing and user friendly Result Section with some additional features.
 - **Resources with Restricted Access**: 
 - **Announcements Section**: 
 - **Internet Usage Limit Alerts**: 
