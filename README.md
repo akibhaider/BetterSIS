@@ -1,5 +1,5 @@
 # BetterSIS
-![Contributors](https://img.shields.io/github/contributors/akibhaider/BetterSIS-?color=darkgreen) ![Forks](https://img.shields.io/github/forks/akibhaider/BetterSIS-?style=social) ![Stargazers](https://img.shields.io/github/stars/akibhaider/BetterSIS-?style=social) ![Issues](https://img.shields.io/github/issues/akibhaider/BetterSIS-?color=brown) 
+![Contributors](https://img.shields.io/github/contributors/akibhaider/BetterSIS?color=darkgreen) ![Forks](https://img.shields.io/github/forks/akibhaider/BetterSIS?style=social) ![Stargazers](https://img.shields.io/github/stars/akibhaider/BetterSIS?style=social) ![Issues](https://img.shields.io/github/issues/akibhaider/BetterSIS?color=brown) 
 
 ## Features
 - **IUT Email Verification**: Play against another player, each with your own grid.
