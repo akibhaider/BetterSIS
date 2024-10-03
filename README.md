@@ -7,9 +7,9 @@
 - **Department Themed Interface**: 
 - **Course Registration with Detailed Info**: A modified Course Registration Section where you can see the detailed informations about the course you are about to enrolled.
 - **Enhanced Result Section**: An amazing and user friendly Result Section with some additional features.
-- **Resources with Restricted Access**: A fully seperated resource section where you can access your semester resources and resources provided by the library.
+- **Resources with Restricted Access**: 
 - **Announcements Section**: 
-- **Internet Usage Limit Alerts**: A notifier for the internet usage limit where you can set your own custom limit.
+- **Internet Usage Limit Alerts**: 
 - **Wallet Recharge**:
 - **Cafeteria Token System**:
 - **IUT Bus Ticket System**:
@@ -33,26 +33,17 @@
 ## System Interaction
 
 <p align="center">
-  <img src="ui/Academics.png" alt="Main Menu" width="337"/>
-   <br/>
-  <em>Main Menu</em>
-   <br/>
-   <br/>
-  <img src="Battleship_Destroyer_(2_player_strategic_game)/src/main/resources/player_blue_planning.png" alt="Ship planning-i" width="337"/>
-   <br/>
-  <em>Ship planning-i</em>
-   <br/>
+  <img src="ui/Internet.png" alt="Insternet Usage Tracker" width="200"/> 
+  <img src="ui/Library.png" alt="E-Library and Question Bank" width="200"/> 
+  <img src="ui/Result.png" alt="Semester wise Course Results" width="200"/> 
 </p>
-
 <p align="center">
-   <br/>
-  <img src="Battleship_Destroyer_(2_player_strategic_game)/src/main/resources/player_red_planning.png" alt="Ship planning-ii" width="337"/>
-   <br/>
-  <em>Ship planning-ii</em>
-   <br/>
-   <br/>
-  <img src="Battleship_Destroyer_(2_player_strategic_game)/src/main/resources/rumble.png" alt="Rumble on!" width="337"/>
-   <br/>
-  <em>Rumble on!</em>
-   <br/>
+  <img src="ui/Home.png" alt="Home Page" width="200"/> 
+  <img src="ui/Dashboard.png" alt="Feature Dashboard" width="200"/> 
+  <img src="ui/Academics.png" alt="Academic Updates and Schedules" width="200"/> 
+</p>
+<p align="center">
+  <img src="ui/AddMoney.png" alt="E-Banking with AB-Direct" width="200"/> 
+  <img src="ui/SmartWallet.png" alt="Smart Wallet" width="200"/> 
+  <img src="ui/Transportation.png" alt="Iut Bus Service Tracker" width="200"/> 
 </p>
