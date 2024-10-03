@@ -32,46 +32,46 @@
 
 ## System Interaction
 <p align="center">
-  <figure>
-    <img src="ui/Home.png" alt="Home Page" width="200"/>
+  <figure style="display: inline-block; text-align: center; margin: 10px;">
+    <img src="ui/Home.png" alt="Home Page" width="150"/>
     <figcaption>Home Page</figcaption>
   </figure>
-  <figure>
-    <img src="ui/Dashboard.png" alt="Feature Dashboard" width="200"/>
+  <figure style="display: inline-block; text-align: center; margin: 10px;">
+    <img src="ui/Dashboard.png" alt="Feature Dashboard" width="150"/>
     <figcaption>Feature Dashboard</figcaption>
   </figure>
-  <figure>
-    <img src="ui/Academics.png" alt="Academic Updates and Schedules" width="200"/>
+  <figure style="display: inline-block; text-align: center; margin: 10px;">
+    <img src="ui/Academics.png" alt="Academic Updates and Schedules" width="150"/>
     <figcaption>Academic Updates and Schedules</figcaption>
   </figure>
 </p>
 
 <p align="center">
-  <figure>
-    <img src="ui/Internet.png" alt="Internet Usage Tracker" width="200"/>
+  <figure style="display: inline-block; text-align: center; margin: 10px;">
+    <img src="ui/Internet.png" alt="Internet Usage Tracker" width="150"/>
     <figcaption>Internet Usage Tracker</figcaption>
   </figure>
-  <figure>
-    <img src="ui/Library.png" alt="E-Library and Question Bank" width="200"/>
+  <figure style="display: inline-block; text-align: center; margin: 10px;">
+    <img src="ui/Library.png" alt="E-Library and Question Bank" width="150"/>
     <figcaption>E-Library and Question Bank</figcaption>
   </figure>
-  <figure>
-    <img src="ui/Result.png" alt="Semester wise Course Results" width="200"/>
+  <figure style="display: inline-block; text-align: center; margin: 10px;">
+    <img src="ui/Result.png" alt="Semester wise Course Results" width="150"/>
     <figcaption>Semester wise Course Results</figcaption>
   </figure>
 </p>
 
 <p align="center">
-  <figure>
-    <img src="ui/AddMoney.png" alt="E-Banking with AB-Direct" width="200"/>
+  <figure style="display: inline-block; text-align: center; margin: 10px;">
+    <img src="ui/AddMoney.png" alt="E-Banking with AB-Direct" width="150"/>
     <figcaption>E-Banking with AB-Direct</figcaption>
   </figure>
-  <figure>
-    <img src="ui/SmartWallet.png" alt="Smart Wallet" width="200"/>
+  <figure style="display: inline-block; text-align: center; margin: 10px;">
+    <img src="ui/SmartWallet.png" alt="Smart Wallet" width="150"/>
     <figcaption>Smart Wallet</figcaption>
   </figure>
-  <figure>
-    <img src="ui/Transportation.png" alt="Iut Bus Service Tracker" width="200"/>
+  <figure style="display: inline-block; text-align: center; margin: 10px;">
+    <img src="ui/Transportation.png" alt="Iut Bus Service Tracker" width="150"/>
     <figcaption>Iut Bus Service Tracker</figcaption>
   </figure>
 </p>
