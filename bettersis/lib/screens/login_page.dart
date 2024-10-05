@@ -59,13 +59,13 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     setState(() {
-      isLoading = false; // Hide loading indicator
+      isLoading = false; 
     });
   }
 
   // Function to contact ICT Center via email
   Future<void> _contactICTCenter() async {
-    const url = 'mailto:ict@iut-dhaka.edu'; // Replace with actual contact email
+    const url = 'mailto:ict@iut-dhaka.edu'; 
     if (await canLaunch(url)) {
       await launch(url);
     } else {

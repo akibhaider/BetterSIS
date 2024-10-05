@@ -6,27 +6,27 @@ class AppTheme {
       case 'cse':
         return ThemeData(
           primaryColor: Colors.blue,
-          secondaryHeaderColor: Colors.blueAccent,
+          secondaryHeaderColor: const Color.fromARGB(255, 6, 55, 139),
         );
       case 'eee':
         return ThemeData(
           primaryColor: Colors.amber,
-          secondaryHeaderColor: Colors.amber,
+          secondaryHeaderColor: const Color.fromARGB(255, 255, 217, 101),
         );
       case 'mpe':
         return ThemeData(
           primaryColor: Colors.red,
-          secondaryHeaderColor: Colors.redAccent,
+          secondaryHeaderColor: const Color.fromARGB(255, 155, 0, 0),
         );
       case 'btm':
         return ThemeData(
           primaryColor: Colors.purple,
-          secondaryHeaderColor: Colors.deepPurple,
+          secondaryHeaderColor: const Color.fromARGB(255, 74, 22, 164),
         );
       case 'cee':
         return ThemeData(
           primaryColor: Colors.green,
-          secondaryHeaderColor: Colors.lightGreen,
+          secondaryHeaderColor: const Color.fromARGB(255, 65, 121, 0),
         );
       default:
         // Default theme if no department matches

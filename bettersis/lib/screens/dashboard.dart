@@ -5,6 +5,7 @@ import 'login_page.dart';
 import 'lunchtoken.dart';
 import '../modules/bettersis_appbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'result_page.dart';
 
 class Dashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -44,9 +45,10 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> _logout() async {
     await _auth.signOut();
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),
+      (Route<dynamic> route) => false,  
     );
   }
 
@@ -63,6 +65,15 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  void _navigateToResult(){
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultPage(onLogout: _logout, userData: widget.userData),
+      ),
+    );
+  }
+
   Widget _buildServiceButton({
     required IconData icon,
     required String label,
@@ -75,7 +86,7 @@ class _DashboardState extends State<Dashboard> {
         mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
-            radius: 35,
+            radius: 40,
             backgroundColor: themeData.primaryColor,
             child: Icon(icon, color: Colors.white, size: 30),
           ),
@@ -209,9 +220,7 @@ class _DashboardState extends State<Dashboard> {
                     icon: Icons.assignment,
                     label: "Result",
                     themeData: theme,
-                    onTap: () {
-                      
-                    },
+                    onTap: _navigateToResult,
                   ),
                   // Smart Wallet button
                   _buildServiceButton(
