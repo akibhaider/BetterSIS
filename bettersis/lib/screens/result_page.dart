@@ -167,7 +167,7 @@ class _ResultPageState extends State<ResultPage> {
                 },
                 children: [
                   QuizPage(userId: widget.userData['id'], userSemester: widget.userData['semester'], theme: theme),
-                  const Midpage(),
+                  Midpage(userId: widget.userData['id'], userSemester: widget.userData['semester'], theme: theme),
                   PageC(),
                 ],
               ),
