@@ -1,4 +1,5 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/screens/final_page.dart';
 import 'package:bettersis/screens/midpage.dart';
 import 'package:bettersis/utis/themes.dart';
 import 'package:flutter/material.dart';
@@ -168,24 +169,12 @@ class _ResultPageState extends State<ResultPage> {
                 children: [
                   QuizPage(userId: widget.userData['id'], userSemester: widget.userData['semester'], theme: theme),
                   Midpage(userId: widget.userData['id'], userSemester: widget.userData['semester'], theme: theme),
-                  PageC(),
+                  FinalPage(userId: widget.userData['id'], userSemester: widget.userData['semester'], theme: theme, userDept: widget.userData['dept']),
                 ],
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class PageB extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        "Page B",
-        style: TextStyle(fontSize: 24),
       ),
     );
   }

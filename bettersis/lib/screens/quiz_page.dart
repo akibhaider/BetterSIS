@@ -90,7 +90,7 @@ class _QuizPageState extends State<QuizPage> {
               alignment: Alignment.center, 
               child: Text(
                 'Quiz Results',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ),
           ),

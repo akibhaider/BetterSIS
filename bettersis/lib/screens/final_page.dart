@@ -1,57 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../modules/final_course_details.dart';
 
-class Midpage extends StatefulWidget {
+class FinalPage extends StatefulWidget {
   final String userId;
   final String userSemester;
+  final String userDept;
   final ThemeData theme;
 
-  const Midpage(
+  const FinalPage(
       {super.key,
       required this.userId,
       required this.userSemester,
+      required this.userDept,
       required this.theme});
 
   @override
-  State<Midpage> createState() => _MidpageState();
+  State<FinalPage> createState() => _FinalPageState();
 }
 
-class _MidpageState extends State<Midpage> {
+class _FinalPageState extends State<FinalPage> {
   bool isLoading = false;
 
   Future<List<String>> _fetchSemesters() async {
-    // Fetch semesters for the user
     QuerySnapshot semesterSnapshot = await FirebaseFirestore.instance
         .collection('Results')
-        .doc('Mid')
+        .doc('Final')
         .collection(widget.userId)
         .get();
 
-    List<String> semesters =
-        semesterSnapshot.docs.map((doc) => doc.id).toList();
-    return semesters;
+    return semesterSnapshot.docs.map((doc) => doc.id).toList();
+  }
+
+  Future<double> _fetchGPA(String semesterId) async {
+    DocumentSnapshot gpaSnapshot = await FirebaseFirestore.instance
+        .collection('Results')
+        .doc('Final')
+        .collection(widget.userId)
+        .doc(semesterId)
+        .get();
+
+    if (gpaSnapshot.exists) {
+      return (gpaSnapshot.data() as Map<String, dynamic>)['gpa'] ?? 0.0;
+    } else {
+      throw Exception('GPA document not found');
+    }
   }
 
   Future<List<String>> _fetchCourses(String semesterId) async {
-    // Fetch courses for the selected semester
     QuerySnapshot courseSnapshot = await FirebaseFirestore.instance
         .collection('Results')
-        .doc('Mid')
+        .doc('Final')
         .collection(widget.userId)
         .doc(semesterId)
         .collection('Courses')
         .get();
 
-    List<String> courses = courseSnapshot.docs.map((doc) => doc.id).toList();
-    return courses;
+    return courseSnapshot.docs.map((doc) => doc.id).toList();
   }
 
-  Future<Map<String, dynamic>> _fetchMidMarks(
+  Future<Map<String, dynamic>> _fetchFinalMarks(
       String semesterId, String courseId) async {
-    // Fetch marks for the selected course
     DocumentSnapshot marksSnapshot = await FirebaseFirestore.instance
         .collection('Results')
-        .doc('Mid')
+        .doc('Final')
         .collection(widget.userId)
         .doc(semesterId)
         .collection('Courses')
@@ -65,6 +77,25 @@ class _MidpageState extends State<Midpage> {
     } else {
       throw Exception('Marks document not found');
     }
+  }
+
+  void _showCourseDetails(Map<String, dynamic> result, String courseId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          child: Container(
+            padding: const EdgeInsets.all(20.0),
+            height: MediaQuery.of(context).size.height * 0.8,
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: FinalCourseDetails(
+                result: result, course: courseId, userDept: widget.userDept),
+          ),
+        );
+      },
+    );
   }
 
   String _getOrdinal(int number) {
@@ -104,8 +135,11 @@ class _MidpageState extends State<Midpage> {
             child: Align(
               alignment: Alignment.center,
               child: Text(
-                'Mid-Term Result',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+                'Final Result',
+                style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
             ),
           ),
@@ -127,9 +161,38 @@ class _MidpageState extends State<Midpage> {
               itemBuilder: (context, index) {
                 String semesterId = semesters[index];
                 return ExpansionTile(
-                  title: Text('${_getOrdinal(int.parse(semesters[index]))} Semester',
+                  title: Text(
+                      '${_getOrdinal(int.parse(semesters[index]))} Semester',
                       style: const TextStyle(fontSize: 20)),
                   children: [
+                    FutureBuilder<double>(
+                      future: _fetchGPA(semesterId),
+                      builder: (context, gpaSnapshot) {
+                        if (gpaSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (gpaSnapshot.hasError) {
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text('Error fetching GPA'),
+                          );
+                        } else if (!gpaSnapshot.hasData) {
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text('GPA not available'),
+                          );
+                        } else {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text('GPA: ${gpaSnapshot.data}',
+                                style: const TextStyle(fontSize: 16)),
+                          );
+                        }
+                      },
+                    ),
                     FutureBuilder<List<String>>(
                       future: _fetchCourses(semesterId),
                       builder: (context, courseSnapshot) {
@@ -154,7 +217,7 @@ class _MidpageState extends State<Midpage> {
                                 children: [
                                   FutureBuilder<Map<String, dynamic>>(
                                     future:
-                                        _fetchMidMarks(semesterId, courseId),
+                                        _fetchFinalMarks(semesterId, courseId),
                                     builder: (context, quizSnapshot) {
                                       if (quizSnapshot.connectionState ==
                                           ConnectionState.waiting) {
@@ -181,9 +244,12 @@ class _MidpageState extends State<Midpage> {
                                       } else {
                                         Map<String, dynamic> marks =
                                             quizSnapshot.data!;
-                                        return ListTile(
-                                          title: Text(
-                                              'Marks: ${marks['marks']}'),
+                                        return ElevatedButton(
+                                          onPressed: () {
+                                            _showCourseDetails(marks, courseId);
+                                          },
+                                          child: const Text(
+                                              'View Course Details'),
                                         );
                                       }
                                     },
