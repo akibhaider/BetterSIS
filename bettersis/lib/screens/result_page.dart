@@ -1,4 +1,5 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/screens/midpage.dart';
 import 'package:bettersis/utis/themes.dart';
 import 'package:flutter/material.dart';
 import 'quiz_page.dart';
@@ -158,7 +159,6 @@ class _ResultPageState extends State<ResultPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
             Expanded(
               child: PageView(
                 controller: _pageController,
@@ -166,8 +166,8 @@ class _ResultPageState extends State<ResultPage> {
                   print("Page changed to: $index");
                 },
                 children: [
-                  QuizPage(userId: widget.userData['id']),
-                  PageB(),
+                  QuizPage(userId: widget.userData['id'], userSemester: widget.userData['semester'], theme: theme),
+                  const Midpage(),
                   PageC(),
                 ],
               ),
