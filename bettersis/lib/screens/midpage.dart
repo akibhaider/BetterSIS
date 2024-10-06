@@ -105,102 +105,118 @@ class _MidpageState extends State<Midpage> {
               alignment: Alignment.center,
               child: Text(
                 'Mid-Term Result',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
             ),
           ),
         ),
       ),
-      body: FutureBuilder<List<String>>(
-        future: _fetchSemesters(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Center(child: Text('Error fetching data'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No semesters found'));
-          } else {
-            List<String> semesters = snapshot.data!;
-            return ListView.builder(
-              itemCount: semesters.length,
-              itemBuilder: (context, index) {
-                String semesterId = semesters[index];
-                return ExpansionTile(
-                  title: Text('${_getOrdinal(int.parse(semesters[index]))} Semester',
-                      style: const TextStyle(fontSize: 20)),
-                  children: [
-                    FutureBuilder<List<String>>(
-                      future: _fetchCourses(semesterId),
-                      builder: (context, courseSnapshot) {
-                        if (courseSnapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        } else if (courseSnapshot.hasError) {
-                          return const Text('Error fetching courses');
-                        } else if (!courseSnapshot.hasData ||
-                            courseSnapshot.data!.isEmpty) {
-                          return const Text('No courses found');
-                        } else {
-                          List<String> courses = courseSnapshot.data!;
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: courses.length,
-                            itemBuilder: (context, courseIndex) {
-                              String courseId = courses[courseIndex];
-                              return ExpansionTile(
-                                title: Text(courseId),
-                                children: [
-                                  FutureBuilder<Map<String, dynamic>>(
-                                    future:
-                                        _fetchMidMarks(semesterId, courseId),
-                                    builder: (context, quizSnapshot) {
-                                      if (quizSnapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 16.0),
-                                          child: Center(
-                                              child:
-                                                  CircularProgressIndicator()),
-                                        );
-                                      } else if (quizSnapshot.hasError) {
-                                        return const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 16.0),
-                                          child: Text('Error fetching marks'),
-                                        );
-                                      } else if (!quizSnapshot.hasData ||
-                                          quizSnapshot.data!.isEmpty) {
-                                        return const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 16.0),
-                                          child: Text('No marks found'),
-                                        );
-                                      } else {
-                                        Map<String, dynamic> marks =
-                                            quizSnapshot.data!;
-                                        return ListTile(
-                                          title: Text(
-                                              'Marks: ${marks['marks']}'),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                ],
-                              );
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FutureBuilder<List<String>>(
+              future: _fetchSemesters(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text('Error fetching data'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No semesters found'));
+                } else {
+                  List<String> semesters = snapshot.data!;
+                  return ListView.builder(
+                    shrinkWrap:
+                        true, // To ensure it shrinks properly in a scrollable view
+                    physics:
+                        const NeverScrollableScrollPhysics(), // Avoid nested scroll issue
+                    itemCount: semesters.length,
+                    itemBuilder: (context, index) {
+                      String semesterId = semesters[index];
+                      return ExpansionTile(
+                        title: Text(
+                            '${_getOrdinal(int.parse(semesters[index]))} Semester',
+                            style: const TextStyle(fontSize: 20)),
+                        children: [
+                          FutureBuilder<List<String>>(
+                            future: _fetchCourses(semesterId),
+                            builder: (context, courseSnapshot) {
+                              if (courseSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              } else if (courseSnapshot.hasError) {
+                                return const Text('Error fetching courses');
+                              } else if (!courseSnapshot.hasData ||
+                                  courseSnapshot.data!.isEmpty) {
+                                return const Text('No courses found');
+                              } else {
+                                List<String> courses = courseSnapshot.data!;
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: courses.length,
+                                  itemBuilder: (context, courseIndex) {
+                                    String courseId = courses[courseIndex];
+                                    return ExpansionTile(
+                                      title: Text(courseId),
+                                      children: [
+                                        FutureBuilder<Map<String, dynamic>>(
+                                          future: _fetchMidMarks(
+                                              semesterId, courseId),
+                                          builder: (context, quizSnapshot) {
+                                            if (quizSnapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 16.0),
+                                                child: Center(
+                                                    child:
+                                                        CircularProgressIndicator()),
+                                              );
+                                            } else if (quizSnapshot.hasError) {
+                                              return const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 16.0),
+                                                child: Text(
+                                                    'Error fetching marks'),
+                                              );
+                                            } else if (!quizSnapshot.hasData ||
+                                                quizSnapshot.data!.isEmpty) {
+                                              return const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 16.0),
+                                                child: Text('No marks found'),
+                                              );
+                                            } else {
+                                              Map<String, dynamic> marks =
+                                                  quizSnapshot.data!;
+                                              return ListTile(
+                                                title: Text(
+                                                    'Marks: ${marks['marks']}'),
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
                             },
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                );
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
               },
-            );
-          }
-        },
+            ),
+          ),
+        ),
       ),
     );
   }

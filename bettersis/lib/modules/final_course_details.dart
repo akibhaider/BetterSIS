@@ -17,26 +17,32 @@ class FinalCourseDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Text(
-          'Detailed Result of',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        Text(
-          course,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 60),
-        SizedBox(
-          height: 300,
-          child: _buildBarChart(),
-        ),
-        const SizedBox(height: 50),
-        _buildDetailsTable(),
-        const SizedBox(height: 50),
-        _displayGrade()
-      ],
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Detailed Result of',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            course,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 30),
+          SizedBox(
+            height: 250,
+            child: _buildBarChart(),
+          ),
+          const SizedBox(height: 30),
+          _buildDetailsTable(),
+          const SizedBox(height: 30),
+          _displayGrade(),
+        ],
+      ),
     );
   }
 
@@ -67,7 +73,7 @@ class FinalCourseDetails extends StatelessWidget {
                   case 1:
                     return const Text('Mid');
                   case 2:
-                    return const Text('Attendance');
+                    return const Text('Att.');
                   case 3:
                     return const Text('Quiz');
                   default:
@@ -76,14 +82,14 @@ class FinalCourseDetails extends StatelessWidget {
               },
             ),
           ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                return Text('${value.toInt()}%');
-              },
-            ),
-          ),
+          // leftTitles: AxisTitles(
+          //   sideTitles: SideTitles(
+          //     showTitles: true,
+          //     getTitlesWidget: (value, meta) {
+          //       return Text('${value.toInt()}%');
+          //     },
+          //   ),
+          // ),
         ),
         gridData: const FlGridData(show: true),
         borderData: FlBorderData(show: true),
@@ -143,10 +149,17 @@ class FinalCourseDetails extends StatelessWidget {
     );
   }
 
-  // Build a table to show the detailed results in text
   Widget _buildDetailsTable() {
     return Table(
       defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      columnWidths: const {
+        0: FlexColumnWidth(2),
+        1: FlexColumnWidth(3),
+      },
+      border: TableBorder.all(
+        color: Colors.black, 
+        width: 1.5, 
+      ),
       children: [
         _buildTableRow('Mid', result['marks']['mid'], 25),
         _buildTableRow('Attendance', result['marks']['attendance'], 5),
@@ -159,16 +172,22 @@ class FinalCourseDetails extends StatelessWidget {
   TableRow _buildTableRow(String label, dynamic achievedMarks, int totalMarks) {
     return TableRow(
       children: [
-        Center(
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ),
         ),
-        Center(
-          child: Text(
-            '${achievedMarks ?? 'N/A'} / $totalMarks',
-            style: const TextStyle(fontSize: 20),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: Text(
+              '${achievedMarks ?? 'N/A'} / $totalMarks',
+              style: const TextStyle(fontSize: 18),
+            ),
           ),
         ),
       ],

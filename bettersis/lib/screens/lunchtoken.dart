@@ -11,10 +11,16 @@ class LunchToken extends StatelessWidget {
   final String userName;
   final VoidCallback onLogout;
 
-  const LunchToken({super.key, required this.userId, required this.userDept, required this.onLogout, required this.userName});
+  const LunchToken({
+    super.key,
+    required this.userId,
+    required this.userDept,
+    required this.onLogout,
+    required this.userName,
+  });
 
   Future<void> _contactCafeteria() async {
-    const phoneNumber = 'tel:+8801713608968'; 
+    const phoneNumber = 'tel:+8801713608968';
     if (await canLaunch(phoneNumber)) {
       await launch(phoneNumber);
     } else {
@@ -24,84 +30,121 @@ class LunchToken extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get screen size
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // Scale factor for font size
+    double scaleFactor = screenWidth / 375;
+
     // Generate current timestamp and expiry date
     final currentTimestamp = DateTime.now();
     final expiryDate = currentTimestamp.add(const Duration(days: 1));
 
     ThemeData theme = AppTheme.getTheme(userDept);
-    
+
     // Format the data to be stored in the QR code
-    String qrData = '$userId\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(currentTimestamp)}\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(expiryDate)}';
+    String qrData =
+        '$userId\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(currentTimestamp)}\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(expiryDate)}';
 
     return Scaffold(
       appBar: BetterSISAppBar(
-          onLogout: onLogout,
-          theme: theme,
-          title: 'Meal Token'
-        ),
+        onLogout: onLogout,
+        theme: theme,
+        title: 'Meal Token',
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('LUNCH TOKEN', style: TextStyle(
-              color: Colors.black,
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
+            Text(
+              'LUNCH TOKEN',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 30 * scaleFactor,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const Text('NORTH CAFETERIA', style: TextStyle(
-              color: Colors.black,
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
+            Text(
+              'NORTH CAFETERIA',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 30 * scaleFactor,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            Text(DateFormat('dd-MM-yyyy').format(currentTimestamp).toString(), style: const TextStyle(
-              color: Colors.black,
-              fontSize: 20
+            Text(
+              DateFormat('dd-MM-yyyy').format(currentTimestamp).toString(),
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 20 * scaleFactor,
               ),
             ),
-            const SizedBox(height: 30),
-            const Text('Scan this QR Code', style: TextStyle(
-              color: Colors.black,
-              fontSize: 20
+            SizedBox(height: 30 * scaleFactor),
+            Text(
+              'Scan this QR Code',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 20 * scaleFactor,
               ),
             ),
-            QrCodeWidget(qrData: qrData), 
-            Text(userName, style: const TextStyle(
-              color: Colors.black,
-              fontSize: 23
+            // Make the QR code dynamically sized based on screen width
+            SizedBox(
+              height: screenWidth * 0.5, // QR Code size is 50% of screen width
+              width: screenWidth * 0.5,
+              child: QrCodeWidget(qrData: qrData),
+            ),
+            Text(
+              userName,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 23 * scaleFactor,
               ),
             ),
-            Text(userId, style: const TextStyle(
-              color: Colors.black,
-              fontSize: 20
+            Text(
+              userId,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 20 * scaleFactor,
               ),
             ),
-            const SizedBox(height: 15),
-            const Text('*Meal tokens will be available for 24 hours before the meal time', style: TextStyle(
-              color: Colors.black,
-              fontSize: 12
+            SizedBox(height: 15 * scaleFactor),
+            Text(
+              '*Meal tokens will be available for 24 hours before the meal time',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 12 * scaleFactor,
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20), 
+            SizedBox(height: 20 * scaleFactor),
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.primaryColor,
-                foregroundColor: Colors.white, 
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.15,
+                  vertical: screenHeight * 0.02,
+                ), // Dynamic padding
               ),
-              child: const Text('Return to Dashboard'),
+              child: Text(
+                'Return to Dashboard',
+                style: TextStyle(fontSize: 16 * scaleFactor),
+              ),
             ),
-            const SizedBox(height: 40),
+            //SizedBox(height: 20 * scaleFactor),
             TextButton(
               onPressed: _contactCafeteria,
-              child: const Text(
+              child: Text(
                 'Contact Cafeteria Management',
-                style: TextStyle(fontSize: 15), 
+                style: TextStyle(
+                  fontSize: 13 * scaleFactor,
+                ),
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -145,128 +145,145 @@ class _FinalPageState extends State<FinalPage> {
           ),
         ),
       ),
-      body: FutureBuilder<List<String>>(
-        future: _fetchSemesters(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Center(child: Text('Error fetching data'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No semesters found'));
-          } else {
-            List<String> semesters = snapshot.data!;
-            return ListView.builder(
-              itemCount: semesters.length,
-              itemBuilder: (context, index) {
-                String semesterId = semesters[index];
-                return ExpansionTile(
-                  title: Text(
-                      '${_getOrdinal(int.parse(semesters[index]))} Semester',
-                      style: const TextStyle(fontSize: 20)),
-                  children: [
-                    FutureBuilder<double>(
-                      future: _fetchGPA(semesterId),
-                      builder: (context, gpaSnapshot) {
-                        if (gpaSnapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (gpaSnapshot.hasError) {
-                          return const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text('Error fetching GPA'),
-                          );
-                        } else if (!gpaSnapshot.hasData) {
-                          return const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text('GPA not available'),
-                          );
-                        } else {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text('GPA: ${gpaSnapshot.data}',
-                                style: const TextStyle(fontSize: 16)),
-                          );
-                        }
-                      },
-                    ),
-                    FutureBuilder<List<String>>(
-                      future: _fetchCourses(semesterId),
-                      builder: (context, courseSnapshot) {
-                        if (courseSnapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        } else if (courseSnapshot.hasError) {
-                          return const Text('Error fetching courses');
-                        } else if (!courseSnapshot.hasData ||
-                            courseSnapshot.data!.isEmpty) {
-                          return const Text('No courses found');
-                        } else {
-                          List<String> courses = courseSnapshot.data!;
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: courses.length,
-                            itemBuilder: (context, courseIndex) {
-                              String courseId = courses[courseIndex];
-                              return ExpansionTile(
-                                title: Text(courseId),
-                                children: [
-                                  FutureBuilder<Map<String, dynamic>>(
-                                    future:
-                                        _fetchFinalMarks(semesterId, courseId),
-                                    builder: (context, quizSnapshot) {
-                                      if (quizSnapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 16.0),
-                                          child: Center(
-                                              child:
-                                                  CircularProgressIndicator()),
-                                        );
-                                      } else if (quizSnapshot.hasError) {
-                                        return const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 16.0),
-                                          child: Text('Error fetching marks'),
-                                        );
-                                      } else if (!quizSnapshot.hasData ||
-                                          quizSnapshot.data!.isEmpty) {
-                                        return const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 16.0),
-                                          child: Text('No marks found'),
-                                        );
-                                      } else {
-                                        Map<String, dynamic> marks =
-                                            quizSnapshot.data!;
-                                        return ElevatedButton(
-                                          onPressed: () {
-                                            _showCourseDetails(marks, courseId);
-                                          },
-                                          child: const Text(
-                                              'View Course Details'),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                ],
-                              );
+      body: SafeArea(
+        child: SingleChildScrollView(
+          // To make the whole body scrollable
+          child: Padding(
+            padding:
+                const EdgeInsets.all(8.0), // Add padding to avoid edge overflow
+            child: FutureBuilder<List<String>>(
+              future: _fetchSemesters(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text('Error fetching data'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No semesters found'));
+                } else {
+                  List<String> semesters = snapshot.data!;
+                  return ListView.builder(
+                    shrinkWrap:
+                        true, // Allows the ListView to shrink and scroll
+                    physics:
+                        const NeverScrollableScrollPhysics(), // Avoid double scroll issue
+                    itemCount: semesters.length,
+                    itemBuilder: (context, index) {
+                      String semesterId = semesters[index];
+                      return ExpansionTile(
+                        title: Text(
+                            '${_getOrdinal(int.parse(semesters[index]))} Semester',
+                            style: const TextStyle(fontSize: 20)),
+                        children: [
+                          FutureBuilder<double>(
+                            future: _fetchGPA(semesterId),
+                            builder: (context, gpaSnapshot) {
+                              if (gpaSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(),
+                                );
+                              } else if (gpaSnapshot.hasError) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text('Error fetching GPA'),
+                                );
+                              } else if (!gpaSnapshot.hasData) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text('GPA not available'),
+                                );
+                              } else {
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text('GPA: ${gpaSnapshot.data}',
+                                      style: const TextStyle(fontSize: 16)),
+                                );
+                              }
                             },
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                );
+                          ),
+                          FutureBuilder<List<String>>(
+                            future: _fetchCourses(semesterId),
+                            builder: (context, courseSnapshot) {
+                              if (courseSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              } else if (courseSnapshot.hasError) {
+                                return const Text('Error fetching courses');
+                              } else if (!courseSnapshot.hasData ||
+                                  courseSnapshot.data!.isEmpty) {
+                                return const Text('No courses found');
+                              } else {
+                                List<String> courses = courseSnapshot.data!;
+                                return ListView.builder(
+                                  shrinkWrap:
+                                      true, // Allows the ListView to shrink
+                                  physics:
+                                      const NeverScrollableScrollPhysics(), // Prevent scroll collision
+                                  itemCount: courses.length,
+                                  itemBuilder: (context, courseIndex) {
+                                    String courseId = courses[courseIndex];
+                                    return ExpansionTile(
+                                      title: Text(courseId),
+                                      children: [
+                                        FutureBuilder<Map<String, dynamic>>(
+                                          future: _fetchFinalMarks(
+                                              semesterId, courseId),
+                                          builder: (context, quizSnapshot) {
+                                            if (quizSnapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 16.0),
+                                                child: Center(
+                                                    child:
+                                                        CircularProgressIndicator()),
+                                              );
+                                            } else if (quizSnapshot.hasError) {
+                                              return const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 16.0),
+                                                child: Text(
+                                                    'Error fetching marks'),
+                                              );
+                                            } else if (!quizSnapshot.hasData ||
+                                                quizSnapshot.data!.isEmpty) {
+                                              return const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 16.0),
+                                                child: Text('No marks found'),
+                                              );
+                                            } else {
+                                              Map<String, dynamic> marks =
+                                                  quizSnapshot.data!;
+                                              return ElevatedButton(
+                                                onPressed: () {
+                                                  _showCourseDetails(
+                                                      marks, courseId);
+                                                },
+                                                child: const Text(
+                                                    'View Course Details'),
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
               },
-            );
-          }
-        },
+            ),
+          ),
+        ),
       ),
     );
   }
