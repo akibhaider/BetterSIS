@@ -4,6 +4,7 @@ import 'package:bettersis/screens/final_page.dart';
 import 'package:bettersis/screens/midpage.dart';
 import 'package:bettersis/utis/themes.dart';
 import 'package:flutter/material.dart';
+import '../modules/graphical_result.dart';
 import 'quiz_page.dart';
 
 class ResultPage extends StatefulWidget {
@@ -68,6 +69,15 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
+  void _showGraphicalResultDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return GraphicalResult(userData: widget.userData);
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -84,7 +94,10 @@ class _ResultPageState extends State<ResultPage> {
       data: theme,
       child: Scaffold(
         appBar: BetterSISAppBar(
-            onLogout: widget.onLogout, theme: theme, title: 'Result'),
+          onLogout: widget.onLogout,
+          theme: theme,
+          title: 'Result',
+        ),
         body: Column(
           children: [
             // Display Student Information
@@ -192,10 +205,9 @@ class _ResultPageState extends State<ResultPage> {
                                     ),
                                     SizedBox(height: screenHeight * 0.01),
                                     _isLoading
-                                        ? CircularProgressIndicator() 
+                                        ? CircularProgressIndicator()
                                         : Text(
-                                            // _latestGPA.toStringAsFixed(2),
-                                            '3.99',
+                                            _latestGPA.toStringAsFixed(2),
                                             style: TextStyle(
                                               fontSize: screenWidth * 0.045,
                                               fontWeight: FontWeight.bold,
@@ -208,45 +220,49 @@ class _ResultPageState extends State<ResultPage> {
                           ),
                         ),
                         SizedBox(width: screenWidth * 0.05),
-                        // CGPA Card
+                        // CGPA Card with GestureDetector
                         Flexible(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(
-                                color: theme.secondaryHeaderColor,
-                                width: 2,
-                              ),
-                            ),
-                            child: Card(
-                              color: Colors.white.withOpacity(0.7),
-                              shape: RoundedRectangleBorder(
+                          child: GestureDetector(
+                            onTap: _showGraphicalResultDialog,
+                            child: Container(
+                              decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(15),
+                                border: Border.all(
+                                  color: theme.secondaryHeaderColor,
+                                  width: 2,
+                                ),
                               ),
-                              elevation: 0,
-                              margin: EdgeInsets.zero,
-                              child: Padding(
-                                padding: EdgeInsets.all(screenWidth * 0.03),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      'CGPA',
-                                      style: TextStyle(
-                                        fontSize: screenWidth * 0.035,
-                                        fontWeight: FontWeight.bold,
+                              child: Card(
+                                color: Colors.white.withOpacity(0.7),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                elevation: 0,
+                                margin: EdgeInsets.zero,
+                                child: Padding(
+                                  padding: EdgeInsets.all(screenWidth * 0.03),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'CGPA',
+                                        style: TextStyle(
+                                          fontSize: screenWidth * 0.035,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(height: screenHeight * 0.01),
-                                    _isLoading
-                                        ? CircularProgressIndicator() // Loading indicator
-                                        : Text(
-                                            _calculatedCGPA.toStringAsFixed(2),
-                                            style: TextStyle(
-                                              fontSize: screenWidth * 0.045,
-                                              fontWeight: FontWeight.bold,
+                                      SizedBox(height: screenHeight * 0.01),
+                                      _isLoading
+                                          ? CircularProgressIndicator()
+                                          : Text(
+                                              _calculatedCGPA
+                                                  .toStringAsFixed(2),
+                                              style: TextStyle(
+                                                fontSize: screenWidth * 0.045,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
-                                          ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -258,7 +274,6 @@ class _ResultPageState extends State<ResultPage> {
                 ),
               ),
             ),
-            // Remaining content of the page
             Expanded(
               child: PageView(
                 controller: _pageController,
