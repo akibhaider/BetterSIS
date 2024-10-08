@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../modules/final_course_details.dart';
+import '../modules/detailed_semester_result.dart';
 
 class FinalPage extends StatefulWidget {
   final String userId;
@@ -147,10 +148,8 @@ class _FinalPageState extends State<FinalPage> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          // To make the whole body scrollable
           child: Padding(
-            padding:
-                const EdgeInsets.all(8.0), // Add padding to avoid edge overflow
+            padding: const EdgeInsets.all(8.0),
             child: FutureBuilder<List<String>>(
               future: _fetchSemesters(),
               builder: (context, snapshot) {
@@ -163,10 +162,8 @@ class _FinalPageState extends State<FinalPage> {
                 } else {
                   List<String> semesters = snapshot.data!;
                   return ListView.builder(
-                    shrinkWrap:
-                        true, // Allows the ListView to shrink and scroll
-                    physics:
-                        const NeverScrollableScrollPhysics(), // Avoid double scroll issue
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: semesters.length,
                     itemBuilder: (context, index) {
                       String semesterId = semesters[index];
@@ -175,33 +172,82 @@ class _FinalPageState extends State<FinalPage> {
                             '${_getOrdinal(int.parse(semesters[index]))} Semester',
                             style: const TextStyle(fontSize: 20)),
                         children: [
-                          FutureBuilder<double>(
-                            future: _fetchGPA(semesterId),
-                            builder: (context, gpaSnapshot) {
-                              if (gpaSnapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: CircularProgressIndicator(),
-                                );
-                              } else if (gpaSnapshot.hasError) {
-                                return const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Text('Error fetching GPA'),
-                                );
-                              } else if (!gpaSnapshot.hasData) {
-                                return const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Text('GPA not available'),
-                                );
-                              } else {
-                                return Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text('GPA: ${gpaSnapshot.data}',
-                                      style: const TextStyle(fontSize: 16)),
-                                );
-                              }
-                            },
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                FutureBuilder<double>(
+                                  future: _fetchGPA(semesterId),
+                                  builder: (context, gpaSnapshot) {
+                                    if (gpaSnapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    } else if (gpaSnapshot.hasError) {
+                                      return const Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Text('Error fetching GPA'),
+                                      );
+                                    } else if (!gpaSnapshot.hasData) {
+                                      return const Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Text('GPA not available'),
+                                      );
+                                    } else {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text('GPA: ${gpaSnapshot.data}',
+                                            style:
+                                                const TextStyle(fontSize: 16)),
+                                      );
+                                    }
+                                  },
+                                ),
+                                ElevatedButton(
+                                    onPressed: () => {
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return Dialog(
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20.0)),
+                                                child: Container(
+                                                    padding: const EdgeInsets
+                                                        .all(8.0),
+                                                    height: MediaQuery
+                                                                .of(context)
+                                                            .size
+                                                            .height *
+                                                        0.8,
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.9,
+                                                    child:
+                                                        DetailedSemesterResult(
+                                                            userId:
+                                                                widget.userId,
+                                                            semesterID:
+                                                                semesterId,
+                                                            userDept: widget
+                                                                .userDept)),
+                                              );
+                                            },
+                                          )
+                                        },
+                                    child: const Text(
+                                      'Detailed Result',
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.black),
+                                    )),
+                              ],
+                            ),
                           ),
                           FutureBuilder<List<String>>(
                             future: _fetchCourses(semesterId),
@@ -217,10 +263,8 @@ class _FinalPageState extends State<FinalPage> {
                               } else {
                                 List<String> courses = courseSnapshot.data!;
                                 return ListView.builder(
-                                  shrinkWrap:
-                                      true, // Allows the ListView to shrink
-                                  physics:
-                                      const NeverScrollableScrollPhysics(), // Prevent scroll collision
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
                                   itemCount: courses.length,
                                   itemBuilder: (context, courseIndex) {
                                     String courseId = courses[courseIndex];

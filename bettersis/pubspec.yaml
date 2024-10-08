@@ -46,6 +46,7 @@ dependencies:
   fl_chart: ^0.69.0
   google_generative_ai: ^0.4.6
   flutter_markdown: ^0.7.3+2
+  flutter_native_splash: ^2.4.1
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +71,10 @@ flutter_launcher_icons:
   adaptive_icon_background: "#FFFFFF" 
   adaptive_icon_foreground: "assets/icon.png"
 
+flutter_native_splash:
+  android: true
+  ios: true
+  color: "#2196f3"
 
 # The following section is specific to Flutter packages.
 flutter:
