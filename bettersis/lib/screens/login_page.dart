@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _loginAndFetchData() async {
     setState(() {
       isLoading = true;
-      errorMessage = ''; // Reset error message
+      errorMessage = ''; 
     });
 
     try {
@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage =
-            'Login error: ${e.message}'; // Update UI with error message
+            'Login error: ${e.message}'; 
       });
     } finally {
       setState(() {
@@ -88,7 +88,6 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: CustomAppBar(appbarHeight: appBarHeight),
       body: SingleChildScrollView(
-        // Wrap the body in SingleChildScrollView
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

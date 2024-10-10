@@ -5,10 +5,6 @@ class BetterSISAppBar extends StatelessWidget implements PreferredSizeWidget {
   final ThemeData theme;
   final String title;
 
-  void _buttonPressed() {
-    return;
-  }
-
   const BetterSISAppBar({
     Key? key,
     required this.onLogout,
@@ -33,7 +29,9 @@ class BetterSISAppBar extends StatelessWidget implements PreferredSizeWidget {
         leading: IconButton(
           icon: const Icon(Icons.menu, color: Colors.white),
           tooltip: 'Menu',
-          onPressed: _buttonPressed,
+          onPressed: () {
+            Scaffold.of(context).openDrawer();
+          },
         ),
         title: Padding(
           padding: const EdgeInsets.only(top: 8.0),

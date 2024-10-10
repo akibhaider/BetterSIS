@@ -1,3 +1,4 @@
+import 'package:bettersis/screens/complain_page.dart';
 import 'package:flutter/material.dart';
 import '../utis/themes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,6 +7,7 @@ import 'lunchtoken.dart';
 import '../modules/bettersis_appbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'result_page.dart';
+import 'appdrawer.dart';
 
 class Dashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -72,6 +74,16 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  void _navigateToComplain() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            ComplainPage(onLogout: _logout, userId: widget.userData['id'], userDept: widget.userData['dept'])
+      ),
+    );
+  }
+
   Widget _buildServiceButton({
     required IconData icon,
     required String label,
@@ -118,6 +130,7 @@ class _DashboardState extends State<Dashboard> {
           theme: theme,
           title: 'Dashboard',
         ),
+        drawer: CustomAppDrawer(theme: theme),
         body: SingleChildScrollView(
           child: Column(
             children: [
@@ -230,7 +243,7 @@ class _DashboardState extends State<Dashboard> {
                         label: "Result",
                         themeData: theme,
                         onTap: _navigateToResult,
-                        fontSize: 14 * scaleFactor, // Scaled font size
+                        fontSize: 14 * scaleFactor, 
                       ),
                       _buildServiceButton(
                         icon: Icons.account_balance_wallet,
@@ -285,7 +298,7 @@ class _DashboardState extends State<Dashboard> {
                         icon: Icons.report_problem,
                         label: "Complain",
                         themeData: theme,
-                        onTap: () {},
+                        onTap: _navigateToComplain,
                         fontSize: 14 * scaleFactor,
                       ),
                     ],

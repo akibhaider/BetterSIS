@@ -1,3 +1,4 @@
+import 'package:bettersis/screens/appdrawer.dart';
 import 'package:bettersis/utis/themes.dart';
 import 'package:flutter/material.dart';
 import '../modules/qr_code_widget.dart';
@@ -48,6 +49,7 @@ class LunchToken extends StatelessWidget {
         '$userId\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(currentTimestamp)}\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(expiryDate)}';
 
     return Scaffold(
+      drawer: CustomAppDrawer(theme: theme),
       appBar: BetterSISAppBar(
         onLogout: onLogout,
         theme: theme,

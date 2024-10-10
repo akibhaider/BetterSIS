@@ -1,4 +1,5 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/screens/appdrawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bettersis/screens/final_page.dart';
 import 'package:bettersis/screens/midpage.dart';
@@ -153,6 +154,7 @@ class _ResultPageState extends State<ResultPage> {
     return Theme(
       data: theme,
       child: Scaffold(
+        drawer: CustomAppDrawer(theme: theme),
         appBar: BetterSISAppBar(
           onLogout: widget.onLogout,
           theme: theme,
@@ -220,8 +222,6 @@ class _ResultPageState extends State<ResultPage> {
                           ),
                         ),
                         Expanded(
-                            child: SizedBox(
-                          height: screenHeight * 0.09,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -256,7 +256,7 @@ class _ResultPageState extends State<ResultPage> {
                                     ),
                             ],
                           ),
-                        ))
+                        )
                       ],
                     ),
                     SizedBox(height: screenHeight * 0.02),
@@ -293,7 +293,7 @@ class _ResultPageState extends State<ResultPage> {
                                     ),
                                     SizedBox(height: screenHeight * 0.01),
                                     _isLoadingCG
-                                        ? CircularProgressIndicator()
+                                        ? const CircularProgressIndicator()
                                         : Text(
                                             _latestGPA.toStringAsFixed(2),
                                             style: TextStyle(
@@ -340,7 +340,7 @@ class _ResultPageState extends State<ResultPage> {
                                       ),
                                       SizedBox(height: screenHeight * 0.01),
                                       _isLoadingCG
-                                          ? CircularProgressIndicator()
+                                          ? const CircularProgressIndicator()
                                           : Text(
                                               _calculatedCGPA
                                                   .toStringAsFixed(2),
