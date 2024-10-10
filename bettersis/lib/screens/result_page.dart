@@ -22,7 +22,46 @@ class _ResultPageState extends State<ResultPage> {
 
   double _latestGPA = 0.0;
   double _calculatedCGPA = 0.0;
-  bool _isLoading = true;
+  double _completedCredits = 0.0;
+  bool _isLoadingCG = true;
+  bool _isLoadingCred = true;
+
+  Future<void> _fetchCompletedCredits() async {
+    try {
+      double totalCredits = 0.0;
+      int userSemester = int.parse(widget.userData['semester'][0]);
+
+      DocumentSnapshot coursesDoc = await FirebaseFirestore.instance
+          .collection('Courses')
+          .doc(widget.userData['dept'])
+          .get();
+
+      for (int semester = 1; semester <= userSemester; semester++) {
+        QuerySnapshot semesterCourses = await FirebaseFirestore.instance
+            .collection('Courses')
+            .doc(widget.userData['dept'])
+            .collection(semester.toString())
+            .get();
+
+        for (var courseDoc in semesterCourses.docs) {
+          Map<String, dynamic> courseData =
+              courseDoc.data() as Map<String, dynamic>;
+          double credit = (courseData['credit'] as num).toDouble();
+          totalCredits += credit;
+        }
+      }
+
+      setState(() {
+        _completedCredits = totalCredits;
+        _isLoadingCred = false;
+      });
+    } catch (error) {
+      print('Error fetching Total Credits: $error');
+      setState(() {
+        _isLoadingCred = false;
+      });
+    }
+  }
 
   Future<void> _fetchGPAAndCalculateCGPA() async {
     try {
@@ -37,34 +76,54 @@ class _ResultPageState extends State<ResultPage> {
           .get();
 
       if (semesterResults.docs.isNotEmpty) {
-        for (var doc in semesterResults.docs) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          double gpa = data['gpa'] ?? 0.0;
+        int last = semesterResults.docs.length;
 
-          totalGPA += gpa;
-          semesterCount++;
+        var lastSemester =
+            semesterResults.docs[last - 1].data() as Map<String, dynamic>?;
+        if (lastSemester == null ||
+            lastSemester['gpa'] == null ||
+            lastSemester['gpa'] == 0.0) {
+          semesterResults.docs.removeLast();
+        }
 
-          if (doc.id.compareTo(semesterResults.docs.first.id) >= 0) {
-            latestGPA = gpa;
+        if (semesterResults.docs.isNotEmpty) {
+          for (var doc in semesterResults.docs) {
+            Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+            double gpa = (data['gpa'] is int)
+                ? (data['gpa'] as int).toDouble()
+                : data['gpa'] ?? 0.0;
+
+            totalGPA += gpa;
+            semesterCount++;
+          }
+
+          var latestSemester =
+              semesterResults.docs[last - 2].data() as Map<String, dynamic>?;
+          if (latestSemester != null && latestSemester['gpa'] != null) {
+            latestGPA = (latestSemester['gpa'] is int)
+                ? (latestSemester['gpa'] as int).toDouble()
+                : latestSemester['gpa'];
           }
         }
 
         setState(() {
           _latestGPA = latestGPA;
-          _calculatedCGPA = semesterCount > 0 ? totalGPA / semesterCount : 0.0;
-          _isLoading = false;
+          _calculatedCGPA =
+              semesterCount > 0 ? totalGPA / (semesterCount - 1) : 0.0;
+          _isLoadingCG = false;
         });
       } else {
         setState(() {
           _latestGPA = 0.0;
           _calculatedCGPA = 0.0;
-          _isLoading = false;
+          _isLoadingCG = false;
         });
       }
     } catch (error) {
       print('Error fetching GPA: $error');
       setState(() {
-        _isLoading = false;
+        _isLoadingCG = false;
       });
     }
   }
@@ -82,6 +141,7 @@ class _ResultPageState extends State<ResultPage> {
   void initState() {
     super.initState();
     _fetchGPAAndCalculateCGPA();
+    _fetchCompletedCredits();
   }
 
   @override
@@ -106,7 +166,7 @@ class _ResultPageState extends State<ResultPage> {
               padding: EdgeInsets.all(screenWidth * 0.05),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: screenHeight * 0.36,
+                  maxHeight: screenHeight * 0.37,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -160,15 +220,43 @@ class _ResultPageState extends State<ResultPage> {
                           ),
                         ),
                         Expanded(
-                          child: Text(
-                            'Completed Credits:\n91',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: screenWidth * 0.035,
-                            ),
-                            textAlign: TextAlign.center,
+                            child: SizedBox(
+                          height: screenHeight * 0.09,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(0),
+                                child: Text(
+                                  'Completed Credits:',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: screenWidth * 0.035,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              _isLoadingCred
+                                  ? SizedBox(
+                                      width: screenWidth * 0.08,
+                                      child: LinearProgressIndicator(
+                                        backgroundColor:
+                                            Colors.white.withOpacity(0.5),
+                                        valueColor:
+                                            const AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
+                                      ),
+                                    )
+                                  : Text(
+                                      _completedCredits.toString(),
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: screenWidth * 0.035,
+                                      ),
+                                    ),
+                            ],
                           ),
-                        ),
+                        ))
                       ],
                     ),
                     SizedBox(height: screenHeight * 0.02),
@@ -204,7 +292,7 @@ class _ResultPageState extends State<ResultPage> {
                                       ),
                                     ),
                                     SizedBox(height: screenHeight * 0.01),
-                                    _isLoading
+                                    _isLoadingCG
                                         ? CircularProgressIndicator()
                                         : Text(
                                             _latestGPA.toStringAsFixed(2),
@@ -251,7 +339,7 @@ class _ResultPageState extends State<ResultPage> {
                                         ),
                                       ),
                                       SizedBox(height: screenHeight * 0.01),
-                                      _isLoading
+                                      _isLoadingCG
                                           ? CircularProgressIndicator()
                                           : Text(
                                               _calculatedCGPA
@@ -277,9 +365,6 @@ class _ResultPageState extends State<ResultPage> {
             Expanded(
               child: PageView(
                 controller: _pageController,
-                onPageChanged: (index) {
-                  print("Page changed to: $index");
-                },
                 children: [
                   QuizPage(
                       userId: widget.userData['id'],

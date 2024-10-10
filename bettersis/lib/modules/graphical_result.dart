@@ -34,7 +34,7 @@ class _GraphicalResultState extends State<GraphicalResult> {
 
       for (var doc in semesterResults.docs) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        double gpa = data['gpa'] ?? 0.0;
+        double gpa = data['gpa'].toDouble() ?? 0.0;
         gpas.add(gpa);
       }
 

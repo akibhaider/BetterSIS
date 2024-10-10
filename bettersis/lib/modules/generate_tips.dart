@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GenerateTips extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -19,7 +20,7 @@ class _GenerateTipsState extends State<GenerateTips> {
 
   final GenerativeModel _model = GenerativeModel(
     model: 'gemini-1.5-flash',
-    apiKey: 'AIzaSyBJLxZ0OV6CGrEajgCa-fwSqoep2XUkTpw',
+    apiKey: dotenv.env['GEMINI_API_KEY'] ?? '',
   );
 
   @override
@@ -73,7 +74,6 @@ class _GenerateTipsState extends State<GenerateTips> {
           .doc(courseID)
           .get();
 
-      // Check if the document exists
       if (courseDoc.exists) {
         Map<String, dynamic>? data = courseDoc.data() as Map<String, dynamic>?;
 
@@ -92,9 +92,7 @@ class _GenerateTipsState extends State<GenerateTips> {
   Future<void> _getImprovementTips() async {
     if (courseMarks.isEmpty) return;
 
-    // Create a prompt for the AI with course names followed by their respective marks
     String prompt = '''
-      Hello Google Gemini,
       Here are the mid-term marks for ${widget.userData['name']}:
       ${courseMarks.entries.map((e) => 'Course: ${e.key}, Marks: ${e.value}').join(', ')}.
       The full marks for each course are 75. 
