@@ -1,6 +1,6 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
-import 'package:bettersis/screens/appdrawer.dart';
-import 'package:bettersis/utis/themes.dart';
+import 'package:bettersis/screens/Misc/appdrawer.dart';
+import 'package:bettersis/utils/themes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 

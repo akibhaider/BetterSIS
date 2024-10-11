@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../modules/final_course_details.dart';
-import '../modules/detailed_semester_result.dart';
+import '../../modules/Result/final_course_details.dart';
+import '../../modules/Result/detailed_semester_result.dart';
 
 class FinalPage extends StatefulWidget {
   final String userId;

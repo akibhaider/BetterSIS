@@ -1,9 +1,9 @@
-import 'package:bettersis/screens/appdrawer.dart';
-import 'package:bettersis/utis/themes.dart';
+import 'package:bettersis/screens/Misc/appdrawer.dart';
+import 'package:bettersis/utils/themes.dart';
 import 'package:flutter/material.dart';
-import '../modules/qr_code_widget.dart';
+import '../../modules/qr_code_widget.dart';
 import 'package:intl/intl.dart';
-import '../modules/bettersis_appbar.dart';
+import '../../modules/bettersis_appbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LunchToken extends StatelessWidget {
@@ -11,6 +11,10 @@ class LunchToken extends StatelessWidget {
   final String userDept;
   final String userName;
   final VoidCallback onLogout;
+  final String cafeteria;
+  final String? date; 
+  final String meal;
+  final String tokenId;
 
   const LunchToken({
     super.key,
@@ -18,6 +22,10 @@ class LunchToken extends StatelessWidget {
     required this.userDept,
     required this.onLogout,
     required this.userName,
+    required this.cafeteria,
+    required this.date,
+    required this.meal,
+    required this.tokenId,
   });
 
   Future<void> _contactCafeteria() async {
@@ -31,22 +39,30 @@ class LunchToken extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get screen size
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Scale factor for font size
     double scaleFactor = screenWidth / 375;
 
-    // Generate current timestamp and expiry date
-    final currentTimestamp = DateTime.now();
+    DateTime? currentTimestamp;
+
+    if (date != null) {
+      try {
+        currentTimestamp = DateFormat('dd-MM-yyyy HH:mm:ss').parse(date!);
+      } catch (e) {
+        // Handle parsing error
+        currentTimestamp = DateTime.now();
+      }
+    } else {
+      currentTimestamp = DateTime.now(); 
+    }
+
     final expiryDate = currentTimestamp.add(const Duration(days: 1));
 
     ThemeData theme = AppTheme.getTheme(userDept);
 
-    // Format the data to be stored in the QR code
     String qrData =
-        '$userId\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(currentTimestamp)}\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(expiryDate)}';
+        '$tokenId\n$userId\n${meal.toUpperCase()}\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(currentTimestamp)}\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(expiryDate)}';
 
     return Scaffold(
       drawer: CustomAppDrawer(theme: theme),
@@ -60,15 +76,15 @@ class LunchToken extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'LUNCH TOKEN',
+              '${meal.toUpperCase()} TOKEN',
               style: TextStyle(
                 color: Colors.black,
-                fontSize: 30 * scaleFactor,
+                fontSize: 15 * scaleFactor,
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
-              'NORTH CAFETERIA',
+              '${cafeteria.toUpperCase()}',
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 30 * scaleFactor,
@@ -90,9 +106,8 @@ class LunchToken extends StatelessWidget {
                 fontSize: 20 * scaleFactor,
               ),
             ),
-            // Make the QR code dynamically sized based on screen width
             SizedBox(
-              height: screenWidth * 0.5, // QR Code size is 50% of screen width
+              height: screenWidth * 0.5,
               width: screenWidth * 0.5,
               child: QrCodeWidget(qrData: qrData),
             ),
@@ -130,14 +145,13 @@ class LunchToken extends StatelessWidget {
                 padding: EdgeInsets.symmetric(
                   horizontal: screenWidth * 0.15,
                   vertical: screenHeight * 0.02,
-                ), // Dynamic padding
+                ),
               ),
               child: Text(
-                'Return to Dashboard',
+                'Return to Tokens',
                 style: TextStyle(fontSize: 16 * scaleFactor),
               ),
             ),
-            //SizedBox(height: 20 * scaleFactor),
             TextButton(
               onPressed: _contactCafeteria,
               child: Text(

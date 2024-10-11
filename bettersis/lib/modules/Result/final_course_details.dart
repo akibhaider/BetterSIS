@@ -1,4 +1,4 @@
-import 'package:bettersis/utis/themes.dart';
+import 'package:bettersis/utils/themes.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 

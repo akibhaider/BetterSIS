@@ -153,6 +153,16 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
             },
           ),
           ListTile(
+            leading: const Icon(Icons.qr_code),
+            title: Text(
+              'My Lunch Tokens',
+              style: TextStyle(fontSize: fontSize),
+            ),
+            onTap: () {
+              Navigator.of(context).pop();
+            }
+          ),
+          ListTile(
             leading: const Icon(Icons.settings),
             title: Text(
               'Settings',

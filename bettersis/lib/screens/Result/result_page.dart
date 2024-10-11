@@ -1,11 +1,11 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
-import 'package:bettersis/screens/appdrawer.dart';
+import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:bettersis/screens/final_page.dart';
-import 'package:bettersis/screens/midpage.dart';
-import 'package:bettersis/utis/themes.dart';
+import 'package:bettersis/screens/Result/final_page.dart';
+import 'package:bettersis/screens/Result/midpage.dart';
+import 'package:bettersis/utils/themes.dart';
 import 'package:flutter/material.dart';
-import '../modules/graphical_result.dart';
+import '../../modules/Result/graphical_result.dart';
 import 'quiz_page.dart';
 
 class ResultPage extends StatefulWidget {

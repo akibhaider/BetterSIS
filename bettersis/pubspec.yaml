@@ -47,6 +47,7 @@ dependencies:
   google_generative_ai: ^0.4.6
   flutter_markdown: ^0.7.3+2
   flutter_native_splash: ^2.4.1
+  uuid: ^4.5.1
 
 dev_dependencies:
   flutter_test:
@@ -87,6 +88,7 @@ flutter:
   assets:
     - assets/default_user.jpg
     - assets/icon.png
+    - assets/bKash.png
     - .env
 
 

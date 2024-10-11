@@ -1,13 +1,14 @@
-import 'package:bettersis/screens/complain_page.dart';
+import 'package:bettersis/screens/Complain/complain_page.dart';
+import 'package:bettersis/screens/Meal-Token/buy_token.dart';
 import 'package:flutter/material.dart';
-import '../utis/themes.dart';
+import '../utils/themes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'login_page.dart';
-import 'lunchtoken.dart';
+import 'Misc/login_page.dart';
+import 'Meal-Token/lunchtoken.dart';
 import '../modules/bettersis_appbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'result_page.dart';
-import 'appdrawer.dart';
+import 'Result/result_page.dart';
+import 'Misc/appdrawer.dart';
 
 class Dashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -55,7 +56,7 @@ class _DashboardState extends State<Dashboard> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => LunchToken(
+        builder: (context) => BuyToken(
             userId: widget.userData['id'],
             userDept: widget.userData['dept'],
             userName: widget.userData['name'],
