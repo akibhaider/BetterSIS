@@ -1,3 +1,4 @@
+import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -45,6 +46,7 @@ class _LoginPageState extends State<LoginPage> {
 
         if (snapshot.docs.isNotEmpty) {
           var userData = snapshot.docs.first.data() as Map<String, dynamic>;
+          Utils.setUser(userData);
           print('User Data: $userData');
 
           Navigator.pushReplacement(

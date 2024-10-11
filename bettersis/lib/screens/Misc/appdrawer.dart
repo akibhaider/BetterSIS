@@ -1,4 +1,6 @@
+import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
+import '../Meal-Token/view_tokens.dart';
 
 class CustomAppDrawer extends StatefulWidget {
   final ThemeData theme;
@@ -14,13 +16,14 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
   bool _isBalanceVisible = false;
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
+  late Map<String, dynamic> userData;
 
   final String balance = "৳5000.00";
 
   @override
   void initState() {
     super.initState();
-
+    userData = Utils.getUser();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -106,10 +109,8 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Icon(
-                                  Icons.currency_pound_sharp,
-                                  color: Colors.white, 
-                                  size: fontSize),
+                                Icon(Icons.currency_pound_sharp,
+                                    color: Colors.white, size: fontSize),
                                 Text(
                                   "Balance",
                                   style: TextStyle(
@@ -153,15 +154,19 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
             },
           ),
           ListTile(
-            leading: const Icon(Icons.qr_code),
-            title: Text(
-              'My Lunch Tokens',
-              style: TextStyle(fontSize: fontSize),
-            ),
-            onTap: () {
-              Navigator.of(context).pop();
-            }
-          ),
+              leading: const Icon(Icons.qr_code),
+              title: Text(
+                'My Lunch Tokens',
+                style: TextStyle(fontSize: fontSize),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ViewTokens(userData: userData),
+                  )
+                );
+              }),
           ListTile(
             leading: const Icon(Icons.settings),
             title: Text(

@@ -1,6 +1,7 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/screens/Meal-Token/display_tokens.dart';
 import 'package:bettersis/screens/Meal-Token/lunchtoken.dart';
+import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -78,6 +79,7 @@ class _BuyTokenState extends State<BuyToken> {
     ThemeData theme = AppTheme.getTheme(widget.userDept);
 
     return Scaffold(
+      drawer: CustomAppDrawer(theme: theme),
       appBar: BetterSISAppBar(
           onLogout: widget.onLogout, theme: theme, title: 'Buy Meal Token'),
       body: Padding(

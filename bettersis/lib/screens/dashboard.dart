@@ -1,5 +1,6 @@
 import 'package:bettersis/screens/Complain/complain_page.dart';
 import 'package:bettersis/screens/Meal-Token/buy_token.dart';
+import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 import '../utils/themes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,6 +28,7 @@ class _DashboardState extends State<Dashboard> {
   void initState() {
     super.initState();
     fetchImageUrl();
+    Utils.setLogout(_logout);
   }
 
   Future<void> fetchImageUrl() async {
