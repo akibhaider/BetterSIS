@@ -1,4 +1,6 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/screens/Internet/internet_appbar.dart';
+import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +30,8 @@ class _InternetUsageState extends State<InternetUsage> {
     ThemeData theme = AppTheme.getTheme(widget.userDept);
 
     return Scaffold(
-      appBar: BetterSISAppBar(
+      drawer: CustomAppDrawer(theme: theme),
+      appBar: InternetAppBar(
           onLogout: widget.onLogout, theme: theme, title: "Internet Usage"),
     );
   }
