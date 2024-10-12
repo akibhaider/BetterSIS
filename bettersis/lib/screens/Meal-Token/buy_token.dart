@@ -74,7 +74,7 @@ class _BuyTokenState extends State<BuyToken> {
     final double paddingValue = screenWidth * 0.05;
     final double fontSize = screenWidth * 0.045;
     final double buttonHeight = screenHeight * 0.07;
-    final double iconSize = screenWidth * 0.07;
+    final double iconSize = screenWidth * 0.065;
 
     ThemeData theme = AppTheme.getTheme(widget.userDept);
 
@@ -173,7 +173,7 @@ class _BuyTokenState extends State<BuyToken> {
                       onChanged: (value) {
                         setState(() {
                           _selectedTokens = value;
-                          _updateTotalCost(); // Update total cost when tokens change
+                          _updateTotalCost(); 
                         });
                       },
                       validator: (value) {

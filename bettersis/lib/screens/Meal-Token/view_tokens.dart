@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'lunchtoken.dart';
 
 class ViewTokens extends StatefulWidget {
-  final Map<String, dynamic> userData; // The user data map is passed
+  final Map<String, dynamic> userData; 
 
   const ViewTokens({
     Key? key,
-    required this.userData, // Required userData parameter
+    required this.userData,
   }) : super(key: key);
 
   @override
@@ -20,7 +20,7 @@ class ViewTokens extends StatefulWidget {
 
 class _ViewTokensState extends State<ViewTokens> {
   List<Map<String, dynamic>> tokensList = [];
-  bool isLoading = true; // Loading indicator for async actions
+  bool isLoading = true; 
   String? userId;
 
   @override
@@ -40,9 +40,10 @@ class _ViewTokensState extends State<ViewTokens> {
     }
   }
 
+  // Fetch tokens for the current user
   Future<void> _fetchTokensFromFirestore() async {
     setState(() {
-      isLoading = true; 
+      isLoading = true;
     });
 
     final tokenCollection = FirebaseFirestore.instance
@@ -61,14 +62,142 @@ class _ViewTokensState extends State<ViewTokens> {
                   'tokenId': doc['tokenId'],
                 })
             .toList();
-        isLoading = false; 
+        isLoading = false;
       });
     } catch (e) {
       setState(() {
-        isLoading = false; 
+        isLoading = false;
       });
       print('Error fetching tokens: $e');
     }
+  }
+
+  Future<void> _showTransferDialog(
+      String tokenId, Map<String, dynamic> token) async {
+    TextEditingController recipientController = TextEditingController();
+
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Transfer Token'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter the ID of the receiving user:'),
+            TextField(
+              controller: recipientController,
+              decoration: const InputDecoration(
+                labelText: 'User ID',
+                hintText: 'Enter User ID',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              String recipientUserId = recipientController.text.trim();
+              Navigator.pop(context);
+              await _transferToken(tokenId, token, recipientUserId);
+            },
+            child: const Text('Transfer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _transferToken(String tokenId, Map<String, dynamic> token,
+      String recipientUserId) async {
+    try {
+      final userQuerySnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('id', isEqualTo: recipientUserId)
+          .get();
+
+      if (userQuerySnapshot.docs.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User not found!')),
+        );
+        return;
+      }
+
+      var recipientUserData = userQuerySnapshot.docs.first.data();
+      String recipientName = recipientUserData['name'];
+
+      bool confirmTransfer = await _showConfirmationDialog(recipientName);
+
+      if (!confirmTransfer) {
+        return; 
+      }
+
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+
+      DocumentReference currentUserTokenRef = FirebaseFirestore.instance
+          .collection('Tokens')
+          .doc(widget.userData['id'])
+          .collection('userTokens')
+          .doc(tokenId);
+
+      batch.delete(currentUserTokenRef);
+
+      DocumentReference recipientUserTokenRef = FirebaseFirestore.instance
+          .collection('Tokens')
+          .doc(recipientUserId)
+          .collection('userTokens')
+          .doc(tokenId);
+
+      batch.set(recipientUserTokenRef, {
+        'meal': token['meal'],
+        'date': token['date'],
+        'cafeteria': token['cafeteria'],
+        'tokenId': token['tokenId'],
+      });
+
+      await batch.commit();
+
+      _fetchTokensFromFirestore();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Token transferred successfully!')),
+      );
+    } catch (e) {
+      print('Error transferring token: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to transfer token.')),
+      );
+    }
+  }
+
+  Future<bool> _showConfirmationDialog(String recipientName) async {
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Transfer'),
+          content: Text(
+              'Are you sure you want to transfer this token to $recipientName?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); 
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); 
+              },
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -84,15 +213,14 @@ class _ViewTokensState extends State<ViewTokens> {
     return Scaffold(
       drawer: CustomAppDrawer(theme: theme),
       appBar: BetterSISAppBar(
-        onLogout: Utils.getLogout(), 
+        onLogout: Utils.getLogout(),
         theme: theme,
         title: 'View Tokens',
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator()) 
+          ? const Center(child: CircularProgressIndicator())
           : tokensList.isEmpty
-              ? const Center(
-                  child: Text('No tokens available')) 
+              ? const Center(child: Text('No tokens available'))
               : GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
@@ -111,8 +239,8 @@ class _ViewTokensState extends State<ViewTokens> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => LunchToken(
-                              userId: widget.userData['id'], 
-                              userDept: widget.userData['dept'], 
+                              userId: widget.userData['id'],
+                              userDept: widget.userData['dept'],
                               onLogout: Utils.getLogout(),
                               userName: widget.userData['name'],
                               cafeteria: token['cafeteria'],
@@ -122,6 +250,9 @@ class _ViewTokensState extends State<ViewTokens> {
                             ),
                           ),
                         );
+                      },
+                      onLongPress: () {
+                        _showTransferDialog(token['tokenId'], token);
                       },
                       child: Card(
                         elevation: 4,

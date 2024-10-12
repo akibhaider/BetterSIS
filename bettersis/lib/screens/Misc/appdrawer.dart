@@ -58,7 +58,7 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
     final screenHeight = MediaQuery.of(context).size.height;
 
     final double paddingValue = screenWidth * 0.04;
-    final double fontSize = screenWidth * 0.045;
+    final double fontSize = screenWidth * 0.04;
     final double containerHeight = screenWidth * 0.18;
     final double borderWidth = screenWidth * 0.003;
 
