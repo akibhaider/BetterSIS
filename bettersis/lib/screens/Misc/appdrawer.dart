@@ -1,3 +1,4 @@
+import 'package:bettersis/screens/Notice/notice_board.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 import '../Meal-Token/view_tokens.dart';
@@ -150,7 +151,11 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
               style: TextStyle(fontSize: fontSize),
             ),
             onTap: () {
-              Navigator.of(context).pop();
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NoticeBoard(),
+                  ));
             },
           ),
           ListTile(
@@ -161,11 +166,10 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
               ),
               onTap: () {
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(
+                    context,
+                    MaterialPageRoute(
                       builder: (context) => ViewTokens(userData: userData),
-                  )
-                );
+                    ));
               }),
           ListTile(
             leading: const Icon(Icons.settings),

@@ -42,7 +42,15 @@ class _FinalPageState extends State<FinalPage> {
         .get();
 
     if (gpaSnapshot.exists) {
-      return (gpaSnapshot.data() as Map<String, dynamic>)['gpa'] ?? 0.0;
+      var gpa = (gpaSnapshot.data() as Map<String, dynamic>)['gpa'];
+
+      if (gpa is int) {
+        return gpa.toDouble(); 
+      } else if (gpa is double) {
+        return gpa;
+      } else {
+        return 0.0;
+      }
     } else {
       throw Exception('GPA document not found');
     }
