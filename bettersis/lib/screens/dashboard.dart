@@ -1,4 +1,5 @@
 import 'package:bettersis/screens/Complain/complain_page.dart';
+import 'package:bettersis/screens/Internet/internet_usage.dart';
 import 'package:bettersis/screens/Meal-Token/buy_token.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +55,19 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  void _navigateToInternet() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => InternetUsage(
+            userId: widget.userData['id'],
+            userDept: widget.userData['dept'],
+            userName: widget.userData['name'],
+            onLogout: _logout),
+      ),
+    );
+  }
+
   void _navigateToLunchToken() {
     Navigator.push(
       context,
@@ -81,9 +95,10 @@ class _DashboardState extends State<Dashboard> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            ComplainPage(onLogout: _logout, userId: widget.userData['id'], userDept: widget.userData['dept'])
-      ),
+          builder: (context) => ComplainPage(
+              onLogout: _logout,
+              userId: widget.userData['id'],
+              userDept: widget.userData['dept'])),
     );
   }
 
@@ -246,7 +261,7 @@ class _DashboardState extends State<Dashboard> {
                         label: "Result",
                         themeData: theme,
                         onTap: _navigateToResult,
-                        fontSize: 14 * scaleFactor, 
+                        fontSize: 14 * scaleFactor,
                       ),
                       _buildServiceButton(
                         icon: Icons.account_balance_wallet,
@@ -287,7 +302,7 @@ class _DashboardState extends State<Dashboard> {
                         icon: Icons.wifi,
                         label: "Internet",
                         themeData: theme,
-                        onTap: () {},
+                        onTap: _navigateToInternet,
                         fontSize: 14 * scaleFactor,
                       ),
                       _buildServiceButton(
