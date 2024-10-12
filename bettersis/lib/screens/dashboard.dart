@@ -123,7 +123,7 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     ThemeData theme = AppTheme.getTheme(widget.userData['dept']);
     final screenWidth = MediaQuery.of(context).size.width;
-    double scaleFactor = screenWidth / 375; // Base width for scaling font size
+    double scaleFactor = screenWidth / 375;
 
     return Theme(
       data: theme,
