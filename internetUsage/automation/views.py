@@ -1,5 +1,5 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from rest_framework.decorators import api_view # type: ignore
+from rest_framework.response import Response # type: ignore
 from .selenium_logic import login_and_get_usage
 
 @api_view(['POST'])
