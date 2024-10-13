@@ -8,16 +8,12 @@ def get_usage(request):
 
     username = request.data.get('username')
     password = request.data.get('password')
-
-    # username = "fahimrahman"
-    # password = "248"
     
     if not username or not password:
         return Response({"error": "Missing username or password"}, status=400)
     
     try:
         usage = login_and_get_usage(username, password)
-        print(usage)
         return Response({"usage": usage})
     except Exception as e:
         return Response({"error": str(e)}, status=500)

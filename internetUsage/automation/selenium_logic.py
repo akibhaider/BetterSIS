@@ -50,7 +50,6 @@ def fetch_chromedriver_version(request):
     # Check if the request was successful
     if response.status_code == 200:
         version = response.text.strip()
-        print(version)
         return version  # Return as JSON response
     else:
         return "129"
@@ -148,8 +147,6 @@ def login_and_get_usage(username, password):
 
     element = driver.find_element("xpath", '//*[@id="updates"]/div[1]/table/tbody/tr[6]/td[2]')
     usage = element.text.split(" ")[0]  # Extract usage from element
-    
-    print(usage)
 
     driver.quit()
     return usage
