@@ -11,7 +11,7 @@ class AppTheme {
       case 'eee':
         return ThemeData(
           primaryColor: Colors.amber,
-          secondaryHeaderColor: const Color.fromARGB(240, 255, 217, 101),
+          secondaryHeaderColor: const Color.fromARGB(255, 255, 217, 101),
         );
       case 'mpe':
         return ThemeData(
