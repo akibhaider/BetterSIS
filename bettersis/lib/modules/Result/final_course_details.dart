@@ -82,14 +82,6 @@ class FinalCourseDetails extends StatelessWidget {
               },
             ),
           ),
-          // leftTitles: AxisTitles(
-          //   sideTitles: SideTitles(
-          //     showTitles: true,
-          //     getTitlesWidget: (value, meta) {
-          //       return Text('${value.toInt()}%');
-          //     },
-          //   ),
-          // ),
         ),
         gridData: const FlGridData(show: true),
         borderData: FlBorderData(show: true),
