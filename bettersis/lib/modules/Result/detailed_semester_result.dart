@@ -2,7 +2,6 @@ import 'package:bettersis/utils/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 
 class DetailedSemesterResult extends StatefulWidget {
   final String userId;
@@ -288,7 +287,7 @@ class _DetailedSemesterResultState extends State<DetailedSemesterResult> {
                                 fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 10),
-                          Container(
+                          SizedBox(
                             height: screenHeight * 0.3,
                             child: _buildBarChart(courses, screenHeight * 0.3),
                           ),

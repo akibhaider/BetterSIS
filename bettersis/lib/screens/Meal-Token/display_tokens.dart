@@ -3,7 +3,6 @@ import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'lunchtoken.dart';
 
@@ -18,7 +17,7 @@ class DisplayTokens extends StatefulWidget {
   final String? tokens;
 
   const DisplayTokens({
-    Key? key,
+    super.key,
     required this.userId,
     required this.userDept,
     required this.userName,
@@ -27,7 +26,7 @@ class DisplayTokens extends StatefulWidget {
     required this.date,
     required this.meal,
     required this.tokens,
-  }) : super(key: key);
+  });
 
   @override
   State<DisplayTokens> createState() => _DisplayTokensState();
@@ -35,7 +34,7 @@ class DisplayTokens extends StatefulWidget {
 
 class _DisplayTokensState extends State<DisplayTokens> {
   late int tokenCount;
-  var uuid = Uuid();
+  var uuid = const Uuid();
   List<Map<String, dynamic>> tokensList = [];
   bool isLoading = true; 
 

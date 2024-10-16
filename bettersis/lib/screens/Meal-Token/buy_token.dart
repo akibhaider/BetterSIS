@@ -1,6 +1,5 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/screens/Meal-Token/display_tokens.dart';
-import 'package:bettersis/screens/Meal-Token/lunchtoken.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +91,7 @@ class _BuyTokenState extends State<BuyToken> {
                 decoration: InputDecoration(
                   labelText: 'Cafeteria',
                   labelStyle: TextStyle(fontSize: fontSize),
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 value: _selectedCafeteria,
                 items: ['Central Cafeteria']
@@ -115,7 +114,7 @@ class _BuyTokenState extends State<BuyToken> {
                 decoration: InputDecoration(
                   labelText: 'Meal Type',
                   labelStyle: TextStyle(fontSize: fontSize),
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 value: _selectedMealType,
                 items: ['Breakfast', 'Lunch']
@@ -160,7 +159,7 @@ class _BuyTokenState extends State<BuyToken> {
                       decoration: InputDecoration(
                         labelText: 'Tokens',
                         labelStyle: TextStyle(fontSize: fontSize),
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                       ),
                       value: _selectedTokens,
                       items: _tokenOptions
@@ -191,7 +190,7 @@ class _BuyTokenState extends State<BuyToken> {
                 decoration: InputDecoration(
                   labelText: 'Select Date',
                   labelStyle: TextStyle(fontSize: fontSize),
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 value: _selectedDate,
                 items: _availableDates

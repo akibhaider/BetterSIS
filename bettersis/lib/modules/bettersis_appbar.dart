@@ -6,11 +6,11 @@ class BetterSISAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
 
   const BetterSISAppBar({
-    Key? key,
+    super.key,
     required this.onLogout,
     required this.theme,
     required this.title,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

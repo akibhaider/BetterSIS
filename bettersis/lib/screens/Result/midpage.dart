@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Midpage extends StatefulWidget {
@@ -68,6 +67,22 @@ class _MidpageState extends State<Midpage> {
     }
   }
 
+  String _getOrdinal(int number) {
+    if (number % 100 >= 11 && number % 100 <= 13) {
+      return '${number}th';
+    }
+    switch (number % 10) {
+      case 1:
+        return '${number}st';
+      case 2:
+        return '${number}nd';
+      case 3:
+        return '${number}rd';
+      default:
+        return '${number}th';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,7 +139,7 @@ class _MidpageState extends State<Midpage> {
                       String semesterId = semesters[index];
                       return ExpansionTile(
                         title: Text(
-                            '${Utils.getOrdinal(int.parse(semesters[index]))} Semester',
+                            '${_getOrdinal(int.parse(semesters[index]))} Semester',
                             style: const TextStyle(fontSize: 20)),
                         children: [
                           FutureBuilder<List<String>>(
