@@ -10,9 +10,9 @@ class ViewTokens extends StatefulWidget {
   final Map<String, dynamic> userData; 
 
   const ViewTokens({
-    Key? key,
+    super.key,
     required this.userData,
-  }) : super(key: key);
+  });
 
   @override
   State<ViewTokens> createState() => _ViewTokensState();

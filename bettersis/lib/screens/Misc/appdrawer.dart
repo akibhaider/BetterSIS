@@ -6,7 +6,7 @@ import '../Meal-Token/view_tokens.dart';
 class CustomAppDrawer extends StatefulWidget {
   final ThemeData theme;
 
-  const CustomAppDrawer({required this.theme});
+  const CustomAppDrawer({super.key, required this.theme});
 
   @override
   _CustomAppDrawerState createState() => _CustomAppDrawerState();
