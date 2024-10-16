@@ -1,4 +1,3 @@
-import 'package:bettersis/screens/dashboard.dart';
 import 'package:flutter/material.dart';
 
 class InternetAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -7,11 +6,11 @@ class InternetAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
 
   const InternetAppBar({
-    Key? key,
+    super.key,
     required this.onLogout,
     required this.theme,
     required this.title,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

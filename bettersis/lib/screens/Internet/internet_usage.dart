@@ -1,9 +1,8 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/screens/Internet/internet_body.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class InternetUsage extends StatefulWidget {
   final String userId;
@@ -35,6 +34,7 @@ class _InternetUsageState extends State<InternetUsage> {
         theme: theme,
         title: 'Internet Usage',
       ),
+      body: InternetBody(userId: widget.userId, userDept: widget.userDept),
     );
   }
 }
