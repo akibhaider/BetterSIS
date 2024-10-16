@@ -9,11 +9,10 @@ class FinalCourseDetails extends StatelessWidget {
   late double totalMarks;
 
   FinalCourseDetails(
-      {Key? key,
+      {super.key,
       required this.result,
       required this.course,
-      required this.userDept})
-      : super(key: key);
+      required this.userDept});
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +81,14 @@ class FinalCourseDetails extends StatelessWidget {
               },
             ),
           ),
+          // leftTitles: AxisTitles(
+          //   sideTitles: SideTitles(
+          //     showTitles: true,
+          //     getTitlesWidget: (value, meta) {
+          //       return Text('${value.toInt()}%');
+          //     },
+          //   ),
+          // ),
         ),
         gridData: const FlGridData(show: true),
         borderData: FlBorderData(show: true),
