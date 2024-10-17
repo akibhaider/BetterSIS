@@ -34,7 +34,10 @@ class _InternetUsageState extends State<InternetUsage> {
         theme: theme,
         title: 'Internet Usage',
       ),
-      body: InternetBody(userId: widget.userId, userDept: widget.userDept),
+      body: InternetBody(
+          userName: widget.userName,
+          userId: widget.userId,
+          userDept: widget.userDept),
     );
   }
 }
