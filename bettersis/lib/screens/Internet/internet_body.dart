@@ -26,18 +26,9 @@ class _InternetBodyState extends State<InternetBody> {
   String totalUsage = "10,780";
   List<List<String>> usageDetails = [];
   List<Map<String, String>> history = [
-    {
-      "location": "Library",
-      "duration": "69",
-    },
-    {
-      "location": "AB2",
-      "duration": "112",
-    },
-    {
-      "location": "CDS",
-      "duration": "15",
-    }
+    {"location": "Library", "duration": "69"},
+    {"location": "AB2", "duration": "112"},
+    {"location": "CDS", "duration": "15"}
   ];
 
   Future<void> _fetchInternetUsage(username, password) async {
@@ -125,11 +116,13 @@ class _InternetBodyState extends State<InternetBody> {
   Widget build(BuildContext context) {
     ThemeData theme = AppTheme.getTheme(widget.userDept);
     final Size screenSize = MediaQuery.of(context).size;
+    final double screenWidth = screenSize.width;
+    final double screenHeight = screenSize.height;
 
     return Container(
       color: theme.primaryColor,
-      width: screenSize.width,
-      height: screenSize.height,
+      width: screenWidth,
+      height: screenHeight,
       child: Column(
         children: [
           /*
@@ -150,7 +143,7 @@ class _InternetBodyState extends State<InternetBody> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 26.0),
             decoration: const BoxDecoration(color: Colors.transparent),
-            child: Column(
+            child: const Column(
               children: [
                 Text(
                   widget.userName,
@@ -172,21 +165,17 @@ class _InternetBodyState extends State<InternetBody> {
             ),
           ),
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 0.083 * screenSize.width),
-            padding: const EdgeInsets.symmetric(
-              vertical: 5.0,
-            ),
+            margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
+            padding: const EdgeInsets.symmetric(vertical: 5.0),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20.0),
               boxShadow: [
                 BoxShadow(
-                  color:
-                      Colors.grey.withOpacity(0.5), // Shadow color with opacity
-                  spreadRadius: 5, // How much the shadow spreads
-                  blurRadius: 7, // How blurry the shadow is
-                  offset: const Offset(0,
-                      3), // The position of the shadow (horizontal, vertical)
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
@@ -195,22 +184,20 @@ class _InternetBodyState extends State<InternetBody> {
                 Text(
                   'Minutes Used',
                   style: TextStyle(
-                    fontSize: 0.037 * screenSize.width,
+                    fontSize: screenWidth * 0.037,
                     fontWeight: FontWeight.w500,
                     color: theme.secondaryHeaderColor,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 25,
-                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         totalUsage,
                         style: TextStyle(
-                          fontSize: 0.083 * screenSize.width,
+                          fontSize: screenWidth * 0.07,
                           fontWeight: FontWeight.w700,
                           color: theme.secondaryHeaderColor,
                         ),
@@ -218,7 +205,7 @@ class _InternetBodyState extends State<InternetBody> {
                       Text(
                         'out of',
                         style: TextStyle(
-                          fontSize: 0.046 * screenSize.width,
+                          fontSize: screenWidth * 0.046,
                           fontWeight: FontWeight.w700,
                           color: theme.secondaryHeaderColor,
                         ),
@@ -226,7 +213,7 @@ class _InternetBodyState extends State<InternetBody> {
                       Text(
                         '12,000',
                         style: TextStyle(
-                          fontSize: 0.083 * screenSize.width,
+                          fontSize: screenWidth * 0.07,
                           fontWeight: FontWeight.w700,
                           color: theme.secondaryHeaderColor,
                         ),
@@ -237,33 +224,31 @@ class _InternetBodyState extends State<InternetBody> {
               ],
             ),
           ),
-          InkWell(
-              onTap: () {
-                _fetchInternetUsage("tanjeebmeheran", "yahbaby");
-              },
-              child: Container(
-                  padding: const EdgeInsets.only(top: 26, bottom: 16),
-                  decoration: const BoxDecoration(color: Colors.transparent),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.refresh,
-                        color: Colors.white,
-                      ),
-                      Text(
-                        "REFRESH",
-                        style: TextStyle(
-                          fontSize: 0.032 * screenSize.width,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
-                      )
-                    ],
-                  ))),
+          Container(
+              padding: const EdgeInsets.only(top: 26, bottom: 16),
+              decoration: const BoxDecoration(color: Colors.transparent),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.refresh,
+                    color: Colors.white,
+                  ),
+                  Text(
+                    "REFRESH",
+                    style: TextStyle(
+                      fontSize: 0.032 * screenSize.width,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  )
+                ],
+              )),
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.05,
+                  vertical: screenHeight * 0.02),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -278,16 +263,17 @@ class _InternetBodyState extends State<InternetBody> {
                     'USAGE HISTORY',
                     style: TextStyle(
                         color: theme.secondaryHeaderColor,
-                        fontSize: 0.041 * screenSize.width,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 0.023 * screenSize.width),
+                  const SizedBox(height: 10),
                   Expanded(
                     child: ListView.builder(
                       itemCount: history.length,
                       itemBuilder: (context, index) {
                         return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 8.0),
+                          margin: EdgeInsets.symmetric(
+                              vertical: screenHeight * 0.01),
                           elevation: 3,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
@@ -301,9 +287,8 @@ class _InternetBodyState extends State<InternetBody> {
                                 'IUTWLAN - ${history[index]['location']!}'),
                             trailing: Text(
                               '${history[index]['duration']!} Mins',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 0.037 * screenSize.width),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16),
                             ),
                           ),
                         );
