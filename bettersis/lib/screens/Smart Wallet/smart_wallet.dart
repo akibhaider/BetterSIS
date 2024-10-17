@@ -225,16 +225,16 @@ Future<double> getBalance(String userID) async {
           // Balance Section
           Card(
             color: Colors.white,
-            margin: const EdgeInsets.symmetric(horizontal: 20),
+            margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: EdgeInsets.all(screenWidth * 0.05),
               child: Column(
                 children: [
                   Text(
                     'BALANCE',
                     style: TextStyle(
                         color: theme.primaryColor,
-                        fontSize: 16,
+                        fontSize: screenWidth * 0.04,
                         fontWeight: FontWeight.bold),
                   ),
                   Text(
@@ -242,7 +242,7 @@ Future<double> getBalance(String userID) async {
                     '৳${balance.toStringAsFixed(2)}',
                     style: TextStyle(
                         color: theme.secondaryHeaderColor,
-                        fontSize: 32,
+                        fontSize: screenWidth * 0.08,
                         fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -252,13 +252,13 @@ Future<double> getBalance(String userID) async {
           const SizedBox(height: 10),
           // Add Money Button
           Container(
-            width: MediaQuery.of(context).size.width *0.8,
+            width: screenWidth *0.6,
             child: ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: theme.secondaryHeaderColor,
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              padding: EdgeInsets.symmetric(vertical: screenHeight *0.02),
               //maximumSize: const Size(150, 50),
             ),
             child: Row(
@@ -266,14 +266,14 @@ Future<double> getBalance(String userID) async {
               children: [
                 Image.asset(
                   'assets/bKash.png',
-                  height: 24,
-                  width: 24,
+                  height: screenWidth * 0.1, // Responsive height
+                  width: screenWidth * 0.1,
                 ),
                 const SizedBox(width: 10),
                 Text(
               "Add Money",
               style: TextStyle(
-                  fontSize: 20,
+                  fontSize: screenWidth * 0.05,
                   fontWeight: FontWeight.bold,
                   color: theme.secondaryHeaderColor,
               ),
@@ -361,3 +361,4 @@ Future<double> getBalance(String userID) async {
     );
   }
 }
+
