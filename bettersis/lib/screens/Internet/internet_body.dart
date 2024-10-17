@@ -65,7 +65,7 @@ class _InternetBodyState extends State<InternetBody> {
         });
       }
     } catch (error) {
-      print("error case");
+      print("error case: $error");
       setState(() {
         totalUsage = "10,780";
       });
