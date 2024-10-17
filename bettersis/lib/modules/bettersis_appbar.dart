@@ -25,7 +25,7 @@ class BetterSISAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: AppBar(
         toolbarHeight: 100,
         backgroundColor: Colors.transparent, 
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         leading: IconButton(
           icon: const Icon(Icons.menu, color: Colors.white),
           tooltip: 'Menu',
@@ -37,7 +37,6 @@ class BetterSISAppBar extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.only(top: 8.0),
           child: Column(
             children: [
-              //'BetterSIS' Title
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
