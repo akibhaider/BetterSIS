@@ -6,36 +6,49 @@ class SeatGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final seatProvider = Provider.of<SeatProvider>(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // Adjust seat size based on screen width
+    final seatSize = screenWidth * 0.1;
+    final seatSpacing = screenWidth * 0.025;
+    final gapBetweenSets = screenWidth * 0.07;
 
     if (seatProvider.isLoading) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
 
     final seats = seatProvider.seats;
     if (seats.isEmpty) {
-      return Center(child: Text('No seats available.'));
+      return const Center(child: Text('No seats available.'));
     }
 
-    // Split seats into 4 columns, ensuring a gap between the second and third columns
+    // Split seats into 4 columns
     final seatColumns = _splitIntoColumns(seats.entries.toList());
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // First set of 2 columns
-          _buildSeatColumn(seatColumns[0], context), // Column 1
-          SizedBox(width: 10), // Small space between columns
-          _buildSeatColumn(seatColumns[1], context), // Column 2
+    return SingleChildScrollView( // Make the grid scrollable
+      child: Padding(
+        padding: EdgeInsets.all(screenWidth * 0.04),
+        child: Column( // Wrap in Column to support vertical scroll
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // First set of 2 columns
+                _buildSeatColumn(seatColumns[0], context, seatSize, seatSpacing),
+                SizedBox(width: seatSpacing),
+                _buildSeatColumn(seatColumns[1], context, seatSize, seatSpacing),
 
-          SizedBox(width: 30), // Gap between two sets of columns
+                SizedBox(width: gapBetweenSets), // Gap between two sets of columns
 
-          // Second set of 2 columns
-          _buildSeatColumn(seatColumns[2], context), // Column 3
-          SizedBox(width: 10), // Small space between columns
-          _buildSeatColumn(seatColumns[3], context), // Column 4
-        ],
+                // Second set of 2 columns
+                _buildSeatColumn(seatColumns[2], context, seatSize, seatSpacing),
+                SizedBox(width: seatSpacing),
+                _buildSeatColumn(seatColumns[3], context, seatSize, seatSpacing),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -53,30 +66,39 @@ class SeatGrid extends StatelessWidget {
   }
 
   // Helper method to build a column of seats
-  Widget _buildSeatColumn(List<MapEntry<String, dynamic>> seats, BuildContext context) {
+  Widget _buildSeatColumn(
+    List<MapEntry<String, dynamic>> seats,
+    BuildContext context,
+    double seatSize,
+    double seatSpacing,
+  ) {
     return Column(
       children: [
         for (var seatEntry in seats) ...[
-          _buildSeat(seatEntry, context),
-          SizedBox(height: 10), // Space between seats vertically
+          _buildSeat(seatEntry, context, seatSize),
+          SizedBox(height: seatSpacing), // Space between seats vertically
         ],
       ],
     );
   }
 
   // Helper method to build individual seat widgets
-  Widget _buildSeat(MapEntry<String, dynamic> seatEntry,BuildContext context) {
+  Widget _buildSeat(
+    MapEntry<String, dynamic> seatEntry,
+    BuildContext context,
+    double seatSize,
+  ) {
     final seatProvider = Provider.of<SeatProvider>(context);
     final seatKey = seatEntry.key;
     final seatData = seatEntry.value;
 
     return GestureDetector(
       onTap: seatData['available']
-          ? () => seatProvider.toggleSeatSelection(seatKey) // Replace with your selection logic
+          ? () => seatProvider.toggleSeatSelection(seatKey)
           : null,
       child: Container(
-        width: 50, // Adjust seat size
-        height: 50,
+        width: seatSize,
+        height: seatSize,
         decoration: BoxDecoration(
           color: seatData['available']
               ? seatData['selected'] == true
@@ -86,7 +108,7 @@ class SeatGrid extends StatelessWidget {
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Center(
-          child: Icon(Icons.event_seat, color: Colors.white),
+          child: Icon(Icons.event_seat, color: Colors.white, size: seatSize * 0.5),
         ),
       ),
     );
