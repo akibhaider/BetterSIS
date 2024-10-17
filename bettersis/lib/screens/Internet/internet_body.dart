@@ -12,6 +12,22 @@ class InternetBody extends StatefulWidget {
 }
 
 class _InternetBodyState extends State<InternetBody> {
+  String totalUsage = "10,780";
+  List<Map<String, String>> history = [
+    {
+      "location": "Library",
+      "duration": "69",
+    },
+    {
+      "location": "AB2",
+      "duration": "112",
+    },
+    {
+      "location": "CDS",
+      "duration": "15",
+    }
+  ];
+
   @override
   Widget build(BuildContext context) {
     ThemeData theme = AppTheme.getTheme(widget.userDept);
@@ -23,6 +39,7 @@ class _InternetBodyState extends State<InternetBody> {
       height: screenSize.height,
       child: Column(
         children: [
+          /*
           Container(
             padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
@@ -36,6 +53,7 @@ class _InternetBodyState extends State<InternetBody> {
               ),
             ),
           ),
+          */
           Container(
             padding: const EdgeInsets.symmetric(vertical: 26.0),
             decoration: const BoxDecoration(color: Colors.transparent),
@@ -45,7 +63,7 @@ class _InternetBodyState extends State<InternetBody> {
                   'FAHIM RAHMAN',
                   style: TextStyle(
                     fontSize: 27.0,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
                 ),
@@ -53,7 +71,7 @@ class _InternetBodyState extends State<InternetBody> {
                   '210041205',
                   style: TextStyle(
                     fontSize: 16.0,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
                 ),
@@ -62,7 +80,9 @@ class _InternetBodyState extends State<InternetBody> {
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 0.083 * screenSize.width),
-            padding: const EdgeInsets.only(top: 5.0),
+            padding: const EdgeInsets.symmetric(
+              vertical: 5.0,
+            ),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20.0),
@@ -95,7 +115,7 @@ class _InternetBodyState extends State<InternetBody> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '10,780',
+                        totalUsage,
                         style: TextStyle(
                           fontSize: 0.083 * screenSize.width,
                           fontWeight: FontWeight.w700,
@@ -125,7 +145,7 @@ class _InternetBodyState extends State<InternetBody> {
             ),
           ),
           Container(
-              padding: const EdgeInsets.only(top: 26),
+              padding: const EdgeInsets.only(top: 26, bottom: 16),
               decoration: const BoxDecoration(color: Colors.transparent),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -143,7 +163,66 @@ class _InternetBodyState extends State<InternetBody> {
                     ),
                   )
                 ],
-              ))
+              )),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'USAGE HISTORY',
+                    style: TextStyle(
+                        color: theme.secondaryHeaderColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: history.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8.0),
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: ListTile(
+                            leading: const CircleAvatar(
+                              backgroundColor: Colors.transparent,
+                              child: Icon(Icons.circle_rounded),
+                            ),
+                            title: Text(
+                                'IUTWLAN - ${history[index]['location']!}'),
+                            trailing: Text(
+                              '${history[index]['duration']!} Mins',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      'View More >>',
+                      style: TextStyle(color: theme.primaryColor),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
