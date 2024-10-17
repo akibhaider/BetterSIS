@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
-import 'package:bettersis/utils/utils.dart';
+//import 'package:bettersis/utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+//import 'package:firebase_storage/firebase_storage.dart';
 import '../../modules/bettersis_appbar.dart';
 
 class SmartWallet extends StatefulWidget {
@@ -28,9 +28,6 @@ class SmartWallet extends StatefulWidget {
 }
 
 class smartWalletPage extends State<SmartWallet> {
-  // Mock user data (will be replaced by Firebase data later)
-
-  // Mock transaction data
   double balance = 0.0;
   int totalTransactions = 0;
   List<Map<String, dynamic>> transactions = [];
@@ -50,16 +47,36 @@ class smartWalletPage extends State<SmartWallet> {
       
       if(userDoc.exists){
         setState(() {
-          balance = userDoc['Balance'];
-          transactions = List<Map<String, dynamic>>.from(
-            userDoc['Transactions'] ?? [],
-          );
-          totalTransactions = transactions.length;
+          balance = (userDoc['Balance'] is int)
+                ? (userDoc['Balance'] as int).toDouble()
+                : userDoc['Balance'];
+      });
+
+      print('\n\n\n\n\n\n\n\n\n');
+    print(balance);
+    print('\n\n\n\n\n\n\n\n\n');      
+      // Fetch all the documents from the "Transactions" subcollection
+      QuerySnapshot transactionsSnapshot = await FirebaseFirestore.instance
+          .collection('Finance')
+          .doc(widget.userId)
+          .collection('Transactions')
+          .get();
+      
+      List<Map<String, dynamic>> tempTransactions = [];
+
+      for (var transaction in transactionsSnapshot.docs) {
+        tempTransactions.add(transaction.data() as Map<String, dynamic>);
+      }
+
+      setState(() {
+        transactions = tempTransactions;
+        totalTransactions = transactions.length;
+      });   
 
           /*if(totalTransactions > 4){
             transactions = transactions.sublist(totalTransactions - 4);
           }*/
-        });
+        
       }
     }
 
@@ -68,61 +85,36 @@ class smartWalletPage extends State<SmartWallet> {
     }
   }
 
-  Future<void> addTransaction(String title, double amount, String type) async {
+Future<void> addTransaction(String userID, String title, double amount, String type) async {
+  print('\n\n\n\n\n\n\n\n\n');
+    print('UUUUUUUUUUUUUUUUUUUU');
+    print('\n\n\n\n\n\n\n\n\n');
+  
+  await FirebaseFirestore.instance.collection('Finance').doc(userID).collection('Transactions').add({
+    'title': title,
+    'type': type,
+    'amount': amount,
+    'timestamp': FieldValue.serverTimestamp(),
+  });
+
+  print('\n\n\n\n\n\n\n\n\n');
+    print('UUUUUUUUUUUUUUUUUUUU');
+    print('\n\n\n\n\n\n\n\n\n');
+}
+
+
+  Future<void> updateBalance(String userID, double newBalance) async {
   try {
-    Map<String, dynamic> newTransaction = {
-      'title': title,
-      'amount': amount,
-      'type': type, // 'add', 'meal', 'transport', etc.
-      'timestamp': FieldValue.serverTimestamp(),
-    };
-
-    setState(() {
-      transactions.add(newTransaction);
-      totalTransactions = transactions.length;
-    });
-
-    // Update the transaction list in Firestore
-    await FirebaseFirestore.instance
-        .collection('Finance')
-        .doc(widget.userId)
-        .update({
-          'Transactions': FieldValue.arrayUnion([newTransaction]),
-        });
-
-    print('Transaction added successfully');
-    } catch (error) {
-      print('Error adding transaction: $error');
-    }
-  }
-
-
-  Future<void> updateBalance(double amount, bool isAdded) async {
-  try {
-    // Update balance based on whether amount is added or deducted
-    setState(() {
-      if (isAdded) {
-        balance += amount; // Add the amount to the balance
-      } else {
-        balance -= amount; // Deduct the amount from the balance
-      }
-    });
-
+    print('\n\n\n\n\n\n\n\n\n');
+    print(balance);
+    print('\n\n\n\n\n\n\n\n\n');
     // Update the balance in Firestore
     await FirebaseFirestore.instance
         .collection('Finance')
-        .doc(widget.userId)
+        .doc(userID)
         .update({
-          'Balance': balance,
+          'Balance': newBalance,
         });
-
-    // Add a transaction to reflect this change
-    /*String transactionTitle = isAdded ? 'Money Added' : 'Money Deducted';
-    String transactionType = isAdded ? 'add' : 'deduct';
-    
-    await addTransaction(transactionTitle, amount, transactionType);
-
-    print('Balance updated and transaction added successfully');*/
   } catch (error) {
     print('Error updating balance: $error');
   }
@@ -144,7 +136,7 @@ Future<void> addMoney(double amount) async {
         });
 
     // After adding money, add a transaction to the user's list
-    await addTransaction('Money Added', amount, 'add');
+    await addTransaction(widget.userId, 'Money Added', amount, 'add');
 
     print('Money added successfully');
   } catch (error) {
@@ -152,21 +144,33 @@ Future<void> addMoney(double amount) async {
   }
 }
 
-Future<double> getBalance() async {
-  //fetchData();
-  final walletRef = FirebaseFirestore.instance.collection('Finance').doc(widget.userId);
+Future<double> getBalance(String userID) async {
+  try {
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('Finance')
+        .doc(userID) // use userID passed as parameter
+        .get();
 
-  final walletSnap = await walletRef.get();
-
-  if(walletSnap.exists) {
-    return walletSnap.data()?['balance']?.toDouble() ?? 0.0;
+    if (userDoc.exists) {
+      // Safely access 'Balance' and convert it
+      var balanceData = userDoc.data() as Map<String, dynamic>?; // Ensure it's a Map
+      if (balanceData != null) {
+        var balance = balanceData['Balance'];
+        if (balance is int) {
+          return balance.toDouble(); // Convert int to double
+        } else if (balance is double) {
+          return balance; // Return as is if already a double
+        }
+      }
+    } else {
+      print('User document does not exist.');
+    }
+  } catch (error) {
+    print('Error fetching balance: $error');
   }
-
-  else{
-    return 0.0;
-  }
+  
+  return 0.0; // Default return if not found or an error occurs
 }
-
 
   @override
   void initState() {
@@ -183,7 +187,7 @@ Future<double> getBalance() async {
     final String name = widget.userName;
     final String studentId = widget.userId;
     final String email = widget.userEmail;
-    final double balance = 4180.20;
+    //final double balance = 4180.20;
 
 
     return Scaffold(
@@ -226,17 +230,18 @@ Future<double> getBalance() async {
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: [
-                  const Text(
+                  Text(
                     'BALANCE',
                     style: TextStyle(
-                        color: Colors.blue,
+                        color: theme.primaryColor,
                         fontSize: 16,
                         fontWeight: FontWeight.bold),
                   ),
                   Text(
+
                     '৳${balance.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                        color: Color.fromARGB(255, 6, 55, 139),
+                    style: TextStyle(
+                        color: theme.secondaryHeaderColor,
                         fontSize: 32,
                         fontWeight: FontWeight.bold),
                   ),
