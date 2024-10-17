@@ -68,6 +68,106 @@ class smartWalletPage extends State<SmartWallet> {
     }
   }
 
+  Future<void> addTransaction(String title, double amount, String type) async {
+  try {
+    Map<String, dynamic> newTransaction = {
+      'title': title,
+      'amount': amount,
+      'type': type, // 'add', 'meal', 'transport', etc.
+      'timestamp': FieldValue.serverTimestamp(),
+    };
+
+    setState(() {
+      transactions.add(newTransaction);
+      totalTransactions = transactions.length;
+    });
+
+    // Update the transaction list in Firestore
+    await FirebaseFirestore.instance
+        .collection('Finance')
+        .doc(widget.userId)
+        .update({
+          'Transactions': FieldValue.arrayUnion([newTransaction]),
+        });
+
+    print('Transaction added successfully');
+    } catch (error) {
+      print('Error adding transaction: $error');
+    }
+  }
+
+
+  Future<void> updateBalance(double amount, bool isAdded) async {
+  try {
+    // Update balance based on whether amount is added or deducted
+    setState(() {
+      if (isAdded) {
+        balance += amount; // Add the amount to the balance
+      } else {
+        balance -= amount; // Deduct the amount from the balance
+      }
+    });
+
+    // Update the balance in Firestore
+    await FirebaseFirestore.instance
+        .collection('Finance')
+        .doc(widget.userId)
+        .update({
+          'Balance': balance,
+        });
+
+    // Add a transaction to reflect this change
+    /*String transactionTitle = isAdded ? 'Money Added' : 'Money Deducted';
+    String transactionType = isAdded ? 'add' : 'deduct';
+    
+    await addTransaction(transactionTitle, amount, transactionType);
+
+    print('Balance updated and transaction added successfully');*/
+  } catch (error) {
+    print('Error updating balance: $error');
+  }
+}
+
+Future<void> addMoney(double amount) async {
+  try {
+    // Update the balance by adding the specified amount
+    setState(() {
+      balance += amount;
+    });
+
+    // Also update the balance in Firestore
+    await FirebaseFirestore.instance
+        .collection('Finance')
+        .doc(widget.userId)
+        .update({
+          'Balance': balance,
+        });
+
+    // After adding money, add a transaction to the user's list
+    await addTransaction('Money Added', amount, 'add');
+
+    print('Money added successfully');
+  } catch (error) {
+    print('Error adding money: $error');
+  }
+}
+
+Future<double> getBalance() async {
+  //fetchData();
+  final walletRef = FirebaseFirestore.instance.collection('Finance').doc(widget.userId);
+
+  final walletSnap = await walletRef.get();
+
+  if(walletSnap.exists) {
+    return walletSnap.data()?['balance']?.toDouble() ?? 0.0;
+  }
+
+  else{
+    return 0.0;
+  }
+}
+
+
   @override
   void initState() {
     super.initState();
