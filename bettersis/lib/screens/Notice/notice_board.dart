@@ -17,11 +17,20 @@ class NoticeBoard extends StatefulWidget {
 class _NoticeBoardState extends State<NoticeBoard> {
   bool isLoading = true;
   List<Map<String, dynamic>> noticeList = [];
+  late String currentMonthYear;
 
   @override
   void initState() {
     super.initState();
+    _initializeMonthYear();
     _fetchNotices();
+  }
+
+  void _initializeMonthYear() {
+    int currentYear = DateTime.now().year;
+    int currentMonth = DateTime.now().month;
+    String monthName = Utils.getMonth(currentMonth);
+    currentMonthYear = "$monthName, $currentYear"; 
   }
 
   Future<void> _fetchNotices() async {
@@ -99,39 +108,57 @@ class _NoticeBoardState extends State<NoticeBoard> {
         theme: theme,
         title: 'Notice Board',
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : noticeList.isEmpty
-              ? const Center(child: Text('No notices available'))
-              : Padding(
-                  padding: EdgeInsets.all(screenWidth * 0.05),
-                  child: ListView.builder(
-                    itemCount: noticeList.length,
-                    itemBuilder: (context, index) {
-                      final notice = noticeList[index];
-                      return Card(
-                        elevation: 5,
-                        margin:
-                            EdgeInsets.symmetric(vertical: screenHeight * 0.01),
-                        child: ListTile(
-                          title: Text(
-                            notice['title'],
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.05,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          subtitle:
-                              const Text('Tap to view/download the notice'),
-                          trailing: Icon(Icons.picture_as_pdf,
-                              color: theme.primaryColor),
-                          onTap: () =>
-                              _openPDFInApp(notice['link'], notice['title']),
-                        ),
-                      );
-                    },
-                  ),
+      body: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
+            child: Center(
+              child: Text(
+                currentMonthYear,
+                style: TextStyle(
+                  fontSize: screenWidth * 0.06,
+                  fontWeight: FontWeight.bold,
                 ),
+              ),
+            ),
+          ),
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : noticeList.isEmpty
+                  ? const Center(child: Text('No notices available'))
+                  : Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.all(screenWidth * 0.05),
+                        child: ListView.builder(
+                          itemCount: noticeList.length,
+                          itemBuilder: (context, index) {
+                            final notice = noticeList[index];
+                            return Card(
+                              elevation: 5,
+                              margin: EdgeInsets.symmetric(
+                                  vertical: screenHeight * 0.01),
+                              child: ListTile(
+                                title: Text(
+                                  notice['title'],
+                                  style: TextStyle(
+                                    fontSize: screenWidth * 0.05,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: const Text(
+                                    'Tap to view/download the notice'),
+                                trailing: Icon(Icons.picture_as_pdf,
+                                    color: theme.primaryColor),
+                                onTap: () => _openPDFInApp(
+                                    notice['link'], notice['title']),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+        ],
+      ),
     );
   }
 }
