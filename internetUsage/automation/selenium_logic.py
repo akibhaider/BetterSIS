@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
 import subprocess
@@ -136,7 +137,8 @@ def get_driver():
     return driver
 
 def login_and_get_usage(username, password):
-    """Login to the site and return the internet usage."""
+    table_data = []
+
     driver = get_driver()
     driver.get("http://10.220.20.12/index.php/home/login")
 
@@ -145,8 +147,20 @@ def login_and_get_usage(username, password):
     
     time.sleep(2)  # Wait for the page to load
 
-    element = driver.find_element("xpath", '//*[@id="updates"]/div[1]/table/tbody/tr[6]/td[2]')
-    usage = element.text.split(" ")[0]  # Extract usage from element
+    usageElement = driver.find_element("xpath", '//*[@id="updates"]/div[1]/table/tbody/tr[6]/td[2]')
+
+    usage = usageElement.text.split(" ")[0]  # Extract usage from element
+    table_data.append(usage)
+
+    driver.get('http://10.220.20.12/index.php/home/usageTable')
+    
+    historyElement = driver.find_elements(By.XPATH, '//*[@id="dyntable"]/tbody/tr')
+
+    if historyElement:
+        for row in historyElement:
+            cols = row.find_elements(By.TAG_NAME, 'td')
+            row_data = [col.text for col in cols]
+            table_data.append(row_data)
 
     driver.quit()
-    return usage
+    return table_data

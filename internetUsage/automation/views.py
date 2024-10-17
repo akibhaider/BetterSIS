@@ -13,7 +13,7 @@ def get_usage(request):
         return Response({"error": "Missing username or password"}, status=400)
     
     try:
-        usage = login_and_get_usage(username, password)
-        return Response({"usage": usage})
+        table_data = login_and_get_usage(username, password)
+        return Response({"usage": table_data,})
     except Exception as e:
         return Response({"error": str(e)}, status=500)

@@ -7,11 +7,11 @@ class QuizPage extends StatefulWidget {
   final ThemeData theme;
 
   const QuizPage({
-    Key? key,
+    super.key,
     required this.userId,
     required this.userSemester,
     required this.theme,
-  }) : super(key: key);
+  });
 
   @override
   _QuizPageState createState() => _QuizPageState();

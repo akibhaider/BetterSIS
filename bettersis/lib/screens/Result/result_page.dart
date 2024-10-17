@@ -19,7 +19,7 @@ class ResultPage extends StatefulWidget {
 }
 
 class _ResultPageState extends State<ResultPage> {
-  PageController _pageController = PageController(initialPage: 0);
+  final PageController _pageController = PageController(initialPage: 0);
 
   double _latestGPA = 0.0;
   double _calculatedCGPA = 0.0;
@@ -388,3 +388,15 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 }
+
+/*
+* void addMoney(double amount) {
+  setState(() {
+    balance += amount;
+  });
+
+  updateBalance(widget.userData['studentId'], balance);
+}
+
+*
+*/

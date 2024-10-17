@@ -6,11 +6,12 @@ import 'package:flutter/material.dart';
 import '../utils/themes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'Misc/login_page.dart';
-import 'Meal-Token/lunchtoken.dart';
 import '../modules/bettersis_appbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'Result/result_page.dart';
+import 'Smart Wallet/smart_wallet.dart';
 import 'Misc/appdrawer.dart';
+import  'Bus Ticket/trip_selection.dart';
 
 class Dashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -68,6 +69,20 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  void _navigateToSmartWallet() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SmartWallet(
+            userId: widget.userData['id'],
+            userDept: widget.userData['dept'],
+            userName: widget.userData['name'],
+            userEmail: widget.userData['email'],
+            onLogout: _logout),
+      ),
+    );
+  }
+
   void _navigateToLunchToken() {
     Navigator.push(
       context,
@@ -100,6 +115,19 @@ class _DashboardState extends State<Dashboard> {
               userId: widget.userData['id'],
               userDept: widget.userData['dept'])),
     );
+  }
+
+   void _navigateToTransportation() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => TripSelectionPage(
+              onLogout: _logout,
+              userId: widget.userData['id'],
+              userDept: widget.userData['dept']
+              )),
+    );
+
   }
 
   Widget _buildServiceButton({
@@ -267,7 +295,7 @@ class _DashboardState extends State<Dashboard> {
                         icon: Icons.account_balance_wallet,
                         label: "Smart Wallet",
                         themeData: theme,
-                        onTap: () {},
+                        onTap: _navigateToSmartWallet,
                         fontSize: 14 * scaleFactor,
                       ),
                       _buildServiceButton(
@@ -295,7 +323,7 @@ class _DashboardState extends State<Dashboard> {
                         icon: Icons.directions_bus,
                         label: "Transportation",
                         themeData: theme,
-                        onTap: () {},
+                        onTap: _navigateToTransportation,
                         fontSize: 14 * scaleFactor,
                       ),
                       _buildServiceButton(
@@ -339,4 +367,6 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
+
+ 
 }
