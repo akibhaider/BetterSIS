@@ -1,9 +1,10 @@
+import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dashboard.dart'; 
-import '../modules/custom_appbar.dart';
+import '../dashboard.dart';
+import '../../modules/custom_appbar.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,17 +17,20 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
+  String errorMessage = '';
 
   // Function to log in user and fetch Firestore data
   Future<void> _loginAndFetchData() async {
     setState(() {
-      isLoading = true; 
+      isLoading = true;
+      errorMessage = ''; 
     });
 
     try {
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
 
       User? currentUser = FirebaseAuth.instance.currentUser;
@@ -42,6 +46,7 @@ class _LoginPageState extends State<LoginPage> {
 
         if (snapshot.docs.isNotEmpty) {
           var userData = snapshot.docs.first.data() as Map<String, dynamic>;
+          Utils.setUser(userData);
           print('User Data: $userData');
 
           Navigator.pushReplacement(
@@ -51,21 +56,26 @@ class _LoginPageState extends State<LoginPage> {
             ),
           );
         } else {
-          print('User not found in Firestore');
+          setState(() {
+            errorMessage = 'User not found in Firestore';
+          });
         }
       }
     } on FirebaseAuthException catch (e) {
-      print('Login error: $e');
+      setState(() {
+        errorMessage =
+            'Login error: ${e.message}'; 
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
-
-    setState(() {
-      isLoading = false; // Hide loading indicator
-    });
   }
 
   // Function to contact ICT Center via email
   Future<void> _contactICTCenter() async {
-    const url = 'mailto:ict@iut-dhaka.edu'; // Replace with actual contact email
+    const url = 'mailto:ict@iut-dhaka.edu';
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -78,9 +88,8 @@ class _LoginPageState extends State<LoginPage> {
     double appBarHeight = MediaQuery.of(context).size.height * 0.40;
 
     return Scaffold(
-      appBar: CustomAppBar(
-              appbarHeight: appBarHeight),
-      body: Padding(
+      appBar: CustomAppBar(appbarHeight: appBarHeight),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -89,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
               controller: emailController,
               decoration: const InputDecoration(
                 labelText: 'Email',
-                labelStyle: TextStyle(fontSize: 20.0), 
+                labelStyle: TextStyle(fontSize: 20.0),
               ),
               style: const TextStyle(fontSize: 18.0),
             ),
@@ -98,17 +107,18 @@ class _LoginPageState extends State<LoginPage> {
               controller: passwordController,
               decoration: const InputDecoration(
                 labelText: 'Password',
-                labelStyle: TextStyle(fontSize: 20.0), 
+                labelStyle: TextStyle(fontSize: 20.0),
               ),
-              style: const TextStyle(fontSize: 18.0), 
+              style: const TextStyle(fontSize: 18.0),
               obscureText: true,
             ),
-            const SizedBox(height: 40), 
+            const SizedBox(height: 40),
             ElevatedButton(
               onPressed: isLoading ? null : _loginAndFetchData,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue, 
-                padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 15.0), 
+                backgroundColor: Colors.blue,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 50.0, vertical: 15.0),
                 textStyle: const TextStyle(fontSize: 22.0),
               ),
               child: isLoading
@@ -116,11 +126,17 @@ class _LoginPageState extends State<LoginPage> {
                   : const Text('Login', style: TextStyle(color: Colors.white)),
             ),
             const SizedBox(height: 20),
+            if (errorMessage.isNotEmpty)
+              Text(
+                errorMessage,
+                style: const TextStyle(color: Colors.red, fontSize: 16),
+              ),
+            const SizedBox(height: 20),
             TextButton(
               onPressed: _contactICTCenter,
               child: const Text(
                 'Contact ICT Centre',
-                style: TextStyle(fontSize: 18.0), 
+                style: TextStyle(fontSize: 18.0),
               ),
             ),
           ],

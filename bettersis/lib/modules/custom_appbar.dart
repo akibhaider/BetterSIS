@@ -6,20 +6,20 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key, required this.appbarHeight});
 
   @override
-  Size get preferredSize => Size.fromHeight(appbarHeight); // Use the field appbarHeight
+  Size get preferredSize => Size.fromHeight(appbarHeight); 
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: null, // Remove default title
+      title: null, 
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.blue,    // Start color
+              Color(0xFF2196F3),    
               Colors.cyan,
               Colors.cyanAccent,
-              Colors.white,   // End color
+              Colors.white,   
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -43,8 +43,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
-      backgroundColor: Colors.transparent, // Transparent to show gradient
-      elevation: 0, // Remove shadow
+      backgroundColor: Colors.transparent,
+      elevation: 0, 
     );
   }
 }
