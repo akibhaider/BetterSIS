@@ -1,6 +1,7 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/screens/Meal-Token/display_tokens.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
+import 'package:bettersis/screens/Smart%20Wallet/smart_wallet.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -35,6 +36,7 @@ class _BuyTokenState extends State<BuyToken> {
   final List<String> _tokenOptions = ['1', '2', '3', '4', '5', '6'];
   final List<DateTime> _availableDates = [];
   final TextEditingController _priceController = TextEditingController();
+  smartWalletPage walletP = smartWalletPage();
 
   @override
   void initState() {
@@ -64,6 +66,99 @@ class _BuyTokenState extends State<BuyToken> {
       _priceController.text = '৳$_pricePerToken'; 
     });
     _updateTotalCost(); 
+  }
+
+  void buyTokenWithWallet(String userID, double tokenCost) async {
+     double currentBalance = await walletP.getBalance(userID);
+
+    print('\n\n\n\n\n\n\n\n\n');
+    print(currentBalance);
+    print('\n\n\n\n\n\n\n\n\n');
+
+    if(currentBalance < tokenCost){
+      // Insufficient funds, show a pop-up dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Insufficient Funds"),
+            content: Text("You do not have enough balance in your Smart Wallet."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    else{
+      // Sufficient funds, proceed with the transaction
+
+      // Deduct the token cost from the current balance
+      double newBalance = currentBalance - tokenCost;
+
+      // Update the balance in Firestore
+      await walletP.updateBalance(userID, newBalance);
+
+      // Log the transaction in Firestore
+      await walletP.addTransaction(userID, 'North Cafeteria - ' + _selectedMealType, tokenCost, 'meal');
+
+      if (_formKey.currentState!.validate()) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DisplayTokens(
+                              userId: widget.userId,
+                              userDept: widget.userDept,
+                              onLogout: widget.onLogout,
+                              userName: widget.userName,
+                              cafeteria: _selectedCafeteria,
+                              date: _selectedDate,
+                              meal: _selectedMealType,
+                              tokens: _selectedTokens)),
+                    );
+      }
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Purchase Successful"),
+            content: Text("Your token purchase was successful."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+
+    if (_formKey.currentState!.validate()) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DisplayTokens(
+                              userId: widget.userId,
+                              userDept: widget.userDept,
+                              onLogout: widget.onLogout,
+                              userName: widget.userName,
+                              cafeteria: _selectedCafeteria,
+                              date: _selectedDate,
+                              meal: _selectedMealType,
+                              tokens: _selectedTokens)),
+                    );
+                  }
   }
 
   @override
@@ -264,7 +359,12 @@ class _BuyTokenState extends State<BuyToken> {
                   minimumSize: Size(double.infinity, buttonHeight),
                 ),
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
+                  print('\n\n\n\n\n\n\n\n\n\n'+ _selectedPaymentMethod + ' ' + _totalCost.toString() + '\n\n\n\n\n\n\n\n\n\n');
+                  if(_selectedPaymentMethod == 'Smart Card'){
+                    buyTokenWithWallet(widget.userId, _totalCost.toDouble());
+                  }
+                  else{
+                    if (_formKey.currentState!.validate()) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -277,7 +377,8 @@ class _BuyTokenState extends State<BuyToken> {
                               date: _selectedDate,
                               meal: _selectedMealType,
                               tokens: _selectedTokens)),
-                    );
+                      );
+                    }
                   }
                 },
                 child: Text(
@@ -293,3 +394,19 @@ class _BuyTokenState extends State<BuyToken> {
     );
   }
 }
+
+/*if (_formKey.currentState!.validate()) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DisplayTokens(
+                              userId: widget.userId,
+                              userDept: widget.userDept,
+                              onLogout: widget.onLogout,
+                              userName: widget.userName,
+                              cafeteria: _selectedCafeteria,
+                              date: _selectedDate,
+                              meal: _selectedMealType,
+                              tokens: _selectedTokens)),
+                    );
+                  }*/

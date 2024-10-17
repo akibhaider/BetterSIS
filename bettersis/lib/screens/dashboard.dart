@@ -1,5 +1,6 @@
 import 'package:bettersis/screens/Complain/complain_page.dart';
 import 'package:bettersis/screens/Internet/internet_usage.dart';
+import 'package:bettersis/screens/Library/resource_front.dart';
 import 'package:bettersis/screens/Meal-Token/buy_token.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'Result/result_page.dart';
 import 'Smart Wallet/smart_wallet.dart';
 import 'Misc/appdrawer.dart';
-import  'Bus Ticket/trip_selection.dart';
+import 'Bus Ticket/trip_selection.dart';
 
 class Dashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -69,6 +70,19 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  void _navigateToLibrary() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Library(
+            userId: widget.userData['id'],
+            userDept: widget.userData['dept'],
+            userName: widget.userData['name'],
+            onLogout: _logout),
+      ),
+    );
+  }
+
   void _navigateToSmartWallet() {
     Navigator.push(
       context,
@@ -117,17 +131,15 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-   void _navigateToTransportation() {
+  void _navigateToTransportation() {
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => TripSelectionPage(
               onLogout: _logout,
               userId: widget.userData['id'],
-              userDept: widget.userData['dept']
-              )),
+              userDept: widget.userData['dept'])),
     );
-
   }
 
   Widget _buildServiceButton({
@@ -316,7 +328,7 @@ class _DashboardState extends State<Dashboard> {
                         icon: Icons.local_library,
                         label: "Library",
                         themeData: theme,
-                        onTap: () {},
+                        onTap: _navigateToLibrary,
                         fontSize: 14 * scaleFactor,
                       ),
                       _buildServiceButton(
@@ -367,6 +379,4 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
-
- 
 }
