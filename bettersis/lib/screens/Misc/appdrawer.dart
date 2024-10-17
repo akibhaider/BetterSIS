@@ -1,5 +1,6 @@
 import 'package:bettersis/screens/Notice/notice_board.dart';
 import 'package:bettersis/utils/utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:flutter/material.dart';
 import '../Meal-Token/view_tokens.dart';
 
@@ -19,7 +20,7 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
   late Animation<Offset> _slideAnimation;
   late Map<String, dynamic> userData;
 
-  final String balance = "৳5000.00";
+  String balance = "Fetching..."; 
 
   @override
   void initState() {
@@ -34,6 +35,34 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
       begin: const Offset(0, 0),
       end: const Offset(-1.5, 0),
     ).animate(_controller);
+
+    _fetchUserBalance(); 
+  }
+
+  // Function to fetch the balance from Firestore
+  Future<void> _fetchUserBalance() async {
+    try {
+      String userId = userData['id']; 
+
+      DocumentSnapshot financeDoc = await FirebaseFirestore.instance
+          .collection('Finance')
+          .doc(userId)
+          .get();
+
+      if (financeDoc.exists && financeDoc.data() != null) {
+        setState(() {
+          balance = '৳${financeDoc['Balance']}'; 
+        });
+      } else {
+        setState(() {
+          balance = "No data";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        balance = "Error"; 
+      });
+    }
   }
 
   void _toggleBalance() {
@@ -60,7 +89,6 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
 
     final double paddingValue = screenWidth * 0.04;
     final double fontSize = screenWidth * 0.04;
-    final double containerHeight = screenWidth * 0.18;
     final double borderWidth = screenWidth * 0.003;
 
     return Drawer(
@@ -98,37 +126,38 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(15.0),
-                      border:
-                          Border.all(color: Colors.white, width: borderWidth),
+                      border: Border.all(color: Colors.white, width: borderWidth),
                     ),
                     height: screenHeight * 0.07,
                     width: screenWidth * 0.35,
                     child: Stack(
                       children: [
                         SlideTransition(
-                            position: _slideAnimation,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Icon(Icons.currency_pound_sharp,
-                                    color: Colors.white, size: fontSize),
-                                Text(
-                                  "Balance",
-                                  style: TextStyle(
-                                    fontSize: fontSize,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          position: _slideAnimation,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Icon(Icons.currency_pound_sharp,
+                                  color: Colors.white, size: fontSize),
+                              SizedBox(width: 5),
+                              Text(
+                                "Balance",
+                                style: TextStyle(
+                                  fontSize: fontSize,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              ],
-                            )),
+                              ),
+                            ],
+                          ),
+                        ),
                         Positioned(
                           right: 0,
                           child: AnimatedOpacity(
                             opacity: _isBalanceVisible ? 1 : 0,
                             duration: const Duration(milliseconds: 300),
                             child: Text(
-                              balance,
+                              balance, // Display the fetched balance
                               style: TextStyle(
                                 fontSize: fontSize,
                                 color: Colors.white,
