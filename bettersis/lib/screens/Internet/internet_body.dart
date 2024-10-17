@@ -143,7 +143,7 @@ class _InternetBodyState extends State<InternetBody> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 26.0),
             decoration: const BoxDecoration(color: Colors.transparent),
-            child: const Column(
+            child: Column(
               children: [
                 Text(
                   widget.userName,
@@ -224,26 +224,31 @@ class _InternetBodyState extends State<InternetBody> {
               ],
             ),
           ),
-          Container(
-              padding: const EdgeInsets.only(top: 26, bottom: 16),
-              decoration: const BoxDecoration(color: Colors.transparent),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.refresh,
-                    color: Colors.white,
-                  ),
-                  Text(
-                    "REFRESH",
-                    style: TextStyle(
-                      fontSize: 0.032 * screenSize.width,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  )
-                ],
-              )),
+          InkWell(
+              onTap: () {
+                print('Refresh button tapped');
+                _fetchInternetUsage("tanjeebmeheran", "yahbaby");
+              },
+              child: Container(
+                  padding: const EdgeInsets.only(top: 26, bottom: 16),
+                  decoration: const BoxDecoration(color: Colors.transparent),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.refresh,
+                        color: Colors.white,
+                      ),
+                      Text(
+                        "REFRESH",
+                        style: TextStyle(
+                          fontSize: 0.032 * screenSize.width,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      )
+                    ],
+                  ))),
           Expanded(
             child: Container(
               padding: EdgeInsets.symmetric(
