@@ -1,7 +1,9 @@
 import 'package:bettersis/firebase_options.dart';
+import 'package:bettersis/modules/Bus%20Ticket/trip_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'screens/Misc/login_page.dart';
 
 void main() async {
@@ -10,7 +12,15 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform
   );
-  runApp(const MyApp());
+  runApp(
+    // Ensure that the provider is initialized at the root of the widget tree
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => TripProvider()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

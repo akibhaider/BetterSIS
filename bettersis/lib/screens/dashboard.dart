@@ -11,6 +11,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'Result/result_page.dart';
 import 'Smart Wallet/smart_wallet.dart';
 import 'Misc/appdrawer.dart';
+import  'Bus Ticket/trip_selection.dart';
 
 class Dashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -114,6 +115,19 @@ class _DashboardState extends State<Dashboard> {
               userId: widget.userData['id'],
               userDept: widget.userData['dept'])),
     );
+  }
+
+   void _navigateToTransportation() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => TripSelectionPage(
+              onLogout: _logout,
+              userId: widget.userData['id'],
+              userDept: widget.userData['dept']
+              )),
+    );
+
   }
 
   Widget _buildServiceButton({
@@ -309,7 +323,7 @@ class _DashboardState extends State<Dashboard> {
                         icon: Icons.directions_bus,
                         label: "Transportation",
                         themeData: theme,
-                        onTap: () {},
+                        onTap: _navigateToTransportation,
                         fontSize: 14 * scaleFactor,
                       ),
                       _buildServiceButton(
@@ -353,4 +367,6 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
+
+ 
 }
