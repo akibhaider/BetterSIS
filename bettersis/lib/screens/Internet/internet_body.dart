@@ -22,9 +22,24 @@ class InternetBody extends StatefulWidget {
 class _InternetBodyState extends State<InternetBody> {
   bool isLoading = true;
   String totalUsage = "12,000";
-  List<List<String>> usageDetails = [];
+  List<Map<String, dynamic>> usageHistory = [];
 
-  Future<void> _fetchInternetUsage(username, password) async {
+  Future<void> _storeUsageDataInFirestore(
+      String totalUsage, List<Map<String, dynamic>> usageHistory) async {
+    try {
+      final documentRef =
+          FirebaseFirestore.instance.collection('Internet').doc(widget.userId);
+
+      await documentRef.set({
+        'totalUsage': totalUsage,
+        'usageHistory': usageHistory,
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print('Error storing data in Firestore: $e');
+    }
+  }
+
+  Future<void> _fetchInternetUsage(String username, String password) async {
     final url = Uri.parse('http://127.0.0.1:8000/api/get-usage/');
 
     try {
@@ -39,6 +54,7 @@ class _InternetBodyState extends State<InternetBody> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         var minutesUsed = data['usage'][0].toString();
+
         if (minutesUsed.length == 4) {
           minutesUsed =
               '${minutesUsed[0]},${minutesUsed[1]}${minutesUsed[2]}${minutesUsed[3]}';
@@ -47,20 +63,29 @@ class _InternetBodyState extends State<InternetBody> {
               '${minutesUsed[0]}${minutesUsed[1]},${minutesUsed[2]}${minutesUsed[3]}${minutesUsed[4]}';
         }
 
+        List<Map<String, dynamic>> formattedUsageHistory =
+            List<Map<String, dynamic>>.from(
+                (data['usage'].sublist(1) as List).map((item) => {
+                      'start': item[0],
+                      'end': item[1],
+                      'duration': item[2],
+                      'mb': item[3],
+                      'location': item[4],
+                      'mac': item[5],
+                    }));
+
         setState(() {
           totalUsage = minutesUsed;
-          usageDetails = List<List<String>>.from(
-            data['usage'].sublist(1).map((item) => List<String>.from(item)),
-          ).reversed.toList();
+          usageHistory = formattedUsageHistory.reversed.toList();
         });
+
+        await _storeUsageDataInFirestore(totalUsage, formattedUsageHistory);
       } else {
-        print("Failed to fetch data");
         setState(() {
           totalUsage = "12,000";
         });
       }
     } catch (error) {
-      print("Error: $error");
       setState(() {
         totalUsage = "12,000";
       });
@@ -70,7 +95,6 @@ class _InternetBodyState extends State<InternetBody> {
   Future<void> fetchInternetCredsFromFirestore() async {
     setState(() {
       isLoading = true;
-      print("Loading Started");
     });
 
     final documentRef =
@@ -86,15 +110,43 @@ class _InternetBodyState extends State<InternetBody> {
         final password = data['password'];
 
         await _fetchInternetUsage(username, password);
-      } else {
-        print('No such document exists!');
       }
     } catch (e) {
       print('Error fetching tokens: $e');
     } finally {
       setState(() {
         isLoading = false;
-        print("Loading Ended");
+      });
+    }
+  }
+
+  Future<void> fetchInittialDataFromFirestore() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final documentRef =
+          FirebaseFirestore.instance.collection('Internet').doc(widget.userId);
+      final documentSnapshot = await documentRef.get();
+
+      if (documentSnapshot.exists) {
+        final data = documentSnapshot.data();
+
+        if (data != null) {
+          setState(() {
+            totalUsage = data['totalUsage'] ?? "12,000";
+            usageHistory =
+                List<Map<String, dynamic>>.from(data['usageHistory'] ?? []);
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      print("Error fetching data: $e");
+    } finally {
+      setState(() {
+        isLoading = false;
       });
     }
   }
@@ -102,7 +154,7 @@ class _InternetBodyState extends State<InternetBody> {
   @override
   void initState() {
     super.initState();
-    fetchInternetCredsFromFirestore();
+    fetchInittialDataFromFirestore();
   }
 
   @override
@@ -254,8 +306,9 @@ class _InternetBodyState extends State<InternetBody> {
                       const SizedBox(height: 10),
                       Expanded(
                         child: ListView.builder(
-                          itemCount: usageDetails.length,
+                          itemCount: usageHistory.length,
                           itemBuilder: (context, index) {
+                            final usage = usageHistory[index];
                             return Card(
                               margin: EdgeInsets.symmetric(
                                   vertical: screenHeight * 0.01),
@@ -269,11 +322,10 @@ class _InternetBodyState extends State<InternetBody> {
                                   backgroundColor: Colors.transparent,
                                   child: const Icon(Icons.circle_rounded),
                                 ),
-                                title: Text(usageDetails[index][4]),
-                                subtitle:
-                                    Text(usageDetails[index][0].split(' ')[0]),
+                                title: Text(usage['location']),
+                                subtitle: Text(usage['start'].split(' ')[0]),
                                 trailing: Text(
-                                  '${usageDetails[index][2].split(' ')[0]} Mins',
+                                  '${usage['duration'].split(' ')[0]} Mins',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16),
