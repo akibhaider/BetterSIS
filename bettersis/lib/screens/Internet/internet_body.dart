@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bettersis/screens/Internet/usage_details_modal.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -330,6 +331,17 @@ class _InternetBodyState extends State<InternetBody> {
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16),
                                 ),
+                                onTap: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    backgroundColor: Colors
+                                        .transparent, // To allow tapping outside to close
+                                    isScrollControlled: true,
+                                    builder: (BuildContext context) {
+                                      return UsageDetailsModal(usage: usage);
+                                    },
+                                  );
+                                },
                               ),
                             );
                           },
