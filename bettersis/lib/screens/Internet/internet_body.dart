@@ -80,7 +80,7 @@ class _InternetBodyState extends State<InternetBody> {
           usageHistory = formattedUsageHistory.reversed.toList();
         });
 
-        await _storeUsageDataInFirestore(totalUsage, formattedUsageHistory);
+        await _storeUsageDataInFirestore(totalUsage, usageHistory);
       } else {
         setState(() {
           totalUsage = "12,000";
@@ -338,7 +338,8 @@ class _InternetBodyState extends State<InternetBody> {
                                         .transparent, // To allow tapping outside to close
                                     isScrollControlled: true,
                                     builder: (BuildContext context) {
-                                      return UsageDetailsModal(usage: usage);
+                                      return UsageDetailsModal(
+                                          usage: usage, theme: theme);
                                     },
                                   );
                                 },

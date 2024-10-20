@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
+import 'info_box.dart';
 
 class UsageDetailsModal extends StatelessWidget {
   final Map<String, dynamic> usage;
+  final ThemeData theme;
 
-  const UsageDetailsModal({super.key, required this.usage});
+  const UsageDetailsModal({
+    super.key,
+    required this.usage,
+    required this.theme,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+    final double screenWidth = screenSize.width;
+    final fontSizeLarge = screenWidth * 0.05;
+
     return GestureDetector(
       onTap: () {
         Navigator.of(context).pop();
@@ -16,38 +26,76 @@ class UsageDetailsModal extends StatelessWidget {
         body: Center(
           child: GestureDetector(
             onTap: () {},
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20.0),
-              padding: const EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Usage Details',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+            child: IntrinsicWidth(
+              child: IntrinsicHeight(
+                child: Container(
+                  padding: const EdgeInsets.all(15.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20.0),
                   ),
-                  const SizedBox(height: 15),
-                  Text('Location: ${usage['location'] ?? 'N/A'}'),
-                  const SizedBox(height: 10),
-                  Text('Start Time: ${usage['start'] ?? 'N/A'}'),
-                  const SizedBox(height: 10),
-                  Text('End Time: ${usage['end'] ?? 'N/A'}'),
-                  const SizedBox(height: 10),
-                  Text('Duration: ${usage['duration'] ?? 'N/A'}'),
-                  const SizedBox(height: 10),
-                  Text('Data Used: ${usage['mb'] ?? 'N/A'} MB'),
-                  const SizedBox(height: 10),
-                  Text('MAC Address: ${usage['mac'] ?? 'N/A'}'),
-                  const SizedBox(height: 15),
-                ],
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text(
+                        'Usage Details',
+                        style: TextStyle(
+                          fontSize: fontSizeLarge,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          InfoBox(
+                            label: 'Location',
+                            value: usage['location'],
+                            theme: theme,
+                          ),
+                          InfoBox(
+                            label: 'Duration',
+                            value: usage['duration'],
+                            theme: theme,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          InfoBox(
+                            label: 'Start Time',
+                            value: usage['start'],
+                            theme: theme,
+                          ),
+                          InfoBox(
+                            label: 'End Time',
+                            value: usage['end'],
+                            theme: theme,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          InfoBox(
+                            label: 'Data Used',
+                            value: usage['mb'],
+                            theme: theme,
+                          ),
+                          InfoBox(
+                            label: 'MAC Address',
+                            value: usage['mac'],
+                            theme: theme,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
