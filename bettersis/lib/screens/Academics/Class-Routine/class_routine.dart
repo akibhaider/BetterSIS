@@ -6,12 +6,16 @@ import 'package:flutter/material.dart';
 class ClassRoutine extends StatefulWidget {
   final String userId;
   final String userDept;
+  final String userSemester;
+  final String userSection;
   final VoidCallback onLogout;
 
   const ClassRoutine({
     super.key,
     required this.userId,
     required this.userDept,
+    required this.userSemester,
+    required this.userSection,
     required this.onLogout,
   });
 

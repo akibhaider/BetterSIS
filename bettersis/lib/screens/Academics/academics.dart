@@ -7,12 +7,18 @@ import 'package:flutter/material.dart';
 class Academics extends StatefulWidget {
   final String userId;
   final String userDept;
+  final String userProgram;
+  final String userSemester;
+  final String userSection;
   final VoidCallback onLogout;
 
   const Academics({
     super.key,
     required this.userId,
     required this.userDept,
+    required this.userProgram,
+    required this.userSemester,
+    required this.userSection,
     required this.onLogout,
   });
 
@@ -35,6 +41,9 @@ class _AcademicsState extends State<Academics> {
       body: AcademicsFrontPage(
         userId: widget.userId,
         userDept: widget.userDept,
+        userProgram: widget.userProgram,
+        userSemester: widget.userSemester,
+        userSection: widget.userSection,
         onLogout: widget.onLogout,
       ),
     );

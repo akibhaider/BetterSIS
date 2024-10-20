@@ -1,17 +1,24 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ClassroomCodes extends StatefulWidget {
   final String userId;
   final String userDept;
+  final String userProgram;
+  final String userSemester;
+  final String userSection;
   final VoidCallback onLogout;
 
   const ClassroomCodes({
     super.key,
     required this.userId,
     required this.userDept,
+    required this.userProgram,
+    required this.userSemester,
+    required this.userSection,
     required this.onLogout,
   });
 
@@ -20,9 +27,59 @@ class ClassroomCodes extends StatefulWidget {
 }
 
 class _ClassroomCodesState extends State<ClassroomCodes> {
+  bool isLoading = true;
+  List<Map<String, String>> classList = [];
+
+  Future<void> fetchClassroomCodesFromFirestore() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final documentRef = FirebaseFirestore.instance
+          .collection('Classroom')
+          .doc(widget.userDept);
+      final documentSnapshot = await documentRef.get();
+
+      if (documentSnapshot.exists) {
+        List<Map<String, String>> data = [];
+        Map<String, dynamic>? programData =
+            documentSnapshot.data()?[widget.userProgram];
+
+        if (programData != null && programData[widget.userSection] is List) {
+          data = List<Map<String, String>>.from(programData[widget.userSection]
+              .map((item) => Map<String, String>.from(item)));
+        }
+
+        if (data.isNotEmpty) {
+          setState(() {
+            classList = data;
+            print(classList);
+          });
+        }
+      }
+    } catch (e) {
+      print("Error fetching data: $e");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchClassroomCodesFromFirestore();
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData theme = AppTheme.getTheme(widget.userDept);
+    final Size screenSize = MediaQuery.of(context).size;
+    final double screenWidth = screenSize.width;
+    final double screenHeight = screenSize.height;
+    final double fontSize = 0.05 * screenWidth;
 
     return Scaffold(
         drawer: CustomAppDrawer(theme: theme),
@@ -31,6 +88,53 @@ class _ClassroomCodesState extends State<ClassroomCodes> {
           theme: theme,
           title: 'Classroom Codes',
         ),
-        body: const Text("ClassroomCodes"));
+        body: Stack(children: [
+          Container(
+              color: theme.primaryColor,
+              width: screenWidth,
+              height: screenHeight,
+              child: Column(children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 26.0),
+                  decoration: const BoxDecoration(color: Colors.transparent),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Department: ${widget.userDept.toUpperCase()}',
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        'Program: BSc in ${widget.userProgram.toUpperCase()}',
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        'Semester: ${widget.userSemester}',
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        'Section: ${widget.userSection}',
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ]))
+        ]));
   }
 }

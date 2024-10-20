@@ -148,9 +148,13 @@ class _DashboardState extends State<Dashboard> {
       context,
       MaterialPageRoute(
           builder: (context) => Academics(
-              onLogout: _logout,
-              userId: widget.userData['id'],
-              userDept: widget.userData['dept'])),
+                onLogout: _logout,
+                userId: widget.userData['id'],
+                userDept: widget.userData['dept'],
+                userProgram: widget.userData['program'],
+                userSemester: widget.userData['semester'],
+                userSection: widget.userData['section'],
+              )),
     );
   }
 
