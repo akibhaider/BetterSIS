@@ -55,7 +55,6 @@ class _ClassroomCodesState extends State<ClassroomCodes> {
         if (data.isNotEmpty) {
           setState(() {
             classList = data;
-            print(classList);
           });
         }
       }
@@ -144,7 +143,7 @@ class _ClassroomCodesState extends State<ClassroomCodes> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Classroom Codes',
+                          'Google Classroom Codes',
                           style: TextStyle(
                             color: theme.secondaryHeaderColor,
                             fontSize: 18,
@@ -160,13 +159,6 @@ class _ClassroomCodesState extends State<ClassroomCodes> {
                               return ShowCode(
                                   classroom: classroom, theme: theme);
                             },
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            'View More >>',
-                            style: TextStyle(color: theme.primaryColor),
                           ),
                         ),
                       ],
