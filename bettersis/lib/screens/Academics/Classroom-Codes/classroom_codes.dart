@@ -1,4 +1,5 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/modules/loading_spinner.dart';
 import 'package:bettersis/screens/Academics/Classroom-Codes/show_code.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
@@ -165,7 +166,8 @@ class _ClassroomCodesState extends State<ClassroomCodes> {
                     ),
                   ),
                 ),
-              ]))
+              ])),
+          if (isLoading) const LoadingSpinner(),
         ]));
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bettersis/modules/loading_spinner.dart';
 import 'package:bettersis/screens/Internet/usage_details_modal.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -362,17 +363,7 @@ class _InternetBodyState extends State<InternetBody> {
             ],
           ),
         ),
-        if (isLoading)
-          Container(
-            width: screenWidth,
-            height: screenHeight,
-            color: Colors.black.withOpacity(0.6),
-            child: const Center(
-              child: CircularProgressIndicator(
-                color: Colors.white,
-              ),
-            ),
-          ),
+        if (isLoading) const LoadingSpinner(),
       ],
     );
   }
