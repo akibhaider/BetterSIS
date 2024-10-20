@@ -64,19 +64,7 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
               ],
             ),
           ),
-          const Spacer(),
-          TextButton(
-            onPressed: () {
-              print("Contact Library Management tapped!");
-            },
-            child: Text(
-              'Contact Library Management',
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.secondaryHeaderColor,
-              ),
-            ),
-          ),
+          const Spacer()
         ],
       ),
     );
