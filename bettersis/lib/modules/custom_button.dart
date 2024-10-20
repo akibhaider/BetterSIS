@@ -4,6 +4,7 @@ class CustomButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
   final Color bgColor;
+  final Color? borderColor;
   final double width;
 
   const CustomButton({
@@ -11,6 +12,7 @@ class CustomButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     required this.bgColor,
+    this.borderColor,
     required this.width,
   });
 
@@ -24,6 +26,7 @@ class CustomButton extends StatelessWidget {
           minimumSize: Size(width, 50),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
+            side: BorderSide(color: borderColor!, width: 3),
           ),
         ),
         onPressed: onPressed,
@@ -31,7 +34,7 @@ class CustomButton extends StatelessWidget {
           label,
           style: const TextStyle(
             fontSize: 18,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w700,
             color: Colors.white,
           ),
         ),
