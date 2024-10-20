@@ -32,8 +32,11 @@ class _AcademicsState extends State<Academics> {
         theme: theme,
         title: 'Academics',
       ),
-      body:
-          AcademicsFrontPage(userId: widget.userId, userDept: widget.userDept),
+      body: AcademicsFrontPage(
+        userId: widget.userId,
+        userDept: widget.userDept,
+        onLogout: widget.onLogout,
+      ),
     );
   }
 }
