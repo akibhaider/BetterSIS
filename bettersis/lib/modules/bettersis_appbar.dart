@@ -1,3 +1,5 @@
+import 'package:bettersis/screens/dashboard.dart';
+import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class BetterSISAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -14,6 +16,16 @@ class BetterSISAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    void navigateToDashboard() {
+      Map<String, dynamic> userData = Utils.getUser();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Dashboard(userData: userData),
+        ),
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -24,7 +36,7 @@ class BetterSISAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       child: AppBar(
         toolbarHeight: 100,
-        backgroundColor: Colors.transparent, 
+        backgroundColor: Colors.transparent,
         automaticallyImplyLeading: true,
         leading: IconButton(
           icon: const Icon(Icons.menu, color: Colors.white),
@@ -37,18 +49,22 @@ class BetterSISAppBar extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.only(top: 8.0),
           child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Colors.white),
-                ),
-                child: const Text(
-                  'BetterSIS',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+              InkWell(
+                onTap: navigateToDashboard,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: Colors.white),
+                  ),
+                  child: const Text(
+                    'BetterSIS',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
