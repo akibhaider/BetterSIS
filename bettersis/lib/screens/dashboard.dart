@@ -1,6 +1,6 @@
 import 'package:bettersis/screens/Complain/complain_page.dart';
 import 'package:bettersis/screens/Internet/internet_usage.dart';
-import 'package:bettersis/screens/Library/resource_front.dart';
+import 'Library/library.dart';
 import 'package:bettersis/screens/Meal-Token/buy_token.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -329,6 +329,7 @@ class _DashboardState extends State<Dashboard> {
                         label: "Library",
                         themeData: theme,
                         onTap: _navigateToLibrary,
+                        // onTap: (){},
                         fontSize: 14 * scaleFactor,
                       ),
                       _buildServiceButton(
