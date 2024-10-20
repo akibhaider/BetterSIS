@@ -1,4 +1,5 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/screens/Academics/Classroom-Codes/show_code.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -79,7 +80,8 @@ class _ClassroomCodesState extends State<ClassroomCodes> {
     final Size screenSize = MediaQuery.of(context).size;
     final double screenWidth = screenSize.width;
     final double screenHeight = screenSize.height;
-    final double fontSize = 0.05 * screenWidth;
+    final double fontSizeLarge = 0.05 * screenWidth;
+    final double fontSizeSmall = 0.04 * screenWidth;
 
     return Scaffold(
         drawer: CustomAppDrawer(theme: theme),
@@ -100,17 +102,9 @@ class _ClassroomCodesState extends State<ClassroomCodes> {
                   child: Column(
                     children: [
                       Text(
-                        'Department: ${widget.userDept.toUpperCase()}',
+                        'BSc in ${widget.userProgram.toUpperCase()}',
                         style: TextStyle(
-                          fontSize: fontSize,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        'Program: BSc in ${widget.userProgram.toUpperCase()}',
-                        style: TextStyle(
-                          fontSize: fontSize,
+                          fontSize: fontSizeLarge,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
@@ -118,22 +112,67 @@ class _ClassroomCodesState extends State<ClassroomCodes> {
                       Text(
                         'Semester: ${widget.userSemester}',
                         style: TextStyle(
-                          fontSize: fontSize,
-                          fontWeight: FontWeight.w600,
+                          fontSize: fontSizeSmall,
+                          fontWeight: FontWeight.w500,
                           color: Colors.white,
                         ),
                       ),
                       Text(
                         'Section: ${widget.userSection}',
                         style: TextStyle(
-                          fontSize: fontSize,
-                          fontWeight: FontWeight.w600,
+                          fontSize: fontSizeSmall,
+                          fontWeight: FontWeight.w500,
                           color: Colors.white,
                         ),
                       ),
                     ],
                   ),
-                )
+                ),
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.05,
+                        vertical: screenHeight * 0.02),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Classroom Codes',
+                          style: TextStyle(
+                            color: theme.secondaryHeaderColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: classList.length,
+                            itemBuilder: (context, index) {
+                              final classroom = classList[index];
+                              return ShowCode(
+                                  classroom: classroom, theme: theme);
+                            },
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'View More >>',
+                            style: TextStyle(color: theme.primaryColor),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ]))
         ]));
   }
