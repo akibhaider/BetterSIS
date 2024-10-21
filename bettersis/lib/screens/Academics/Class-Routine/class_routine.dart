@@ -1,6 +1,7 @@
 import 'dart:io' as io;
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/modules/loading_spinner.dart';
+import 'package:bettersis/screens/Academics/Class-Routine/image_fullview_modal.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -189,7 +190,7 @@ class _ClassRoutineState extends State<ClassRoutine> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 40),
                         routineImageUrl != null
                             ? Container(
                                 padding: const EdgeInsets.all(10.0),
@@ -207,12 +208,22 @@ class _ClassRoutineState extends State<ClassRoutine> {
                                     ),
                                   ],
                                 ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  child: Image.network(
-                                    routineImageUrl!,
-                                    width: screenWidth * 0.80,
-                                    fit: BoxFit.cover,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      builder: (context) => ImageFullviewModal(
+                                          imageUrl: routineImageUrl!),
+                                    );
+                                  },
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: Image.network(
+                                      routineImageUrl!,
+                                      width: screenWidth * 0.80,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
                               )
