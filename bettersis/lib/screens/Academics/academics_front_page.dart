@@ -1,4 +1,5 @@
 import 'package:bettersis/modules/custom_button.dart';
+import 'package:bettersis/screens/Academics/Admit-Card/admit-card.dart';
 import 'package:bettersis/screens/Academics/Class-Routine/class_routine.dart';
 import 'package:bettersis/screens/Academics/Classroom-Codes/classroom_codes.dart';
 import 'package:bettersis/screens/Academics/Course-Feedback/course_feedback.dart';
@@ -77,23 +78,39 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
                     bgColor: theme.secondaryHeaderColor.withOpacity(0.5),
                     borderColor: theme.secondaryHeaderColor,
                     width: buttonWidth),
-                const SizedBox(height: 50),
                 CustomButton(
-                    label: 'CLASS ROUTINE',
+                    label: 'DOWNLOAD ADMIT CARD',
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ClassRoutine(
-                                  onLogout: widget.onLogout,
-                                  userId: widget.userId,
-                                  userDept: widget.userDept,
-                                  userProgram: widget.userProgram,
-                                  userSemester: widget.userSemester,
-                                  userSection: widget.userSection,
-                                )),
+                            builder: (context) => AdmitCard(
+                                onLogout: widget.onLogout,
+                                userId: widget.userId,
+                                userDept: widget.userDept)),
                       );
                     },
+                    bgColor: theme.secondaryHeaderColor.withOpacity(0.5),
+                    borderColor: theme.secondaryHeaderColor,
+                    width: buttonWidth),
+                const SizedBox(height: 50),
+                CustomButton(
+                    label: 'CLASS ROUTINE',
+                    onPressed: (){},
+                    // onPressed: () {
+                    //   Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (context) => ClassRoutine(
+                    //               onLogout: widget.onLogout,
+                    //               userId: widget.userId,
+                    //               userDept: widget.userDept,
+                    //               userProgram: widget.userProgram,
+                    //               userSemester: widget.userSemester,
+                    //               userSection: widget.userSection,
+                    //             )),
+                    //   );
+                    // },
                     bgColor: theme.primaryColor,
                     borderColor: theme.secondaryHeaderColor,
                     width: buttonWidth),
