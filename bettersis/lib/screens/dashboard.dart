@@ -1,3 +1,4 @@
+import 'package:bettersis/screens/Academics/academics.dart';
 import 'package:bettersis/screens/Complain/complain_page.dart';
 import 'package:bettersis/screens/Internet/internet_usage.dart';
 import 'Library/library.dart';
@@ -136,6 +137,17 @@ class _DashboardState extends State<Dashboard> {
       context,
       MaterialPageRoute(
           builder: (context) => TripSelectionPage(
+              onLogout: _logout,
+              userId: widget.userData['id'],
+              userDept: widget.userData['dept'])),
+    );
+  }
+
+  void _navigateToAcademics() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => Academics(
               onLogout: _logout,
               userId: widget.userData['id'],
               userDept: widget.userData['dept'])),
@@ -314,7 +326,7 @@ class _DashboardState extends State<Dashboard> {
                         icon: Icons.book,
                         label: "Academics",
                         themeData: theme,
-                        onTap: () {},
+                        onTap: _navigateToAcademics,
                         fontSize: 14 * scaleFactor,
                       ),
                       _buildServiceButton(

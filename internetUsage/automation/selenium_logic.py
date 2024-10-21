@@ -126,10 +126,18 @@ def get_driver():
     chrome_driver_path = setup_chromedriver()
     service = Service(chrome_driver_path)
     options = webdriver.ChromeOptions()
-    options.add_argument("disable-infobars")
-    options.add_argument("start-maximized")
-    options.add_argument("disable-dev-shm-usage")
-    options.add_argument("no-sandbox")
+    options.add_argument("--headless")  # Run in headless mode
+    options.add_argument("--disable-gpu")  # Disable GPU usage (for systems where GPU is enabled)
+    options.add_argument("--no-sandbox")  # Sandbox might cause issues in headless mode
+    options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems in containers
+    options.add_argument("--disable-infobars")  # Prevent infobars from appearing
+    options.add_argument("--disable-extensions")  # Disable browser extensions for cleaner session
+    options.add_argument("--disable-software-rasterizer")  # Prevent software rendering
+    options.add_argument("--mute-audio")  # Mute any audio from the page (if applicable)
+    options.add_argument("--log-level=3")  # Set Chrome's log level to reduce output
+    options.add_argument("--window-size=1920x1080") 
+
+    # Enable automation exclusion and prevent the browser from being detected as Selenium
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_argument("disable-blink-features=AutomationControlled")
     
