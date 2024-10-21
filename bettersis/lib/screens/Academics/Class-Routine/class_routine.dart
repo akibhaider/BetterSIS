@@ -1,6 +1,7 @@
 import 'dart:io' as io;
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/modules/loading_spinner.dart';
+import 'package:bettersis/modules/show_message.dart';
 import 'package:bettersis/screens/Academics/Class-Routine/image_fullview_modal.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
@@ -52,7 +53,7 @@ class _ClassRoutineState extends State<ClassRoutine> {
         routineImageUrl = downloadUrl;
       });
     } catch (e) {
-      print("Error fetching routine image: $e");
+      ShowMessage.error(context, "Error fetching routine image: $e");
     } finally {
       setState(() {
         isLoading = false;
@@ -80,9 +81,7 @@ class _ClassRoutineState extends State<ClassRoutine> {
         // Clean up
         html.Url.revokeObjectUrl(url);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Routine downloaded in browser')),
-        );
+        ShowMessage.success(context, 'Routine downloaded in browser');
         return;
       } else {
         final directory = await getApplicationDocumentsDirectory();
@@ -91,15 +90,10 @@ class _ClassRoutineState extends State<ClassRoutine> {
         final file = io.File(filePath);
         await file.writeAsBytes(response.bodyBytes);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Routine downloaded to: $filePath')),
-        );
+        ShowMessage.success(context, 'Routine downloaded to: $filePath');
       }
     } catch (e) {
-      print("Error downloading image: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to download routine')),
-      );
+      ShowMessage.error(context, 'Failed to download routine');
     }
   }
 
