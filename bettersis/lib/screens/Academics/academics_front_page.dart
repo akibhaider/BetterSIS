@@ -88,6 +88,7 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
                                   onLogout: widget.onLogout,
                                   userId: widget.userId,
                                   userDept: widget.userDept,
+                                  userProgram: widget.userProgram,
                                   userSemester: widget.userSemester,
                                   userSection: widget.userSection,
                                 )),
