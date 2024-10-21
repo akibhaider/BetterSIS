@@ -11,12 +11,18 @@ import 'package:flutter/material.dart';
 class AcademicsFrontPage extends StatefulWidget {
   final String userId;
   final String userDept;
+  final String userProgram;
+  final String userSemester;
+  final String userSection;
   final VoidCallback onLogout;
 
   const AcademicsFrontPage({
     super.key,
     required this.userId,
     required this.userDept,
+    required this.userProgram,
+    required this.userSemester,
+    required this.userSection,
     required this.onLogout,
   });
 
@@ -79,9 +85,13 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => ClassRoutine(
-                                onLogout: widget.onLogout,
-                                userId: widget.userId,
-                                userDept: widget.userDept)),
+                                  onLogout: widget.onLogout,
+                                  userId: widget.userId,
+                                  userDept: widget.userDept,
+                                  userProgram: widget.userProgram,
+                                  userSemester: widget.userSemester,
+                                  userSection: widget.userSection,
+                                )),
                       );
                     },
                     bgColor: theme.primaryColor,
@@ -109,9 +119,13 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => ClassroomCodes(
-                                onLogout: widget.onLogout,
-                                userId: widget.userId,
-                                userDept: widget.userDept)),
+                                  onLogout: widget.onLogout,
+                                  userId: widget.userId,
+                                  userDept: widget.userDept,
+                                  userProgram: widget.userProgram,
+                                  userSemester: widget.userSemester,
+                                  userSection: widget.userSection,
+                                )),
                       );
                     },
                     bgColor: theme.primaryColor,
