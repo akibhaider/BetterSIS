@@ -33,19 +33,13 @@ class _AdmitCardState extends State<AdmitCard> {
       ),
       drawer: CustomAppDrawer(theme: theme),
       body: GenerateAdmitCard(
-        userId: widget.userId,
-        userName: 'S.M. Tanjeeb Meheran Rohan',  // Dummy data for testing
         userDept: widget.userDept,
-        programme: 'BSc in CSE',
-        semester: 'Fifth',
-        registeredCourses: [
-          'CSE 4501: Operating Systems',
-          'CSE 4503: Microprocessor and Assembly Language',
-          'CSE 4511: Computer Networks',
-          'CSE 4513: Software Engineering and Object Oriented Design',
-          'CSE 4519: Simulation and Modeling',
-          'Math 4541: Multivariable Calculus and Complex Variables',
-        ],
+        userId: widget.userId,
+        userName: 'Tanjeeb Meheran Rohan',
+        programme: 'CSE',
+        semester: "Winter",
+        examination: "Mid",
+        registeredCourses: const ['CSE-4501: Operating Systems'],
       ),
     );
   }

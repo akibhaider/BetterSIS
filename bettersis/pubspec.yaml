@@ -95,6 +95,8 @@ flutter:
     - assets/default_user.jpg
     - assets/icon.png
     - assets/bKash.png
+    - assets/iut_logo.png
+    - assets/oic_logo.jpg
     - .env
 
   # To add assets to your application, add an assets section, like this:
