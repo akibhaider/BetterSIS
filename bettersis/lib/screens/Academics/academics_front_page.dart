@@ -10,6 +10,7 @@ import 'package:bettersis/utils/themes.dart';
 import 'package:flutter/material.dart';
 
 class AcademicsFrontPage extends StatefulWidget {
+  final String userName;
   final String userId;
   final String userDept;
   final String userProgram;
@@ -19,6 +20,7 @@ class AcademicsFrontPage extends StatefulWidget {
 
   const AcademicsFrontPage({
     super.key,
+    required this.userName,
     required this.userId,
     required this.userDept,
     required this.userProgram,
@@ -87,7 +89,10 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
                             builder: (context) => AdmitCard(
                                 onLogout: widget.onLogout,
                                 userId: widget.userId,
-                                userDept: widget.userDept)),
+                                userDept: widget.userDept,
+                                userName: widget.userName,
+                                userProgram: widget.userProgram,
+                                userSemester: widget.userSemester,)),
                       );
                     },
                     bgColor: theme.secondaryHeaderColor.withOpacity(0.5),

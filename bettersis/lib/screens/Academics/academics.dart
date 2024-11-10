@@ -10,10 +10,12 @@ class Academics extends StatefulWidget {
   final String userProgram;
   final String userSemester;
   final String userSection;
+  final String userName;
   final VoidCallback onLogout;
 
   const Academics({
     super.key,
+    required this.userName,
     required this.userId,
     required this.userDept,
     required this.userProgram,
@@ -39,6 +41,7 @@ class _AcademicsState extends State<Academics> {
         title: 'Academics',
       ),
       body: AcademicsFrontPage(
+        userName: widget.userName,
         userId: widget.userId,
         userDept: widget.userDept,
         userProgram: widget.userProgram,

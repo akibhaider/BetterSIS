@@ -3,29 +3,32 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
+import 'package:path_provider/path_provider.dart'; 
 import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:permission_handler/permission_handler.dart';
 import '../../utils/Utils.dart';
 
 class GenerateAdmitCard extends StatefulWidget {
   final String userId;
   final String userName;
   final String userDept;
-  final String programme;
+  final String userProgram;
   final String semester;
   final String examination;
+  final String userSemester;
   final List<String> registeredCourses;
 
   GenerateAdmitCard({
-    required this.userId,
-    required this.userName,
-    required this.userDept,
-    required this.programme,
     required this.semester,
     required this.examination,
     required this.registeredCourses,
+    required this.userId,
+    required this.userDept,
+    required this.userName,
+    required this.userProgram,
+    required this.userSemester
   });
 
   @override
@@ -44,19 +47,16 @@ class _GenerateAdmitCardState extends State<GenerateAdmitCard> {
   Future<void> _generateAndSavePDF() async {
     final pdf = pw.Document();
 
-    final iutLogo = pw.MemoryImage(
-      (await rootBundle.load('assets/iut_logo.png')).buffer.asUint8List(),
-    );
-    final oicLogo = pw.MemoryImage(
-      (await rootBundle.load('assets/oic_logo.jpg')).buffer.asUint8List(),
-    );
+    final output =
+        await getTemporaryDirectory(); 
+    final filePath =
+        "${output.path}/admit_card.pdf"; // File path in Documents directory
 
-    // final userImageUrl = Utils.getUserImageURL();
-    // final userImageBytes = await _fetchImageFromUrl(userImageUrl);
+    // Load logos
+    final ByteData iutLogoData = await rootBundle.load('assets/iut_logo.png');
+    final ByteData oicLogoData = await rootBundle.load('assets/oic_logo.jpg');
 
-    final output = await getTemporaryDirectory();
-    final filePath = "${output.path}/admit_card.pdf";
-
+    // Building the PDF structure
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
@@ -64,90 +64,116 @@ class _GenerateAdmitCardState extends State<GenerateAdmitCard> {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
+              // Header with logos
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Image(iutLogo, width: 60), // Left IUT logo
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.center,
-                    children: [
-                      pw.Text(
-                        'Islamic University of Technology (IUT)',
-                        style: pw.TextStyle(
-                          fontSize: 16,
-                          fontWeight: pw.FontWeight.bold,
-                        ),
-                        textAlign: pw.TextAlign.center,
-                      ),
-                      pw.Text(
-                        '(A Subsidiary Organ of the OIC)',
-                        style: pw.TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
-                  pw.Image(oicLogo, width: 60), 
+                  pw.Image(pw.MemoryImage(iutLogoData.buffer.asUint8List()),
+                      width: 50, height: 50),
+                  pw.Image(pw.MemoryImage(oicLogoData.buffer.asUint8List()),
+                      width: 50, height: 50),
                 ],
               ),
               pw.SizedBox(height: 10),
-              pw.Text(
-                '${widget.semester} Semester 2023-2024 (${widget.examination} Examination)',
-                style: pw.TextStyle(fontSize: 12),
+
+              // Main title
+              pw.Center(
+                child: pw.Text(
+                  'Islamic University of Technology (IUT)',
+                  style: pw.TextStyle(
+                      fontSize: 17, fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+              pw.SizedBox(height: 5),
+
+              // Subtitle
+              pw.Center(
+                child: pw.Text(
+                  '${widget.semester} Semester 2023-2024 (${widget.examination} Examination)',
+                  style: pw.TextStyle(fontSize: 12),
+                ),
+              ),
+              pw.SizedBox(height: 5),
+
+              // Admit Card title
+              pw.Center(
+                child: pw.Text(
+                  'Admit Card',
+                  style: pw.TextStyle(fontSize: 18),
+                ),
               ),
               pw.SizedBox(height: 10),
-              pw.Text(
-                'Admit Card',
-                style:
-                    pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-              ),
-              pw.SizedBox(height: 20),
+
+              // User image and information row
               pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
+                  // Student info
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('Student ID: ${widget.userId}',
-                          style: pw.TextStyle(fontSize: 12)),
-                      pw.Text('Name: ${widget.userName}',
-                          style: pw.TextStyle(fontSize: 12)),
-                      pw.Text('Department: ${widget.userDept}',
-                          style: pw.TextStyle(fontSize: 12)),
-                      pw.Text('Programme: ${widget.programme}',
-                          style: pw.TextStyle(fontSize: 12)),
-                      pw.Text('Semester: ${widget.semester}',
-                          style: pw.TextStyle(fontSize: 12)),
+                      pw.Text('Student ID: ${widget.userId}'),
+                      pw.Text('Name: ${widget.userName}'),
+                      pw.Text('Department: ${widget.userDept.toUpperCase()}'),
+                      pw.Text('Programme: ${widget.userProgram.toUpperCase()}'),
+                      pw.Text('Semester: ${widget.userSemester}'),
                     ],
                   ),
-                  pw.Image(iutLogo, width: 60), 
                 ],
               ),
               pw.SizedBox(height: 20),
+
+              // Registered courses
               pw.Text('Registered Theory Courses:',
-                  style: pw.TextStyle(fontSize: 12)),
-              pw.Bullet(
-                text: widget.registeredCourses.join('\n'),
-                style: pw.TextStyle(fontSize: 12),
-              ),
-              pw.SizedBox(height: 30),
-              pw.Text(
-                'PENALTY OF COMMITTING OFFENCES RELATED TO EXAMINATIONS (GERR ARTICLE 8.0)',
-                style:
-                    pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
-              ),
-              pw.SizedBox(height: 10),
-              pw.Text(
-                '''1. Attempt to communicate with other examinee or examiners:
-   a. First time – Warning by the invigilator.
-   b. Second time – Changing of seats by the invigilator.
-   c. Third time – Expulsion from the examination hall for that paper by the Chief Invigilator.
-2. Possession of incriminating documents or possession of writings related to the subject of examination...''',
-                style: pw.TextStyle(fontSize: 10),
-              ),
+                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 5),
+              ...widget.registeredCourses
+                  .map((course) => pw.Bullet(text: course))
+                  .toList(),
               pw.SizedBox(height: 20),
-              pw.Align(
-                alignment: pw.Alignment.centerRight,
-                child: pw.Text('Registrar', style: pw.TextStyle(fontSize: 12)),
+
+              // Penalty Section with border
+              pw.Container(
+                padding: pw.EdgeInsets.all(10),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.black),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'PENALTY OF COMMITTING OFFENCES RELATED TO EXAMINATIONS (GERR ARTICLE 8.0)',
+                      style: pw.TextStyle(
+                          fontSize: 10, fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.SizedBox(height: 5),
+                    pw.Text(
+                      '1. Attempt to communicate with other examinee or examinees:',
+                      style: pw.TextStyle(fontSize: 10),
+                    ),
+                    pw.SizedBox(height: 5),
+                    pw.Text(
+                      '    - First time -Warning by the invigilator.',
+                      style: pw.TextStyle(fontSize: 10),
+                    ),
+                    pw.SizedBox(height: 5),
+                    pw.Text(
+                      '    - Second time - Changing of seats by the invigilator.',
+                      style: pw.TextStyle(fontSize: 10),
+                    ),
+                    pw.SizedBox(height: 5),
+                    pw.Text(
+                      '    - Third time - Expulsion from the examination hall for that paper by the Chief Invigilator.',
+                      style: pw.TextStyle(fontSize: 10),
+                    ),
+                    pw.SizedBox(height: 5),
+                    pw.Text(
+                      '2. Possession of incriminating document or possession of writings related to the subject of examination or copying from any other source or attempting to copy or taking help or attempting to take help from any incriminating document: The minimum punishment is expulsion from Examination Hall and maximum punishment is cancellation of the entire examination (mid semester / semester final) in which s/he is appearing.',
+                      style: pw.TextStyle(fontSize: 10),
+                    ),
+                    // Add more penalty points as necessary
+                  ],
+                ),
               ),
             ],
           );
@@ -155,29 +181,19 @@ class _GenerateAdmitCardState extends State<GenerateAdmitCard> {
       ),
     );
 
+    // Write PDF file to the local storage
     final file = File(filePath);
     await file.writeAsBytes(await pdf.save());
 
+    // Update the UI with the PDF path
     setState(() {
-      pdfPath = filePath;
+      pdfPath = filePath; // Save the generated file path
     });
-  }
-
-  Future<Uint8List> _fetchImageFromUrl(String imageUrl) async {
-    final response = await http.get(Uri.parse(imageUrl));
-    if (response.statusCode == 200) {
-      return response.bodyBytes;
-    } else {
-      throw Exception('Failed to load image from $imageUrl');
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Admit Card'),
-      ),
       body: pdfPath == null
           ? Center(child: CircularProgressIndicator())
           : PDFView(

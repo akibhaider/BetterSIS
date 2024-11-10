@@ -8,12 +8,18 @@ class AdmitCard extends StatefulWidget {
   final VoidCallback onLogout;
   final String userId;
   final String userDept;
+  final String userName;
+  final String userProgram;
+  final String userSemester;
 
   const AdmitCard({
     super.key,
     required this.onLogout,
     required this.userDept,
     required this.userId,
+    required this.userName,
+    required this.userProgram,
+    required this.userSemester
   });
 
   @override
@@ -33,13 +39,14 @@ class _AdmitCardState extends State<AdmitCard> {
       ),
       drawer: CustomAppDrawer(theme: theme),
       body: GenerateAdmitCard(
-        userDept: widget.userDept,
-        userId: widget.userId,
-        userName: 'Tanjeeb Meheran Rohan',
-        programme: 'CSE',
         semester: "Winter",
         examination: "Mid",
-        registeredCourses: const ['CSE-4501: Operating Systems'],
+        registeredCourses: const ['CSE-4501: Operating Systems', 'CSE-4503: Microprocessor'],
+        userDept: widget.userDept,
+        userId: widget.userId,
+        userName: widget.userName,
+        userProgram: widget.userProgram,
+        userSemester: widget.userSemester
       ),
     );
   }
