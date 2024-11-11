@@ -1,7 +1,6 @@
-import 'package:bettersis/screens/Academics/academics.dart';
 import 'package:bettersis/screens/Complain/complain_page.dart';
 import 'package:bettersis/screens/Internet/internet_usage.dart';
-import 'Library/library.dart';
+import 'package:bettersis/screens/Library/library_home.dart';
 import 'package:bettersis/screens/Meal-Token/buy_token.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -58,32 +57,18 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void _navigateToInternet() {
+// 1) Result Button clicking logic
+  void _navigateToResult() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => InternetUsage(
-            userId: widget.userData['id'],
-            userDept: widget.userData['dept'],
-            userName: widget.userData['name'],
-            onLogout: _logout),
+        builder: (context) =>
+            ResultPage(onLogout: _logout, userData: widget.userData),
       ),
     );
   }
 
-  void _navigateToLibrary() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Library(
-            userId: widget.userData['id'],
-            userDept: widget.userData['dept'],
-            userName: widget.userData['name'],
-            onLogout: _logout),
-      ),
-    );
-  }
-
+  // 2) Smart Wallet Button clicking logic
   void _navigateToSmartWallet() {
     Navigator.push(
       context,
@@ -98,6 +83,9 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+
+
+  // 4) Lunch Token Button clicking logic
   void _navigateToLunchToken() {
     Navigator.push(
       context,
@@ -111,27 +99,25 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void _navigateToResult() {
+// 5) E-Resource Button clicking logic
+  void _navigateToLibrary() {
+    // Fetch the theme based on the department
+    final themeData = AppTheme.getTheme(widget.userData['dept']);
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            ResultPage(onLogout: _logout, userData: widget.userData),
+        builder: (context) => Library(
+          userId: widget.userData['id'],
+          userDept: widget.userData['dept'],
+          userName: widget.userData['name'],
+          onLogout: _logout,
+          themeData: themeData, // Pass the theme data
+        ),
       ),
     );
   }
 
-  void _navigateToComplain() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => ComplainPage(
-              onLogout: _logout,
-              userId: widget.userData['id'],
-              userDept: widget.userData['dept'])),
-    );
-  }
-
+  // 6) Transportation Button clicking logic
   void _navigateToTransportation() {
     Navigator.push(
       context,
@@ -143,21 +129,34 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void _navigateToAcademics() {
+
+// 7) Internet Button clicking logic
+  void _navigateToInternet() {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => Academics(
-                onLogout: _logout,
-                userId: widget.userData['id'],
-                userDept: widget.userData['dept'],
-                userProgram: widget.userData['program'],
-                userSemester: widget.userData['semester'],
-                userSection: widget.userData['section'],
-                userName: widget.userData['name'],
-              )),
+        builder: (context) => InternetUsage(
+            userId: widget.userData['id'],
+            userDept: widget.userData['dept'],
+            userName: widget.userData['name'],
+            onLogout: _logout),
+      ),
     );
   }
+
+// 9) E-Resource Button clicking logic
+  void _navigateToComplain() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => ComplainPage(
+              onLogout: _logout,
+              userId: widget.userData['id'],
+              userDept: widget.userData['dept'])),
+    );
+  }
+
+
 
   Widget _buildServiceButton({
     required IconData icon,
@@ -331,7 +330,7 @@ class _DashboardState extends State<Dashboard> {
                         icon: Icons.book,
                         label: "Academics",
                         themeData: theme,
-                        onTap: _navigateToAcademics,
+                        onTap: () {},
                         fontSize: 14 * scaleFactor,
                       ),
                       _buildServiceButton(
@@ -346,7 +345,6 @@ class _DashboardState extends State<Dashboard> {
                         label: "Library",
                         themeData: theme,
                         onTap: _navigateToLibrary,
-                        // onTap: (){},
                         fontSize: 14 * scaleFactor,
                       ),
                       _buildServiceButton(
