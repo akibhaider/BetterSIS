@@ -1,3 +1,5 @@
+import 'package:bettersis/screens/Academics/academics.dart';
+import 'package:bettersis/screens/Academics/academics_front_page.dart';
 import 'package:bettersis/screens/Complain/complain_page.dart';
 import 'package:bettersis/screens/Internet/internet_usage.dart';
 import 'package:bettersis/screens/Library/library_home.dart';
@@ -83,7 +85,23 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-
+  // 3) Academics Button clicking logic
+  void _navigateToAcademics() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Academics(
+          onLogout: _logout,
+          userName: widget.userData['name'],
+          userId: widget.userData['id'],
+          userDept: widget.userData['dept'],
+          userProgram: widget.userData['program'],
+          userSemester: widget.userData['semester'],
+          userSection: widget.userData['section'],
+        ),
+      ),
+    );
+  }
 
   // 4) Lunch Token Button clicking logic
   void _navigateToLunchToken() {
@@ -129,7 +147,6 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-
 // 7) Internet Button clicking logic
   void _navigateToInternet() {
     Navigator.push(
@@ -155,8 +172,6 @@ class _DashboardState extends State<Dashboard> {
               userDept: widget.userData['dept'])),
     );
   }
-
-
 
   Widget _buildServiceButton({
     required IconData icon,
@@ -330,7 +345,7 @@ class _DashboardState extends State<Dashboard> {
                         icon: Icons.book,
                         label: "Academics",
                         themeData: theme,
-                        onTap: () {},
+                        onTap: _navigateToAcademics,
                         fontSize: 14 * scaleFactor,
                       ),
                       _buildServiceButton(

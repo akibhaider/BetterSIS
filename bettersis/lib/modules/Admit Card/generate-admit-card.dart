@@ -44,6 +44,8 @@ class _GenerateAdmitCardState extends State<GenerateAdmitCard> {
     _generateAndSavePDF();
   }
 
+  
+
   Future<void> _generateAndSavePDF() async {
     final pdf = pw.Document();
 
