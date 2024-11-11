@@ -11,6 +11,7 @@ class Academics extends StatefulWidget {
   final String userSemester;
   final String userSection;
   final String userName;
+  final Map<String, dynamic> userData;
   final VoidCallback onLogout;
 
   const Academics({
@@ -21,6 +22,7 @@ class Academics extends StatefulWidget {
     required this.userProgram,
     required this.userSemester,
     required this.userSection,
+    required this.userData,
     required this.onLogout,
   });
 
@@ -47,6 +49,7 @@ class _AcademicsState extends State<Academics> {
         userProgram: widget.userProgram,
         userSemester: widget.userSemester,
         userSection: widget.userSection,
+        userData: widget.userData,
         onLogout: widget.onLogout,
       ),
     );

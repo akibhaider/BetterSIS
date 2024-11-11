@@ -98,6 +98,7 @@ class _DashboardState extends State<Dashboard> {
           userProgram: widget.userData['program'],
           userSemester: widget.userData['semester'],
           userSection: widget.userData['section'],
+          userData: widget.userData
         ),
       ),
     );
