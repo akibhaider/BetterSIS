@@ -8,7 +8,7 @@ import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:permission_handler/permission_handler.dart';
-import '../../utils/Utils.dart';
+import '../../utils/utils.dart'; // filename case sensitivity mistake //
 
 class GenerateAdmitCard extends StatefulWidget {
   final String userId;
