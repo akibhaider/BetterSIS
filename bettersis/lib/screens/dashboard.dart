@@ -55,7 +55,7 @@ class _DashboardState extends State<Dashboard> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),
-      (Route<dynamic> route) => false,
+          (Route<dynamic> route) => false,
     );
   }
 
@@ -90,15 +90,16 @@ class _DashboardState extends State<Dashboard> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Academics(
-          onLogout: _logout,
-          userName: widget.userData['name'],
-          userId: widget.userData['id'],
-          userDept: widget.userData['dept'],
-          userProgram: widget.userData['program'],
-          userSemester: widget.userData['semester'],
-          userSection: widget.userData['section'],
-          userData: widget.userData
+        // Change to "AcademicsFrontPage" from "Academics"
+        builder: (context) => AcademicsFrontPage(
+            onLogout: _logout,
+            userName: widget.userData['name'],
+            userId: widget.userData['id'],
+            userDept: widget.userData['dept'],
+            userProgram: widget.userData['program'],
+            userSemester: widget.userData['semester'],
+            userSection: widget.userData['section'],
+            userData: widget.userData
         ),
       ),
     );
