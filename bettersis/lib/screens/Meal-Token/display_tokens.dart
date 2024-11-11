@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'lunchtoken.dart';
+import 'package:intl/intl.dart'; // For date parsing and formatting
 
 class DisplayTokens extends StatefulWidget {
   final String userId;
@@ -36,7 +37,7 @@ class _DisplayTokensState extends State<DisplayTokens> {
   late int tokenCount;
   var uuid = const Uuid();
   List<Map<String, dynamic>> tokensList = [];
-  bool isLoading = true; 
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -69,9 +70,10 @@ class _DisplayTokensState extends State<DisplayTokens> {
     await batch.commit();
   }
 
+  // Fetch tokens, check expiration, and remove expired tokens
   Future<void> _fetchTokensFromFirestore() async {
     setState(() {
-      isLoading = true; 
+      isLoading = true;
     });
 
     final tokenCollection = FirebaseFirestore.instance
@@ -80,16 +82,39 @@ class _DisplayTokensState extends State<DisplayTokens> {
         .collection('userTokens');
 
     final querySnapshot = await tokenCollection.get();
+
+    DateTime now = DateTime.now();
+    List<Map<String, dynamic>> validTokens = [];
+
+    final batch =
+        FirebaseFirestore.instance.batch(); 
+
+    for (var doc in querySnapshot.docs) {
+      String tokenDateStr =
+          doc['date']; 
+      DateTime tokenDate =
+          DateFormat('dd-MM-yyyy HH:mm:ss').parse(tokenDateStr);
+
+      if (tokenDate.isAfter(now)) {
+        // Token is still valid, add it to the validTokens list
+        validTokens.add({
+          'meal': doc['meal'],
+          'date': doc['date'],
+          'cafeteria': doc['cafeteria'],
+          'tokenId': doc['tokenId'],
+        });
+      } else {
+        // Token is expired, mark it for deletion
+        batch.delete(doc.reference);
+      }
+    }
+
+    // Commit the batch to delete expired tokens
+    await batch.commit();
+
     setState(() {
-      tokensList = querySnapshot.docs
-          .map((doc) => {
-                'meal': doc['meal'],
-                'date': doc['date'],
-                'cafeteria': doc['cafeteria'],
-                'tokenId': doc['tokenId'],
-              })
-          .toList();
-      isLoading = false; 
+      tokensList = validTokens;
+      isLoading = false;
     });
   }
 
@@ -104,14 +129,14 @@ class _DisplayTokensState extends State<DisplayTokens> {
     ThemeData theme = AppTheme.getTheme(widget.userDept);
 
     return Scaffold(
-      drawer: CustomAppDrawer(theme: theme ),
+      drawer: CustomAppDrawer(theme: theme),
       appBar: BetterSISAppBar(
         onLogout: widget.onLogout,
         theme: theme,
         title: 'Tokens',
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator()) 
+          ? const Center(child: CircularProgressIndicator())
           : GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
