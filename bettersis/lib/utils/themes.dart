@@ -5,8 +5,8 @@ class AppTheme {
     switch (dept.toLowerCase()) {
       case 'cse':
         return ThemeData(
-          primaryColor: Colors.indigo,
-          secondaryHeaderColor: const Color.fromARGB(255, 0, 0, 128), // Gradient from dark to lighter blue
+          primaryColor: Colors.blue,
+          secondaryHeaderColor: const Color.fromARGB(255, 6, 94, 179), 
         );
       case 'eee':
         return ThemeData(
