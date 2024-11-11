@@ -1,3 +1,5 @@
+import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:flutter/material.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:bettersis/screens/Library/question_bank.dart';
@@ -36,7 +38,6 @@ class Library extends StatelessWidget {
     }
   }
 
-
   Widget _buildResourceButton({
     required IconData icon,
     required String label,
@@ -70,20 +71,14 @@ class Library extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = AppTheme.getTheme(userDept);
     final screenWidth = MediaQuery.of(context).size.width;
     double scaleFactor = screenWidth / 375;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Library Home"),
-        backgroundColor: themeData.primaryColor,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: onLogout,
-          ),
-        ],
-      ),
+      appBar:
+          BetterSISAppBar(onLogout: onLogout, theme: theme, title: "Library"),
+      drawer: CustomAppDrawer(theme: theme),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -123,7 +118,8 @@ class Library extends StatelessWidget {
                     _buildResourceButton(
                       icon: Icons.note,
                       label: "Course Outlines",
-                      onTap: () => _navigateToSection(context, "Course_Outlines"),
+                      onTap: () =>
+                          _navigateToSection(context, "Course_Outlines"),
                       fontSize: 14 * scaleFactor,
                     ),
                     _buildResourceButton(
@@ -152,7 +148,7 @@ class SectionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(sectionTitle),
+        title: const Text("Section"),
       ),
       body: Center(
         child: Text(
