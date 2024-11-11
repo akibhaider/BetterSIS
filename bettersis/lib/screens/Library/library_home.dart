@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bettersis/utils/themes.dart';
+import 'package:bettersis/screens/Library/question_bank.dart';
 
 class Library extends StatelessWidget {
   final String userId;
@@ -18,13 +19,23 @@ class Library extends StatelessWidget {
   }) : super(key: key);
 
   void _navigateToSection(BuildContext context, String section) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SectionPage(sectionTitle: section),
-      ),
-    );
+    if (section == "Question_Bank") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => QuestionBankPage(),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SectionPage(sectionTitle: section),
+        ),
+      );
+    }
   }
+
 
   Widget _buildResourceButton({
     required IconData icon,
