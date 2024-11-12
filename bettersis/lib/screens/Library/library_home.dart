@@ -1,10 +1,12 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
-import 'package:flutter/material.dart';
-import 'package:bettersis/utils/themes.dart';
 import 'package:bettersis/screens/Library/question_bank.dart';
 import 'package:bettersis/screens/Library/course_materials.dart';
 import 'package:bettersis/screens/Library/course_outline.dart';
+import 'package:bettersis/screens/Library/lecture_notes.dart';
+import 'package:bettersis/screens/Library/engineering_village.dart'; // Import the new EngineeringVillagePage file
+import 'package:flutter/material.dart';
+import 'package:bettersis/utils/themes.dart';
 
 class Library extends StatelessWidget {
   final String userId;
@@ -21,30 +23,7 @@ class Library extends StatelessWidget {
     required this.onLogout,
     required this.themeData,
   }) : super(key: key);
-  //
-  // void _navigateToSection(BuildContext context, String section) {
-  //   if (section == "Question_Bank") {
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(builder: (context) => QuestionBankPage()),
-  //     );
-  //   } else if (section == "Course_Materials") {
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(builder: (context) => CourseMaterialsPage()),
-  //     );
-  //   } else if (section == "Course_Outlines") {
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(builder: (context) => CourseOutlinePage()),
-  //     );
-  //   } else {
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(builder: (context) => SectionPage(sectionTitle: section)),
-  //     );
-  //   }
-  // }
+
   void _navigateToSection(BuildContext context, String section) {
     if (section == "Question_Bank") {
       Navigator.push(
@@ -63,6 +42,20 @@ class Library extends StatelessWidget {
           builder: (context) => CourseOutlinePage(),
         ),
       );
+    } else if (section == "Lecture_Notes") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LectureNotesPage(),
+        ),
+      );
+    } else if (section == "Engineering_Village") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EngineeringVillagePage(),
+        ),
+      );
     } else {
       Navigator.push(
         context,
@@ -70,7 +63,6 @@ class Library extends StatelessWidget {
       );
     }
   }
-
 
   Widget _buildResourceButton({
     required IconData icon,
@@ -150,7 +142,6 @@ class Library extends StatelessWidget {
                           onTap: () => _navigateToSection(context, "Course_Outlines"),
                           fontSize: 14 * scaleFactor,
                         ),
-
                         _buildResourceButton(
                           icon: Icons.sticky_note_2,
                           label: "Lecture Notes",
@@ -166,7 +157,6 @@ class Library extends StatelessWidget {
                         label: "Engineering Village",
                         onTap: () => _navigateToSection(context, "Engineering_Village"),
                         fontSize: 16 * scaleFactor,
-                        // backgroundColor: theme.accentColor,
                         iconSize: 40,
                       ),
                     ),
@@ -190,7 +180,7 @@ class SectionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Section"),
+        title: Text(sectionTitle),
       ),
       body: Center(
         child: Text(
