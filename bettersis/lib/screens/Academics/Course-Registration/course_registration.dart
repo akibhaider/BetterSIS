@@ -1,8 +1,8 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class CourseRegistration extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -22,37 +22,52 @@ class CourseRegistration extends StatefulWidget {
 
 class _CourseRegistrationState extends State<CourseRegistration> {
   // Number of courses and course data
-  int totalCourses = 10; 
+  //int totalCourses = 10; 
   
-  // Can be adjusted
-  final List<Map<String, dynamic>> offeredCourses = [
-    {'code': 'CSE 4501', 'title': 'Operating Systems', 'credit': 3.00},
-    {'code': 'CSE 4502', 'title': 'Operating Systems Lab', 'credit': 1.00},
-    {'code': 'CSE 4503', 'title': 'Microprocessor and Assembly Language', 'credit': 3.00},
-    {'code': 'CSE 4504', 'title': 'Microprocessor and Assembly Language Lab', 'credit': 1.00},
-    {'code': 'CSE 4508', 'title': 'RDBMS', 'credit': 1.5},
-    {'code': 'CSE 4510', 'title': 'Software Development', 'credit': 0.75},
-                  {'code': 'CSE 4511', 'title': 'Computer Networks', 'credit': 3.0},
-                  {'code': 'CSE 4512', 'title': 'Computer Networks Lab', 'credit': 1.5},
-                  {'code': 'CSE 4513', 'title': 'SWEOOD', 'credit': 3.0},
-                  {'code': 'CSE 4551', 'title': 'Graphics', 'credit': 3.0},
-                  {'code': 'CSE 4552', 'title': 'Graphics Lab', 'credit': 0.75},
-                  {'code': 'MATH 4541', 'title': 'Calculus', 'credit': 3.0},
-    // Add more courses here as needed...
-  ];
+  List<Map<String, dynamic>> offeredCourses = [];
 
   List<Map<String, dynamic>> selectedCourses = [];
 
-  // void toggleCourseSelection(int index) {
-  //   setState(() {
-  //     final course = offeredCourses[index];
-  //     if (selectedCourses.contains(course)) {
-  //       selectedCourses.remove(course);
-  //     } else {
-  //       selectedCourses.add(course);
-  //     }
-  //   });
-  // }
+  Future<void> fetchData() async {
+    try{
+      List<Map<String, dynamic>> tempCourses = [];
+
+      String sem = widget.userData['semester'];
+      String cleanSem = sem.replaceAll(RegExp(r'[^0-9]'), '');
+
+      QuerySnapshot courseSnapshot = await FirebaseFirestore.instance
+        .collection('Courses')
+        .doc(widget.userData['dept'])
+        .collection(cleanSem)
+        .get();
+ 
+      for(var course in courseSnapshot.docs){
+        Map<String, dynamic> courseData = course.data() as Map<String, dynamic>;
+
+        tempCourses.add({
+          'code': course.id,
+          'title': courseData['name'],
+          'credit': courseData['credit'],
+          //'short': courseData['short'],
+        });
+      }
+
+      setState(() {
+        offeredCourses = tempCourses;
+        print('offeredCourses updated: $offeredCourses');
+      });
+    }
+
+    catch(error){
+      print('\x1B[31mError Fetching\x1B[0m');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +79,7 @@ class _CourseRegistrationState extends State<CourseRegistration> {
     const String currentAcademicYear = '2023-2024';
 
     return Scaffold(
+        backgroundColor: theme.primaryColor,
         drawer: CustomAppDrawer(theme: theme),
         appBar: BetterSISAppBar(
           onLogout: widget.onLogout,
@@ -74,7 +90,7 @@ class _CourseRegistrationState extends State<CourseRegistration> {
         children: [
           // Blue Box for Profile Information
           Container(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(13.0),
             width: double.infinity,
             color: theme.primaryColor,
             child: Column(
@@ -127,13 +143,22 @@ class _CourseRegistrationState extends State<CourseRegistration> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            "ID: ${widget.userData['id']}",
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: theme.secondaryHeaderColor.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                            "${widget.userData['id']}",
                             style: TextStyle(
-                              color: Colors.white70,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                               fontSize: 13 * scaleFactor,
                             ),
                           ),
+                          ),
+                          
                           const SizedBox(height: 4),
                           Text(
                             "Department: ${widget.userData['dept'].toString().toUpperCase()}",
@@ -144,7 +169,7 @@ class _CourseRegistrationState extends State<CourseRegistration> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            "Program: ${widget.userData['program'].toString().toUpperCase()}",
+                            "Program: BSc in ${widget.userData['program'].toString().toUpperCase()}",
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 13 * scaleFactor,
@@ -156,7 +181,7 @@ class _CourseRegistrationState extends State<CourseRegistration> {
                   ],
                 ),
               ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 2),
                 const Divider(color: Colors.white),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
