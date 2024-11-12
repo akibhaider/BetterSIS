@@ -99,6 +99,7 @@ class _DashboardState extends State<Dashboard> {
             userSemester: widget.userData['semester'],
             userSection: widget.userData['section'],
             userData: widget.userData),
+        ),
       ),
     );
   }

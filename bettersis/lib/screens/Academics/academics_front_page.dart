@@ -17,6 +17,7 @@ class AcademicsFrontPage extends StatefulWidget {
   final String userProgram;
   final String userSemester;
   final String userSection;
+  final String imageUrl;
   final Map<String, dynamic> userData;
   final VoidCallback onLogout;
 
@@ -28,6 +29,7 @@ class AcademicsFrontPage extends StatefulWidget {
     required this.userProgram,
     required this.userSemester,
     required this.userSection,
+    required this.imageUrl,
     required this.userData,
     required this.onLogout,
   });
@@ -54,7 +56,11 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
               builder: (context) => CourseRegistration(
                 onLogout: widget.onLogout,
                 userId: widget.userId,
+                userName: widget.userName,
                 userDept: widget.userDept,
+                userSemester: widget.userSemester,
+                imageUrl: widget.imageUrl,
+
               ),
             ),
           );
