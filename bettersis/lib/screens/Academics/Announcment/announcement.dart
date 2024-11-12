@@ -11,17 +11,20 @@ class Announcement extends StatefulWidget {
   final String userDept;
   final String userProgram;
   final String userSection;
+  final String userSemester;
   final VoidCallback onLogout;
 
-  const Announcement(
-      {super.key,
-        required this.isCr,
-        required this.userName,
-        required this.userId,
-        required this.userDept,
-        required this.userProgram,
-        required this.userSection,
-        required this.onLogout});
+  const Announcement({
+    super.key,
+    required this.isCr,
+    required this.userName,
+    required this.userId,
+    required this.userDept,
+    required this.userProgram,
+    required this.userSection,
+    required this.userSemester,
+    required this.onLogout,
+  });
 
   @override
   State<Announcement> createState() => _AnnouncementState();
@@ -45,15 +48,16 @@ class _AnnouncementState extends State<Announcement> {
     });
 
     try {
+      // Firestore path based on the new schema
       DocumentSnapshot docSnapshot = await _firestore
           .collection('Announcements')
           .doc(widget.userDept)
           .collection(widget.userProgram)
-          .doc(widget.userSection)
+          .doc(widget.userSemester[0])
           .get();
 
       if (docSnapshot.exists) {
-        List<dynamic> announcementData = docSnapshot['announcements'] ?? [];
+        List<dynamic> announcementData = docSnapshot[widget.userSection] ?? [];
         setState(() {
           announcements = List<Map<String, dynamic>>.from(announcementData);
         });
@@ -82,16 +86,34 @@ class _AnnouncementState extends State<Announcement> {
           .collection('Announcements')
           .doc(widget.userDept)
           .collection(widget.userProgram)
-          .doc(widget.userSection);
+          .doc(widget.userSemester[0]);
 
       await announcementRef.update({
-        'announcements': FieldValue.arrayUnion([newAnnouncement]),
+        widget.userSection: FieldValue.arrayUnion([newAnnouncement]),
       });
 
-      // Fetch the updated list
-      _fetchAnnouncements();
+      _fetchAnnouncements(); 
     } catch (e) {
       print('Error adding announcement: $e');
+    }
+  }
+
+  // Remove an announcement from Firestore
+  Future<void> _removeAnnouncement(Map<String, dynamic> announcement) async {
+    try {
+      DocumentReference announcementRef = _firestore
+          .collection('Announcements')
+          .doc(widget.userDept)
+          .collection(widget.userProgram)
+          .doc(widget.userSemester[0]);
+
+      await announcementRef.update({
+        widget.userSection: FieldValue.arrayRemove([announcement]),
+      });
+
+      _fetchAnnouncements(); 
+    } catch (e) {
+      print('Error removing announcement: $e');
     }
   }
 
@@ -173,6 +195,25 @@ class _AnnouncementState extends State<Announcement> {
                 Text(announcement['date']),
                 const Divider(),
                 Text(announcement['message']),
+                if (widget.isCr) ...[
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.delete, color: Colors.white,),
+                        label: const Text("Remove", style: TextStyle(color: Colors.white),),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _removeAnnouncement(announcement); 
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                      ),
+                    ],
+                  )
+                ]
               ],
             ),
           ),
@@ -192,54 +233,54 @@ class _AnnouncementState extends State<Announcement> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: announcements.length,
-        itemBuilder: (context, index) {
-          final announcement = announcements[index];
-          return GestureDetector(
-            onTap: () => _showAnnouncementDetails(announcement),
-            child: Card(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      announcement['title'],
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.045,
-                        fontWeight: FontWeight.bold,
+              padding: const EdgeInsets.all(8),
+              itemCount: announcements.length,
+              itemBuilder: (context, index) {
+                final announcement = announcements[index];
+                return GestureDetector(
+                  onTap: () => _showAnnouncementDetails(announcement),
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            announcement['title'],
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.045,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            "By ${announcement['author']}",
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.035,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          Text(
+                            announcement['date'],
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.035,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 5),
-                    Text(
-                      "By ${announcement['author']}",
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.035,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    Text(
-                      announcement['date'],
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.035,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
       floatingActionButton: widget.isCr
           ? FloatingActionButton(
-        onPressed: _showAddAnnouncementDialog,
-        child: const Icon(Icons.add),
-        backgroundColor: theme.primaryColor,
-      )
+              onPressed: _showAddAnnouncementDialog,
+              child: const Icon(Icons.add, color: Colors.white,),
+              backgroundColor: theme.primaryColor,
+            )
           : null,
     );
   }

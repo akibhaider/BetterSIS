@@ -55,7 +55,7 @@ class _DashboardState extends State<Dashboard> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),
-          (Route<dynamic> route) => false,
+      (Route<dynamic> route) => false,
     );
   }
 
@@ -90,7 +90,7 @@ class _DashboardState extends State<Dashboard> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AcademicsFrontPage(
+        builder: (context) => Academics(
             onLogout: _logout,
             userName: widget.userData['name'],
             userId: widget.userData['id'],
@@ -98,8 +98,7 @@ class _DashboardState extends State<Dashboard> {
             userProgram: widget.userData['program'],
             userSemester: widget.userData['semester'],
             userSection: widget.userData['section'],
-            userData: widget.userData
-        ),
+            userData: widget.userData),
       ),
     );
   }
@@ -235,9 +234,19 @@ class _DashboardState extends State<Dashboard> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.white,
+                          color: Colors.white, 
                           width: 4.0,
                         ),
+                        boxShadow: widget.userData['cr']
+                            ? [
+                                BoxShadow(
+                                  color: Colors.white
+                                      .withOpacity(0.7), 
+                                  spreadRadius: 8, 
+                                  blurRadius: 15, 
+                                ),
+                              ]
+                            : [], 
                       ),
                       child: CircleAvatar(
                         radius: 50,

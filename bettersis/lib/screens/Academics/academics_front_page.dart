@@ -41,163 +41,210 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
   Widget build(BuildContext context) {
     ThemeData theme = AppTheme.getTheme(widget.userDept);
     final Size screenSize = MediaQuery.of(context).size;
+    final double buttonSize = screenSize.width * 0.3; // Circular button size
 
-    // Button size adjustments
-    final double buttonWidth = screenSize.width * 0.75;
-    final double buttonHeight = screenSize.height * 0.07;
+    List<Map<String, dynamic>> options = [
+      {
+        'label': 'Course Registration',
+        'icon': Icons.app_registration,
+        'onPressed': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CourseRegistration(
+                onLogout: widget.onLogout,
+                userId: widget.userId,
+                userDept: widget.userDept,
+              ),
+            ),
+          );
+        }
+      },
+      {
+        'label': 'Course Feedback',
+        'icon': Icons.feedback,
+        'onPressed': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CourseFeedback(
+                onLogout: widget.onLogout,
+                userId: widget.userId,
+                userDept: widget.userDept,
+              ),
+            ),
+          );
+        }
+      },
+      {
+        'label': 'Download Admit Card',
+        'icon': Icons.card_membership,
+        'onPressed': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AdmitCard(
+                onLogout: widget.onLogout,
+                userId: widget.userId,
+                userDept: widget.userDept,
+                userName: widget.userName,
+                userProgram: widget.userProgram,
+                userSemester: widget.userSemester,
+              ),
+            ),
+          );
+        }
+      },
+      {
+        'label': 'Announcements',
+        'icon': Icons.announcement,
+        'onPressed': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Announcement(
+                isCr: widget.userData['cr'],
+                userId: widget.userId,
+                userName: widget.userName,
+                userDept: widget.userDept,
+                userProgram: widget.userProgram,
+                userSection: widget.userSection,
+                userSemester: widget.userSemester,
+                onLogout: widget.onLogout,
+              ),
+            ),
+          );
+        }
+      },
+      {
+        'label': 'Class Routine',
+        'icon': Icons.schedule,
+        'onPressed': () {
+          // Implement class routine logic here
+        }
+      },
+      {
+        'label': 'Enrolled Courses',
+        'icon': Icons.book,
+        'onPressed': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EnrolledCourses(
+                onLogout: widget.onLogout,
+                userId: widget.userId,
+                userDept: widget.userDept,
+              ),
+            ),
+          );
+        }
+      },
+      {
+        'label': 'Classroom Codes',
+        'icon': Icons.code,
+        'onPressed': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ClassroomCodes(
+                onLogout: widget.onLogout,
+                userId: widget.userId,
+                userDept: widget.userDept,
+                userProgram: widget.userProgram,
+                userSemester: widget.userSemester,
+                userSection: widget.userSection,
+              ),
+            ),
+          );
+        }
+      },
+      {
+        'label': 'Upcoming Exams',
+        'icon': Icons.event,
+        'onPressed': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => UpcomingExams(
+                onLogout: widget.onLogout,
+                userId: widget.userId,
+                userDept: widget.userDept,
+              ),
+            ),
+          );
+        }
+      },
+    ];
 
     return Scaffold(
-      body: SingleChildScrollView(
+      body: SafeArea( 
         child: Padding(
-          padding: EdgeInsets.symmetric(
-              vertical: screenSize.height * 0.05,
-              horizontal: screenSize.width * 0.1),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              CustomButton(
-                  label: 'COURSE REGISTRATION',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CourseRegistration(
-                            onLogout: widget.onLogout,
-                            userId: widget.userId,
-                            userDept: widget.userDept,
-                          )),
-                    );
-                  },
-                  bgColor: theme.secondaryHeaderColor.withOpacity(0.5),
-                  borderColor: theme.secondaryHeaderColor,
-                  width: buttonWidth
-              ),
-              CustomButton(
-                  label: 'COURSE FEEDBACK',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CourseFeedback(
-                            onLogout: widget.onLogout,
-                            userId: widget.userId,
-                            userDept: widget.userDept,
-                          )),
-                    );
-                  },
-                  bgColor: theme.secondaryHeaderColor.withOpacity(0.5),
-                  borderColor: theme.secondaryHeaderColor,
-                  width: buttonWidth
-              ),
-              CustomButton(
-                  label: 'DOWNLOAD ADMIT CARD',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => AdmitCard(
-                            onLogout: widget.onLogout,
-                            userId: widget.userId,
-                            userDept: widget.userDept,
-                            userName: widget.userName,
-                            userProgram: widget.userProgram,
-                            userSemester: widget.userSemester,
-                          )),
-                    );
-                  },
-                  bgColor: theme.secondaryHeaderColor.withOpacity(0.5),
-                  borderColor: theme.secondaryHeaderColor,
-                  width: buttonWidth
-              ),
-              const SizedBox(height: 30), // Adjust the space between sections
-              CustomButton(
-                  label: 'ANNOUNCEMENTS',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Announcement(
-                            isCr: widget.userData['cr'],
-                            userId: widget.userId,
-                            userName: widget.userName,
-                            userDept: widget.userDept,
-                            userProgram: widget.userProgram,
-                            userSection: widget.userSection,
-                            onLogout: widget.onLogout,
-                          )),
-                    );
-                  },
-                  bgColor: theme.primaryColor,
-                  borderColor: theme.secondaryHeaderColor,
-                  width: buttonWidth
-              ),
-              CustomButton(
-                  label: 'CLASS ROUTINE',
-                  onPressed: () {
-                    // Uncomment and implement class routine logic
-                  },
-                  bgColor: theme.primaryColor,
-                  borderColor: theme.secondaryHeaderColor,
-                  width: buttonWidth
-              ),
-              CustomButton(
-                  label: 'ENROLLED COURSES',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => EnrolledCourses(
-                            onLogout: widget.onLogout,
-                            userId: widget.userId,
-                            userDept: widget.userDept,
-                          )),
-                    );
-                  },
-                  bgColor: theme.primaryColor,
-                  borderColor: theme.secondaryHeaderColor,
-                  width: buttonWidth
-              ),
-              CustomButton(
-                  label: 'CLASSROOM CODES',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ClassroomCodes(
-                            onLogout: widget.onLogout,
-                            userId: widget.userId,
-                            userDept: widget.userDept,
-                            userProgram: widget.userProgram,
-                            userSemester: widget.userSemester,
-                            userSection: widget.userSection,
-                          )),
-                    );
-                  },
-                  bgColor: theme.primaryColor,
-                  borderColor: theme.secondaryHeaderColor,
-                  width: buttonWidth
-              ),
-              CustomButton(
-                  label: 'UPCOMING EXAMS',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => UpcomingExams(
-                            onLogout: widget.onLogout,
-                            userId: widget.userId,
-                            userDept: widget.userDept,
-                          )),
-                    );
-                  },
-                  bgColor: theme.primaryColor,
-                  borderColor: theme.secondaryHeaderColor,
-                  width: buttonWidth
-              ),
-            ],
+          padding: EdgeInsets.only(
+            top: screenSize.height * 0.03,
+            left: screenSize.width * 0.05,
+            right: screenSize.width * 0.05,
+          ),
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+            ),
+            itemCount: options.length,
+            itemBuilder: (context, index) {
+              return _buildCircularButton(
+                theme: theme,
+                label: options[index]['label'],
+                icon: options[index]['icon'],
+                onPressed: options[index]['onPressed'],
+                buttonSize: buttonSize,
+              );
+            },
           ),
         ),
       ),
+    );
+  }
+
+  // Method to build a circular button with icon and label
+  Widget _buildCircularButton({
+    required ThemeData theme,
+    required String label,
+    required IconData icon,
+    required VoidCallback onPressed,
+    required double buttonSize,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: onPressed,
+          child: Container(
+            width: buttonSize,
+            height: buttonSize,
+            decoration: BoxDecoration(
+              color: theme.primaryColor,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Icon(
+                icon,
+                size: buttonSize * 0.4, 
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: buttonSize * 0.12, 
+            fontWeight: FontWeight.w600,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }
