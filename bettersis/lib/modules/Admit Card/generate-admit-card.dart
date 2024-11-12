@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart'; 
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart' show rootBundle;
@@ -44,13 +44,13 @@ class _GenerateAdmitCardState extends State<GenerateAdmitCard> {
     _generateAndSavePDF();
   }
 
-  
+
 
   Future<void> _generateAndSavePDF() async {
     final pdf = pw.Document();
 
     final output =
-        await getTemporaryDirectory(); 
+    await getTemporaryDirectory();
     final filePath =
         "${output.path}/admit_card.pdf"; // File path in Documents directory
 
@@ -199,21 +199,21 @@ class _GenerateAdmitCardState extends State<GenerateAdmitCard> {
       body: pdfPath == null
           ? Center(child: CircularProgressIndicator())
           : PDFView(
-              filePath: pdfPath!,
-              enableSwipe: true,
-              swipeHorizontal: true,
-              autoSpacing: false,
-              pageFling: false,
-              onRender: (_pages) {
-                setState(() {});
-              },
-              onError: (error) {
-                print(error.toString());
-              },
-              onPageError: (page, error) {
-                print('$page: ${error.toString()}');
-              },
-            ),
+        filePath: pdfPath!,
+        enableSwipe: true,
+        swipeHorizontal: true,
+        autoSpacing: false,
+        pageFling: false,
+        onRender: (_pages) {
+          setState(() {});
+        },
+        onError: (error) {
+          print(error.toString());
+        },
+        onPageError: (page, error) {
+          print('$page: ${error.toString()}');
+        },
+      ),
     );
   }
 }

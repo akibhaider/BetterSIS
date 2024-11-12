@@ -90,7 +90,6 @@ class _DashboardState extends State<Dashboard> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        // Change to "AcademicsFrontPage" from "Academics"
         builder: (context) => AcademicsFrontPage(
             onLogout: _logout,
             userName: widget.userData['name'],

@@ -27,11 +27,11 @@ class BuyToken extends StatefulWidget {
 class _BuyTokenState extends State<BuyToken> {
   final _formKey = GlobalKey<FormState>();
   String _selectedCafeteria = "Central Cafeteria";
-  String _selectedMealType = "Lunch"; 
+  String _selectedMealType = "Lunch";
   String _selectedPaymentMethod = "bKash";
   String? _selectedTokens;
   int _totalCost = 0;
-  int _pricePerToken = 70; 
+  int _pricePerToken = 70;
   String? _selectedDate;
   final List<String> _tokenOptions = ['1', '2', '3', '4', '5', '6'];
   final List<DateTime> _availableDates = [];
@@ -63,9 +63,9 @@ class _BuyTokenState extends State<BuyToken> {
 
   void _updatePrice() {
     setState(() {
-      _priceController.text = '৳$_pricePerToken'; 
+      _priceController.text = '৳$_pricePerToken';
     });
-    _updateTotalCost(); 
+    _updateTotalCost();
   }
 
   Future<void> buyTokenWithWallet(String userID, double tokenCost) async {
@@ -194,12 +194,12 @@ class _BuyTokenState extends State<BuyToken> {
                 value: _selectedCafeteria,
                 items: ['Central Cafeteria']
                     .map((cafeteria) => DropdownMenuItem<String>(
-                          value: cafeteria,
-                          child: Text(
-                            cafeteria,
-                            style: TextStyle(fontSize: fontSize),
-                          ),
-                        ))
+                  value: cafeteria,
+                  child: Text(
+                    cafeteria,
+                    style: TextStyle(fontSize: fontSize),
+                  ),
+                ))
                     .toList(),
                 onChanged: (value) {
                   setState(() {
@@ -217,12 +217,12 @@ class _BuyTokenState extends State<BuyToken> {
                 value: _selectedMealType,
                 items: ['Breakfast', 'Lunch']
                     .map((mealType) => DropdownMenuItem<String>(
-                          value: mealType,
-                          child: Text(
-                            mealType,
-                            style: TextStyle(fontSize: fontSize),
-                          ),
-                        ))
+                  value: mealType,
+                  child: Text(
+                    mealType,
+                    style: TextStyle(fontSize: fontSize),
+                  ),
+                ))
                     .toList(),
                 onChanged: (value) {
                   setState(() {
@@ -262,15 +262,15 @@ class _BuyTokenState extends State<BuyToken> {
                       value: _selectedTokens,
                       items: _tokenOptions
                           .map((token) => DropdownMenuItem<String>(
-                                value: token,
-                                child: Text(token,
-                                    style: TextStyle(fontSize: fontSize)),
-                              ))
+                        value: token,
+                        child: Text(token,
+                            style: TextStyle(fontSize: fontSize)),
+                      ))
                           .toList(),
                       onChanged: (value) {
                         setState(() {
                           _selectedTokens = value;
-                          _updateTotalCost(); 
+                          _updateTotalCost();
                         });
                       },
                       validator: (value) {
@@ -293,12 +293,12 @@ class _BuyTokenState extends State<BuyToken> {
                 value: _selectedDate,
                 items: _availableDates
                     .map((date) => DropdownMenuItem<String>(
-                          value: DateFormat('dd-MM-yyyy HH:mm:ss').format(date),
-                          child: Text(
-                            DateFormat('dd-MM-yyyy').format(date),
-                            style: TextStyle(fontSize: fontSize),
-                          ),
-                        ))
+                  value: DateFormat('dd-MM-yyyy HH:mm:ss').format(date),
+                  child: Text(
+                    DateFormat('dd-MM-yyyy').format(date),
+                    style: TextStyle(fontSize: fontSize),
+                  ),
+                ))
                     .toList(),
                 onChanged: (value) {
                   setState(() {
@@ -316,7 +316,7 @@ class _BuyTokenState extends State<BuyToken> {
               Text(
                 'Total Cost: $_totalCost Taka',
                 style:
-                    TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+                TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: screenHeight * 0.02),
               DropdownButtonFormField<String>(

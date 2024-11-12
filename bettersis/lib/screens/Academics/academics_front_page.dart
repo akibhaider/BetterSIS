@@ -56,143 +56,143 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               CustomButton(
-                label: 'COURSE REGISTRATION',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CourseRegistration(
-                              onLogout: widget.onLogout,
-                              userId: widget.userId,
-                              userDept: widget.userDept,
-                            )),
-                  );
-                },
-                bgColor: theme.secondaryHeaderColor.withOpacity(0.5),
-                borderColor: theme.secondaryHeaderColor,
-                width: buttonWidth
+                  label: 'COURSE REGISTRATION',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CourseRegistration(
+                            onLogout: widget.onLogout,
+                            userId: widget.userId,
+                            userDept: widget.userDept,
+                          )),
+                    );
+                  },
+                  bgColor: theme.secondaryHeaderColor.withOpacity(0.5),
+                  borderColor: theme.secondaryHeaderColor,
+                  width: buttonWidth
               ),
               CustomButton(
-                label: 'COURSE FEEDBACK',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CourseFeedback(
-                              onLogout: widget.onLogout,
-                              userId: widget.userId,
-                              userDept: widget.userDept,
-                            )),
-                  );
-                },
-                bgColor: theme.secondaryHeaderColor.withOpacity(0.5),
-                borderColor: theme.secondaryHeaderColor,
-                width: buttonWidth
+                  label: 'COURSE FEEDBACK',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CourseFeedback(
+                            onLogout: widget.onLogout,
+                            userId: widget.userId,
+                            userDept: widget.userDept,
+                          )),
+                    );
+                  },
+                  bgColor: theme.secondaryHeaderColor.withOpacity(0.5),
+                  borderColor: theme.secondaryHeaderColor,
+                  width: buttonWidth
               ),
               CustomButton(
-                label: 'DOWNLOAD ADMIT CARD',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AdmitCard(
-                              onLogout: widget.onLogout,
-                              userId: widget.userId,
-                              userDept: widget.userDept,
-                              userName: widget.userName,
-                              userProgram: widget.userProgram,
-                              userSemester: widget.userSemester,
-                            )),
-                  );
-                },
-                bgColor: theme.secondaryHeaderColor.withOpacity(0.5),
-                borderColor: theme.secondaryHeaderColor,
-                width: buttonWidth
+                  label: 'DOWNLOAD ADMIT CARD',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AdmitCard(
+                            onLogout: widget.onLogout,
+                            userId: widget.userId,
+                            userDept: widget.userDept,
+                            userName: widget.userName,
+                            userProgram: widget.userProgram,
+                            userSemester: widget.userSemester,
+                          )),
+                    );
+                  },
+                  bgColor: theme.secondaryHeaderColor.withOpacity(0.5),
+                  borderColor: theme.secondaryHeaderColor,
+                  width: buttonWidth
               ),
               const SizedBox(height: 30), // Adjust the space between sections
               CustomButton(
-                label: 'ANNOUNCEMENTS',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => Announcement(
-                              isCr: widget.userData['cr'],
-                              userId: widget.userId,
-                              userName: widget.userName,
-                              userDept: widget.userDept,
-                              userProgram: widget.userProgram,
-                              userSection: widget.userSection,
-                              onLogout: widget.onLogout,
-                            )),
-                  );
-                },
-                bgColor: theme.primaryColor,
-                borderColor: theme.secondaryHeaderColor,
-                width: buttonWidth
+                  label: 'ANNOUNCEMENTS',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Announcement(
+                            isCr: widget.userData['cr'],
+                            userId: widget.userId,
+                            userName: widget.userName,
+                            userDept: widget.userDept,
+                            userProgram: widget.userProgram,
+                            userSection: widget.userSection,
+                            onLogout: widget.onLogout,
+                          )),
+                    );
+                  },
+                  bgColor: theme.primaryColor,
+                  borderColor: theme.secondaryHeaderColor,
+                  width: buttonWidth
               ),
               CustomButton(
-                label: 'CLASS ROUTINE',
-                onPressed: () {
-                  // Uncomment and implement class routine logic
-                },
-                bgColor: theme.primaryColor,
-                borderColor: theme.secondaryHeaderColor,
-                width: buttonWidth
+                  label: 'CLASS ROUTINE',
+                  onPressed: () {
+                    // Uncomment and implement class routine logic
+                  },
+                  bgColor: theme.primaryColor,
+                  borderColor: theme.secondaryHeaderColor,
+                  width: buttonWidth
               ),
               CustomButton(
-                label: 'ENROLLED COURSES',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => EnrolledCourses(
-                              onLogout: widget.onLogout,
-                              userId: widget.userId,
-                              userDept: widget.userDept,
-                            )),
-                  );
-                },
-                bgColor: theme.primaryColor,
-                borderColor: theme.secondaryHeaderColor,
-                width: buttonWidth
+                  label: 'ENROLLED COURSES',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => EnrolledCourses(
+                            onLogout: widget.onLogout,
+                            userId: widget.userId,
+                            userDept: widget.userDept,
+                          )),
+                    );
+                  },
+                  bgColor: theme.primaryColor,
+                  borderColor: theme.secondaryHeaderColor,
+                  width: buttonWidth
               ),
               CustomButton(
-                label: 'CLASSROOM CODES',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ClassroomCodes(
-                              onLogout: widget.onLogout,
-                              userId: widget.userId,
-                              userDept: widget.userDept,
-                              userProgram: widget.userProgram,
-                              userSemester: widget.userSemester,
-                              userSection: widget.userSection,
-                            )),
-                  );
-                },
-                bgColor: theme.primaryColor,
-                borderColor: theme.secondaryHeaderColor,
-                width: buttonWidth
+                  label: 'CLASSROOM CODES',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ClassroomCodes(
+                            onLogout: widget.onLogout,
+                            userId: widget.userId,
+                            userDept: widget.userDept,
+                            userProgram: widget.userProgram,
+                            userSemester: widget.userSemester,
+                            userSection: widget.userSection,
+                          )),
+                    );
+                  },
+                  bgColor: theme.primaryColor,
+                  borderColor: theme.secondaryHeaderColor,
+                  width: buttonWidth
               ),
               CustomButton(
-                label: 'UPCOMING EXAMS',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => UpcomingExams(
-                              onLogout: widget.onLogout,
-                              userId: widget.userId,
-                              userDept: widget.userDept,
-                            )),
-                  );
-                },
-                bgColor: theme.primaryColor,
-                borderColor: theme.secondaryHeaderColor,
-                width: buttonWidth
+                  label: 'UPCOMING EXAMS',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => UpcomingExams(
+                            onLogout: widget.onLogout,
+                            userId: widget.userId,
+                            userDept: widget.userDept,
+                          )),
+                    );
+                  },
+                  bgColor: theme.primaryColor,
+                  borderColor: theme.secondaryHeaderColor,
+                  width: buttonWidth
               ),
             ],
           ),

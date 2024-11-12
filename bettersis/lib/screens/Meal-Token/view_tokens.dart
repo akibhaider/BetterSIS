@@ -62,9 +62,9 @@ class _ViewTokensState extends State<ViewTokens> {
 
       for (var doc in querySnapshot.docs) {
         String tokenDateStr =
-            doc['date']; // Date stored in "dd-MM-yyyy HH:mm:ss"
+        doc['date']; // Date stored in "dd-MM-yyyy HH:mm:ss"
         DateTime tokenDate =
-            DateFormat('dd-MM-yyyy HH:mm:ss').parse(tokenDateStr);
+        DateFormat('dd-MM-yyyy HH:mm:ss').parse(tokenDateStr);
 
         if (tokenDate.isAfter(now)) {
           // Token is still valid, add to validTokens list
@@ -245,95 +245,95 @@ class _ViewTokensState extends State<ViewTokens> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : tokensList.isEmpty
-              ? const Center(child: Text('No tokens available'))
-              : GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: cardWidth / cardHeight,
-                    crossAxisSpacing: 8.0,
-                    mainAxisSpacing: 8.0,
-                  ),
-                  padding: EdgeInsets.all(screenWidth * 0.02),
-                  itemCount: tokensList.length,
-                  itemBuilder: (context, index) {
-                    final token = tokensList[index];
+          ? const Center(child: Text('No tokens available'))
+          : GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: cardWidth / cardHeight,
+          crossAxisSpacing: 8.0,
+          mainAxisSpacing: 8.0,
+        ),
+        padding: EdgeInsets.all(screenWidth * 0.02),
+        itemCount: tokensList.length,
+        itemBuilder: (context, index) {
+          final token = tokensList[index];
 
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => LunchToken(
-                              userId: widget.userData['id'],
-                              userDept: widget.userData['dept'],
-                              onLogout: Utils.getLogout(),
-                              userName: widget.userData['name'],
-                              cafeteria: token['cafeteria'],
-                              date: token['date'],
-                              meal: token['meal'],
-                              tokenId: token['tokenId'],
-                            ),
-                          ),
-                        );
-                      },
-                      onLongPress: () {
-                        _showTransferDialog(token['tokenId'], token);
-                      },
-                      child: Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                theme.primaryColor,
-                                theme.secondaryHeaderColor
-                              ],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: EdgeInsets.all(screenWidth * 0.04),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                token['meal'].toUpperCase(),
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.045,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              SizedBox(height: screenHeight * 0.02),
-                              Text(
-                                token['date'],
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.045,
-                                  color: Colors.white,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              SizedBox(height: screenHeight * 0.015),
-                              Text(
-                                token['tokenId'].substring(0, 8),
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.035,
-                                  color: Colors.white70,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LunchToken(
+                    userId: widget.userData['id'],
+                    userDept: widget.userData['dept'],
+                    onLogout: Utils.getLogout(),
+                    userName: widget.userData['name'],
+                    cafeteria: token['cafeteria'],
+                    date: token['date'],
+                    meal: token['meal'],
+                    tokenId: token['tokenId'],
+                  ),
                 ),
+              );
+            },
+            onLongPress: () {
+              _showTransferDialog(token['tokenId'], token);
+            },
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      theme.primaryColor,
+                      theme.secondaryHeaderColor
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: EdgeInsets.all(screenWidth * 0.04),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      token['meal'].toUpperCase(),
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.045,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: screenHeight * 0.02),
+                    Text(
+                      token['date'],
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.045,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: screenHeight * 0.015),
+                    Text(
+                      token['tokenId'].substring(0, 8),
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.035,
+                        color: Colors.white70,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

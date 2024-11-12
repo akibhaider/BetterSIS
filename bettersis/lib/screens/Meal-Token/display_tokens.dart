@@ -87,13 +87,13 @@ class _DisplayTokensState extends State<DisplayTokens> {
     List<Map<String, dynamic>> validTokens = [];
 
     final batch =
-        FirebaseFirestore.instance.batch(); 
+    FirebaseFirestore.instance.batch();
 
     for (var doc in querySnapshot.docs) {
       String tokenDateStr =
-          doc['date']; 
+      doc['date'];
       DateTime tokenDate =
-          DateFormat('dd-MM-yyyy HH:mm:ss').parse(tokenDateStr);
+      DateFormat('dd-MM-yyyy HH:mm:ss').parse(tokenDateStr);
 
       if (tokenDate.isAfter(now)) {
         // Token is still valid, add it to the validTokens list
@@ -138,90 +138,90 @@ class _DisplayTokensState extends State<DisplayTokens> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: cardWidth / cardHeight,
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 8.0,
-              ),
-              padding: EdgeInsets.all(screenWidth * 0.02),
-              itemCount: tokensList.length,
-              itemBuilder: (context, index) {
-                final token = tokensList[index];
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: cardWidth / cardHeight,
+          crossAxisSpacing: 8.0,
+          mainAxisSpacing: 8.0,
+        ),
+        padding: EdgeInsets.all(screenWidth * 0.02),
+        itemCount: tokensList.length,
+        itemBuilder: (context, index) {
+          final token = tokensList[index];
 
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LunchToken(
-                          userId: widget.userId,
-                          userDept: widget.userDept,
-                          onLogout: widget.onLogout,
-                          userName: widget.userName,
-                          cafeteria: token['cafeteria'],
-                          date: token['date'],
-                          meal: token['meal'],
-                          tokenId: token['tokenId'],
-                        ),
-                      ),
-                    );
-                  },
-                  child: Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            theme.primaryColor,
-                            theme.secondaryHeaderColor
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: EdgeInsets.all(screenWidth * 0.04),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            token['meal'].toUpperCase(),
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.045,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(height: screenHeight * 0.02),
-                          Text(
-                            token['date'],
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.045,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(height: screenHeight * 0.015),
-                          Text(
-                            token['tokenId'].substring(0, 8),
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.035,
-                              color: Colors.white70,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LunchToken(
+                    userId: widget.userId,
+                    userDept: widget.userDept,
+                    onLogout: widget.onLogout,
+                    userName: widget.userName,
+                    cafeteria: token['cafeteria'],
+                    date: token['date'],
+                    meal: token['meal'],
+                    tokenId: token['tokenId'],
                   ),
-                );
-              },
+                ),
+              );
+            },
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      theme.primaryColor,
+                      theme.secondaryHeaderColor
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: EdgeInsets.all(screenWidth * 0.04),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      token['meal'].toUpperCase(),
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.045,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: screenHeight * 0.02),
+                    Text(
+                      token['date'],
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.045,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: screenHeight * 0.015),
+                    Text(
+                      token['tokenId'].substring(0, 8),
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.035,
+                        color: Colors.white70,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
             ),
+          );
+        },
+      ),
     );
   }
 }

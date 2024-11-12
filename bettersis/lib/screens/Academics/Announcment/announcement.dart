@@ -15,13 +15,13 @@ class Announcement extends StatefulWidget {
 
   const Announcement(
       {super.key,
-      required this.isCr,
-      required this.userName,
-      required this.userId,
-      required this.userDept,
-      required this.userProgram,
-      required this.userSection,
-      required this.onLogout});
+        required this.isCr,
+        required this.userName,
+        required this.userId,
+        required this.userDept,
+        required this.userProgram,
+        required this.userSection,
+        required this.onLogout});
 
   @override
   State<Announcement> createState() => _AnnouncementState();
@@ -192,54 +192,54 @@ class _AnnouncementState extends State<Announcement> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: announcements.length,
-              itemBuilder: (context, index) {
-                final announcement = announcements[index];
-                return GestureDetector(
-                  onTap: () => _showAnnouncementDetails(announcement),
-                  child: Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            announcement['title'],
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.045,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            "By ${announcement['author']}",
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.035,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          Text(
-                            announcement['date'],
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.035,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
+        padding: const EdgeInsets.all(8),
+        itemCount: announcements.length,
+        itemBuilder: (context, index) {
+          final announcement = announcements[index];
+          return GestureDetector(
+            onTap: () => _showAnnouncementDetails(announcement),
+            child: Card(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      announcement['title'],
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.045,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                );
-              },
+                    const SizedBox(height: 5),
+                    Text(
+                      "By ${announcement['author']}",
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.035,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    Text(
+                      announcement['date'],
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.035,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
+          );
+        },
+      ),
       floatingActionButton: widget.isCr
           ? FloatingActionButton(
-              onPressed: _showAddAnnouncementDialog,
-              child: const Icon(Icons.add),
-              backgroundColor: theme.primaryColor,
-            )
+        onPressed: _showAddAnnouncementDialog,
+        child: const Icon(Icons.add),
+        backgroundColor: theme.primaryColor,
+      )
           : null,
     );
   }

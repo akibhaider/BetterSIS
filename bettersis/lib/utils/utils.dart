@@ -29,7 +29,7 @@ class Utils {
     return _userImageURL;
   }
 
-   static String getOrdinal(int number) {
+  static String getOrdinal(int number) {
     if (number % 100 >= 11 && number % 100 <= 13) {
       return '${number}th';
     }

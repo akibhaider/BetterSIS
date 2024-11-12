@@ -15,12 +15,12 @@ class AdmitCard extends StatefulWidget {
 
   const AdmitCard(
       {super.key,
-      required this.onLogout,
-      required this.userDept,
-      required this.userId,
-      required this.userName,
-      required this.userProgram,
-      required this.userSemester});
+        required this.onLogout,
+        required this.userDept,
+        required this.userId,
+        required this.userName,
+        required this.userProgram,
+        required this.userSemester});
 
   @override
   State<AdmitCard> createState() => _AdmitCardState();
@@ -33,7 +33,7 @@ class _AdmitCardState extends State<AdmitCard> {
       QuerySnapshot courseSnapshot = await FirebaseFirestore.instance
           .collection('Courses')
           .doc(widget.userDept)
-          .collection(widget.userSemester[0]) 
+          .collection(widget.userSemester[0])
           .get();
 
       // List to store course details as strings
@@ -76,7 +76,7 @@ class _AdmitCardState extends State<AdmitCard> {
             return GenerateAdmitCard(
               semester: "Winter",
               examination: "Mid",
-              registeredCourses: snapshot.data!, 
+              registeredCourses: snapshot.data!,
               userDept: widget.userDept,
               userId: widget.userId,
               userName: widget.userName,
