@@ -5,20 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class CourseRegistration extends StatefulWidget {
-  final String userId;
-  final String userName;
-  final String userDept;
-  final String userSemester;
-  //final String userAY;
+  final Map<String, dynamic> userData;
   final String imageUrl;
   final VoidCallback onLogout;
 
   const CourseRegistration({
     super.key,
-    required this.userId,
-    required this.userName,
-    required this.userDept,
-    required this.userSemester,
+    required this.userData,
     required this.imageUrl,
     required this.onLogout,
   });
@@ -63,13 +56,11 @@ class _CourseRegistrationState extends State<CourseRegistration> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = AppTheme.getTheme(widget.userDept);
+    ThemeData theme = AppTheme.getTheme(widget.userData['dept']);
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
+    double scaleFactor = screenWidth / 375;
 
-    final String studentName = widget.userName;
-    final String studentId = widget.userId;
-    final String currentSemester = widget.userSemester;
     const String currentAcademicYear = '2023-2024';
 
     return Scaffold(
@@ -88,53 +79,90 @@ class _CourseRegistrationState extends State<CourseRegistration> {
             color: theme.primaryColor,
             child: Column(
               children: [
-                Row(
+                Container(
+                color: theme.primaryColor,
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundImage: NetworkImage(widget.imageUrl),
-                      onBackgroundImageError: (exception, stackTrace){
-                        print('Error loading image: $exception');
-                      },
-                    ),
-                    const SizedBox(width: 16.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          studentName,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    Container(
+                      width: screenWidth * 0.25,
+                      height: screenWidth * 0.25,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white, 
+                          width: 4.0,
                         ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: theme.secondaryHeaderColor.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            studentId,
-                            style: const TextStyle(
+                        boxShadow: widget.userData['cr']
+                            ? [
+                                BoxShadow(
+                                  color: Colors.white
+                                      .withOpacity(0.7), 
+                                  spreadRadius: 8, 
+                                  blurRadius: 15, 
+                                ),
+                              ]
+                            : [], 
+                      ),
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage: NetworkImage(widget.imageUrl),
+                        onBackgroundImageError: (exception, stackTrace) {
+                          print('Error loading image: $exception');
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.userData['name'],
+                            style: TextStyle(
                               color: Colors.white,
+                              fontSize: 20 * scaleFactor,
                               fontWeight: FontWeight.bold,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            "ID: ${widget.userData['id']}",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13 * scaleFactor,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Department: ${widget.userData['dept'].toString().toUpperCase()}",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13 * scaleFactor,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Program: ${widget.userData['program'].toString().toUpperCase()}",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13 * scaleFactor,
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+              ),
+                const SizedBox(height: 10),
                 const Divider(color: Colors.white),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Current Semester: $currentSemester',
+                      'Current Semester: ${widget.userData['semester']}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

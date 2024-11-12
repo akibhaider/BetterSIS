@@ -55,12 +55,8 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
             MaterialPageRoute(
               builder: (context) => CourseRegistration(
                 onLogout: widget.onLogout,
-                userId: widget.userId,
-                userName: widget.userName,
-                userDept: widget.userDept,
-                userSemester: widget.userSemester,
+                userData: widget.userData,
                 imageUrl: widget.imageUrl,
-
               ),
             ),
           );
