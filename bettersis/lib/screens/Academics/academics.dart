@@ -10,15 +10,21 @@ class Academics extends StatefulWidget {
   final String userProgram;
   final String userSemester;
   final String userSection;
+  final String userName;
+  final String imageUrl;
+  final Map<String, dynamic> userData;
   final VoidCallback onLogout;
 
   const Academics({
     super.key,
+    required this.userName,
     required this.userId,
     required this.userDept,
     required this.userProgram,
     required this.userSemester,
     required this.userSection,
+    required this.imageUrl,
+    required this.userData,
     required this.onLogout,
   });
 
@@ -39,11 +45,14 @@ class _AcademicsState extends State<Academics> {
         title: 'Academics',
       ),
       body: AcademicsFrontPage(
+        userName: widget.userName,
         userId: widget.userId,
         userDept: widget.userDept,
         userProgram: widget.userProgram,
         userSemester: widget.userSemester,
         userSection: widget.userSection,
+        imageUrl: widget.imageUrl,
+        userData: widget.userData,
         onLogout: widget.onLogout,
       ),
     );

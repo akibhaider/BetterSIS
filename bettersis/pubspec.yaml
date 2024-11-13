@@ -55,6 +55,8 @@ dependencies:
   provider: ^6.1.2
   pdf: ^3.11.1
   printing: ^5.13.3
+  permission_handler: ^11.3.1
+  dio: ^5.7.0
 
 dev_dependencies:
   flutter_test:

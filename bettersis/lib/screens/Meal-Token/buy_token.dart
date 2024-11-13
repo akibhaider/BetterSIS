@@ -27,11 +27,11 @@ class BuyToken extends StatefulWidget {
 class _BuyTokenState extends State<BuyToken> {
   final _formKey = GlobalKey<FormState>();
   String _selectedCafeteria = "Central Cafeteria";
-  String _selectedMealType = "Lunch"; 
+  String _selectedMealType = "Lunch";
   String _selectedPaymentMethod = "bKash";
   String? _selectedTokens;
   int _totalCost = 0;
-  int _pricePerToken = 70; 
+  int _pricePerToken = 70;
   String? _selectedDate;
   final List<String> _tokenOptions = ['1', '2', '3', '4', '5', '6'];
   final List<DateTime> _availableDates = [];
@@ -63,102 +63,105 @@ class _BuyTokenState extends State<BuyToken> {
 
   void _updatePrice() {
     setState(() {
-      _priceController.text = '৳$_pricePerToken'; 
+      _priceController.text = '৳$_pricePerToken';
     });
-    _updateTotalCost(); 
+    _updateTotalCost();
   }
 
-  void buyTokenWithWallet(String userID, double tokenCost) async {
-     double currentBalance = await walletP.getBalance(userID);
+  Future<void> buyTokenWithWallet(String userID, double tokenCost) async {
+    double currentBalance = await walletP.getBalance(userID);
 
-    print('\n\n\n\n\n\n\n\n\n');
-    print(currentBalance);
-    print('\n\n\n\n\n\n\n\n\n');
-
-    if(currentBalance < tokenCost){
+    if (currentBalance < tokenCost) {
       // Insufficient funds, show a pop-up dialog
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Insufficient Funds"),
-            content: Text("You do not have enough balance in your Smart Wallet."),
+            title: const Text("Insufficient Funds"),
+            content: const Text("You do not have enough balance in your Smart Wallet."),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the dialog
                 },
-                child: Text("OK"),
+                child: const Text("OK"),
               ),
             ],
           );
         },
       );
-    }
-
-    else{
-      // Sufficient funds, proceed with the transaction
-
-      // Deduct the token cost from the current balance
-      double newBalance = currentBalance - tokenCost;
-
-      // Update the balance in Firestore
-      await walletP.updateBalance(userID, newBalance);
-
-      // Log the transaction in Firestore
-      await walletP.addTransaction(userID, 'North Cafeteria - ' + _selectedMealType, tokenCost, 'meal');
-
-      if (_formKey.currentState!.validate()) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => DisplayTokens(
-                              userId: widget.userId,
-                              userDept: widget.userDept,
-                              onLogout: widget.onLogout,
-                              userName: widget.userName,
-                              cafeteria: _selectedCafeteria,
-                              date: _selectedDate,
-                              meal: _selectedMealType,
-                              tokens: _selectedTokens)),
-                    );
-      }
-
-      showDialog(
+    } else {
+      // Sufficient funds, proceed with the transaction and show confirmation dialog
+      bool confirmation = await showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Purchase Successful"),
-            content: Text("Your token purchase was successful."),
+            title: const Text("Confirm Purchase"),
+            content: Text("You are about to purchase $_selectedTokens token(s) for a total of $_totalCost Taka. Do you want to continue?"),
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop(false); // Cancel purchase
                 },
-                child: Text("OK"),
+                child: const Text("Cancel"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true); // Confirm purchase
+                },
+                child: const Text("Confirm"),
               ),
             ],
           );
         },
       );
-    }
 
+      if (confirmation) {
+        // Deduct the token cost from the current balance
+        double newBalance = currentBalance - tokenCost;
 
-    if (_formKey.currentState!.validate()) {
+        // Update the balance in Firestore
+        await walletP.updateBalance(userID, newBalance);
+
+        // Log the transaction in Firestore
+        await walletP.addTransaction(userID, 'North Cafeteria - ' + _selectedMealType, tokenCost, 'meal');
+
+        // Show success dialog before navigation
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Purchase Successful"),
+              content: const Text("Your token purchase was successful."),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                    // Navigate to DisplayTokens after confirmation
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => DisplayTokens(
-                              userId: widget.userId,
-                              userDept: widget.userDept,
-                              onLogout: widget.onLogout,
-                              userName: widget.userName,
-                              cafeteria: _selectedCafeteria,
-                              date: _selectedDate,
-                              meal: _selectedMealType,
-                              tokens: _selectedTokens)),
+                        builder: (context) => DisplayTokens(
+                          userId: widget.userId,
+                          userDept: widget.userDept,
+                          onLogout: widget.onLogout,
+                          userName: widget.userName,
+                          cafeteria: _selectedCafeteria,
+                          date: _selectedDate,
+                          meal: _selectedMealType,
+                          tokens: _selectedTokens,
+                        ),
+                      ),
                     );
-                  }
+                  },
+                  child: const Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
   }
 
   @override
@@ -191,12 +194,12 @@ class _BuyTokenState extends State<BuyToken> {
                 value: _selectedCafeteria,
                 items: ['Central Cafeteria']
                     .map((cafeteria) => DropdownMenuItem<String>(
-                          value: cafeteria,
-                          child: Text(
-                            cafeteria,
-                            style: TextStyle(fontSize: fontSize),
-                          ),
-                        ))
+                  value: cafeteria,
+                  child: Text(
+                    cafeteria,
+                    style: TextStyle(fontSize: fontSize),
+                  ),
+                ))
                     .toList(),
                 onChanged: (value) {
                   setState(() {
@@ -214,12 +217,12 @@ class _BuyTokenState extends State<BuyToken> {
                 value: _selectedMealType,
                 items: ['Breakfast', 'Lunch']
                     .map((mealType) => DropdownMenuItem<String>(
-                          value: mealType,
-                          child: Text(
-                            mealType,
-                            style: TextStyle(fontSize: fontSize),
-                          ),
-                        ))
+                  value: mealType,
+                  child: Text(
+                    mealType,
+                    style: TextStyle(fontSize: fontSize),
+                  ),
+                ))
                     .toList(),
                 onChanged: (value) {
                   setState(() {
@@ -259,15 +262,15 @@ class _BuyTokenState extends State<BuyToken> {
                       value: _selectedTokens,
                       items: _tokenOptions
                           .map((token) => DropdownMenuItem<String>(
-                                value: token,
-                                child: Text(token,
-                                    style: TextStyle(fontSize: fontSize)),
-                              ))
+                        value: token,
+                        child: Text(token,
+                            style: TextStyle(fontSize: fontSize)),
+                      ))
                           .toList(),
                       onChanged: (value) {
                         setState(() {
                           _selectedTokens = value;
-                          _updateTotalCost(); 
+                          _updateTotalCost();
                         });
                       },
                       validator: (value) {
@@ -290,10 +293,12 @@ class _BuyTokenState extends State<BuyToken> {
                 value: _selectedDate,
                 items: _availableDates
                     .map((date) => DropdownMenuItem<String>(
-                          value: DateFormat('dd-MM-yyyy hh:mm:ss').format(date),
-                          child:
-                              Text(DateFormat('dd-MM-yyyy').format(date), style: TextStyle(fontSize: fontSize)),
-                        ))
+                  value: DateFormat('dd-MM-yyyy HH:mm:ss').format(date),
+                  child: Text(
+                    DateFormat('dd-MM-yyyy').format(date),
+                    style: TextStyle(fontSize: fontSize),
+                  ),
+                ))
                     .toList(),
                 onChanged: (value) {
                   setState(() {
@@ -311,7 +316,7 @@ class _BuyTokenState extends State<BuyToken> {
               Text(
                 'Total Cost: $_totalCost Taka',
                 style:
-                    TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+                TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: screenHeight * 0.02),
               DropdownButtonFormField<String>(
@@ -359,32 +364,35 @@ class _BuyTokenState extends State<BuyToken> {
                   minimumSize: Size(double.infinity, buttonHeight),
                 ),
                 onPressed: () {
-                  print('\n\n\n\n\n\n\n\n\n\n'+ _selectedPaymentMethod + ' ' + _totalCost.toString() + '\n\n\n\n\n\n\n\n\n\n');
-                  if(_selectedPaymentMethod == 'Smart Card'){
-                    buyTokenWithWallet(widget.userId, _totalCost.toDouble());
-                  }
-                  else{
-                    if (_formKey.currentState!.validate()) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
+                  if (_formKey.currentState!.validate()) {
+                    if (_selectedPaymentMethod == 'Smart Card') {
+                      buyTokenWithWallet(widget.userId, _totalCost.toDouble());
+                    } else {
+                      // Handle bKash or other payments
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
                           builder: (context) => DisplayTokens(
-                              userId: widget.userId,
-                              userDept: widget.userDept,
-                              onLogout: widget.onLogout,
-                              userName: widget.userName,
-                              cafeteria: _selectedCafeteria,
-                              date: _selectedDate,
-                              meal: _selectedMealType,
-                              tokens: _selectedTokens)),
+                            userId: widget.userId,
+                            userDept: widget.userDept,
+                            onLogout: widget.onLogout,
+                            userName: widget.userName,
+                            cafeteria: _selectedCafeteria,
+                            date: _selectedDate,
+                            meal: _selectedMealType,
+                            tokens: _selectedTokens,
+                          ),
+                        ),
                       );
                     }
                   }
                 },
                 child: Text(
                   'Buy',
-                  style:
-                      TextStyle(color: Colors.white, fontSize: fontSize * 1.2),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: fontSize * 1.2,
+                  ),
                 ),
               ),
             ],
@@ -394,19 +402,3 @@ class _BuyTokenState extends State<BuyToken> {
     );
   }
 }
-
-/*if (_formKey.currentState!.validate()) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => DisplayTokens(
-                              userId: widget.userId,
-                              userDept: widget.userDept,
-                              onLogout: widget.onLogout,
-                              userName: widget.userName,
-                              cafeteria: _selectedCafeteria,
-                              date: _selectedDate,
-                              meal: _selectedMealType,
-                              tokens: _selectedTokens)),
-                    );
-                  }*/

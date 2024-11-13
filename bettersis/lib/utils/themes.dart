@@ -6,7 +6,7 @@ class AppTheme {
       case 'cse':
         return ThemeData(
           primaryColor: Colors.blue,
-          secondaryHeaderColor: const Color.fromARGB(255, 6, 94, 179), // Gradient from dark to lighter blue
+          secondaryHeaderColor: const Color.fromARGB(255, 6, 94, 179), 
         );
       case 'eee':
         return ThemeData(
