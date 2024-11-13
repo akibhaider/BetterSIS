@@ -92,6 +92,10 @@ class SeatProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  int getSelectedSeatCount() {
+    return seats.where((seat) => seat['selected'] == true && seat['id'] == userId).length;
+  }
+
   void _scheduleDailyReset() {
     final now = DateTime.now();
     final midnight = DateTime(now.year, now.month, now.day + 1, 0, 1); // 12:01 AM
