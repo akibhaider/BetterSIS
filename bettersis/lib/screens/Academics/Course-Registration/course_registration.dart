@@ -181,7 +181,8 @@ class _CourseRegistrationState extends State<CourseRegistration> {
                 print("Submit pressed");
                 registerCourses();
                 Navigator.of(context).pop(); // Dismiss on Yes
-                // Add future submit functionality here
+                
+                
               },
               child: const Text("Yes"),
             ),

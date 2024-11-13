@@ -31,7 +31,16 @@ class TripProvider with ChangeNotifier {
 
   void selectTripType(String tripType) {
     selectedTripType = tripType;
+    print("Selected trip type: $selectedTripType");
     notifyListeners();
+  }
+
+  double getTripCost(int seatCount) {
+    if (selectedTripType == 'Round Trip') {
+      return seatCount * 60.0;
+    } else {
+      return seatCount * 30.0;
+    }
   }
 }
 

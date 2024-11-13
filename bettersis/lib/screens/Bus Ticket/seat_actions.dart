@@ -4,11 +4,14 @@ import '../../modules/Bus Ticket/seat_provider.dart';
 
 class SeatActions extends StatelessWidget {
   final String userId;
+  final double tripCost;
 
-  const SeatActions({super.key, required this.userId});
+  const SeatActions({super.key, required this.userId, required this.tripCost});
   @override
   Widget build(BuildContext context) {
     final seatProvider = Provider.of<SeatProvider>(context);
+    // final seatCount = seatProvider.getSelectedSeatCount();
+    // final tripCost = tripProvider.getTripCost(seatCount);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
@@ -17,7 +20,7 @@ class SeatActions extends StatelessWidget {
         children: [
           ElevatedButton(
             onPressed: () {
-              print("Confirm button pressed");
+              print("Confirm button pressed $tripCost");
               seatProvider
                   .confirmSelection(userId); // Pass the userId dynamically
             },
