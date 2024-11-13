@@ -1,7 +1,17 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/utils/themes.dart';
 
 class LectureNotesPage extends StatefulWidget {
+  final String userDept;
+  final VoidCallback onLogout;
+
+  const LectureNotesPage({
+    Key? key,
+    required this.userDept,
+    required this.onLogout,
+  }) : super(key: key);
+
   @override
   _LectureNotesPageState createState() => _LectureNotesPageState();
 }
@@ -10,53 +20,55 @@ class _LectureNotesPageState extends State<LectureNotesPage> {
   String? _selectedProgram;
   String? _selectedSemester;
   String? _selectedCourse;
-  String? _selectedBatch;
-  String? _selectedTag;
+  String? _selectedLectureTopic;
 
   final List<String> programs = ['CSE', 'SWE'];
   final List<String> semesters = [
     'Semester 1', 'Semester 2', 'Semester 3', 'Semester 4',
     'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8'
   ];
-  final List<String> batches = ['18', '19', '20'];
 
   final List<String> semester1Courses = ['CSE 4105', 'CSE 4107', 'Math 4141', 'Phy 4141'];
   final List<String> semester2Courses = ['CSE 4203', 'CSE 4205', 'Math 4241', 'Phy 4241'];
+  final List<String> semester3Courses = ['CSE 4301', 'CSE 4303', 'CSE 4307', 'Math 4341'];
+  final List<String> semester4Courses = ['CSE 4403', 'CSE 4405', 'CSE 4407', 'Math 4441'];
+  final List<String> semester5Courses = ['CSE 4501', 'CSE 4503', 'CSE 4511', 'CSE 4513'];
+  final List<String> semester6Courses = ['CSE 4615', 'CSE 4619', 'CSE 4621', 'Math 4641'];
+  final List<String> semester7Courses = ['CSE 4703', 'CSE 4711', 'CSE 4733', 'Math 4741'];
+  final List<String> semester8Courses = ['CSE 4801', 'CSE 4803', 'CSE 4805', 'CSE 4807'];
+
   List<String> currentCourses = [];
-
-  // List of possible note owners
-  final List<String> noteOwners = ['Navid', 'Sabbir', 'Evan', 'Ashnan', 'Sarah', 'Ayesha', 'John'];
-  List<String> currentTags = [];
-
-  // Method to generate random tags based on selected criteria
-  void generateRandomTags() {
-    currentTags = List<String>.from(noteOwners..shuffle()).take(4).toList(); // Take 4 random names
-  }
+  final List<String> lectureTopics = ['Introduction', 'Advanced Concepts', 'Review']; // Example topics
 
   @override
   Widget build(BuildContext context) {
+    final theme = AppTheme.getTheme(widget.userDept);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final double paddingValue = screenWidth * 0.05;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Lecture Notes"),
+      appBar: BetterSISAppBar(
+        onLogout: widget.onLogout,
+        theme: theme,
+        title: 'Lecture Notes',
       ),
       body: Padding(
         padding: EdgeInsets.all(paddingValue),
         child: ListView(
           children: [
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Program',
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
               value: _selectedProgram,
-              items: programs.map((program) => DropdownMenuItem<String>(
+              items: programs
+                  .map((program) => DropdownMenuItem<String>(
                 value: program,
                 child: Text(program),
-              )).toList(),
+              ))
+                  .toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedProgram = value;
@@ -65,27 +77,47 @@ class _LectureNotesPageState extends State<LectureNotesPage> {
             ),
             SizedBox(height: screenHeight * 0.02),
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Semester',
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
               value: _selectedSemester,
-              items: semesters.map((semester) => DropdownMenuItem<String>(
+              items: semesters
+                  .map((semester) => DropdownMenuItem<String>(
                 value: semester,
                 child: Text(semester),
-              )).toList(),
+              ))
+                  .toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedSemester = value;
                   _selectedCourse = null;
 
-                  // Update courses based on the selected semester
+                  // Update course list based on the selected semester
                   switch (_selectedSemester) {
                     case 'Semester 1':
                       currentCourses = semester1Courses;
                       break;
                     case 'Semester 2':
                       currentCourses = semester2Courses;
+                      break;
+                    case 'Semester 3':
+                      currentCourses = semester3Courses;
+                      break;
+                    case 'Semester 4':
+                      currentCourses = semester4Courses;
+                      break;
+                    case 'Semester 5':
+                      currentCourses = semester5Courses;
+                      break;
+                    case 'Semester 6':
+                      currentCourses = semester6Courses;
+                      break;
+                    case 'Semester 7':
+                      currentCourses = semester7Courses;
+                      break;
+                    case 'Semester 8':
+                      currentCourses = semester8Courses;
                       break;
                     default:
                       currentCourses = [];
@@ -95,67 +127,51 @@ class _LectureNotesPageState extends State<LectureNotesPage> {
             ),
             SizedBox(height: screenHeight * 0.02),
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Course',
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
               value: _selectedCourse,
-              items: currentCourses.map((course) => DropdownMenuItem<String>(
+              items: currentCourses
+                  .map((course) => DropdownMenuItem<String>(
                 value: course,
                 child: Text(course),
-              )).toList(),
+              ))
+                  .toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedCourse = value;
-                  _selectedTag = null;
-                  generateRandomTags(); // Generate new random tags based on course selection
                 });
               },
             ),
             SizedBox(height: screenHeight * 0.02),
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: 'Batch',
-                border: const OutlineInputBorder(),
+              decoration: const InputDecoration(
+                labelText: 'Lecture Topic',
+                border: OutlineInputBorder(),
               ),
-              value: _selectedBatch,
-              items: batches.map((batch) => DropdownMenuItem<String>(
-                value: batch,
-                child: Text(batch),
-              )).toList(),
+              value: _selectedLectureTopic,
+              items: lectureTopics
+                  .map((topic) => DropdownMenuItem<String>(
+                value: topic,
+                child: Text(topic),
+              ))
+                  .toList(),
               onChanged: (value) {
                 setState(() {
-                  _selectedBatch = value;
-                  _selectedTag = null;
-                  generateRandomTags(); // Refresh tags based on batch selection
-                });
-              },
-            ),
-            SizedBox(height: screenHeight * 0.02),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: 'Tag',
-                border: const OutlineInputBorder(),
-              ),
-              value: _selectedTag,
-              items: currentTags.map((tag) => DropdownMenuItem<String>(
-                value: tag,
-                child: Text(tag),
-              )).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedTag = value;
+                  _selectedLectureTopic = value;
                 });
               },
             ),
             SizedBox(height: screenHeight * 0.02),
             ElevatedButton(
               onPressed: () {
-                if (_selectedCourse != null) {
-                  print('Downloading notes for $_selectedCourse (Batch $_selectedBatch, Tag $_selectedTag)...');
-                }
+                print('Program: $_selectedProgram');
+                print('Semester: $_selectedSemester');
+                print('Course: $_selectedCourse');
+                print('Lecture Topic: $_selectedLectureTopic');
               },
-              child: const Text('Download Notes'),
+              child: const Text('Submit'),
             ),
           ],
         ),
