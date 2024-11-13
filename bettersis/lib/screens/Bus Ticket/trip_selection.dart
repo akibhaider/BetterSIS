@@ -1,8 +1,10 @@
+import 'package:bettersis/modules/Bus%20Ticket/trip_provider.dart';
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'seat_selection_screen.dart';
 
 class TripSelectionPage extends StatefulWidget {
@@ -10,13 +12,19 @@ class TripSelectionPage extends StatefulWidget {
   final String userDept;
   final VoidCallback onLogout;
 
-  const TripSelectionPage({super.key, required this.userId, required this.onLogout, required this.userDept});
+  const TripSelectionPage(
+      {super.key,
+      required this.userId,
+      required this.onLogout,
+      required this.userDept});
 
   @override
   _TripSelectionPageState createState() => _TripSelectionPageState();
 }
 
 class _TripSelectionPageState extends State<TripSelectionPage> {
+  double owPrice = 30.0;
+  double rtPrice = 60.0;
   String selectedTripType = 'One Way';
   DateTime today = DateTime.now();
 
@@ -80,9 +88,13 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text("BALANCE", style: TextStyle(color: Colors.white, fontSize: screenWidth * 0.05)),
+                      Text("BALANCE",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: screenWidth * 0.05)),
                       SizedBox(width: screenWidth * 0.02),
-                      Icon(Icons.visibility_off, color: Colors.white, size: screenWidth * 0.05),
+                      Icon(Icons.visibility_off,
+                          color: Colors.white, size: screenWidth * 0.05),
                     ],
                   ),
                   style: TextButton.styleFrom(
@@ -104,6 +116,8 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
                 setState(() {
                   selectedTripType = newValue!;
                 });
+                Provider.of<TripProvider>(context, listen: false)
+                    .selectTripType(newValue!);
               },
             ),
             SizedBox(height: screenHeight * 0.03),
@@ -120,6 +134,7 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
                           userId: widget.userId,
                           userDept: widget.userDept,
                           onLogout: widget.onLogout,
+                          //tripCost: selectedTripType == 'One Way' ? owPrice : rtPrice,
                         ),
                       ),
                     );
@@ -177,7 +192,8 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
             items: items.map((String item) {
               return DropdownMenuItem<String>(
                 value: item,
-                child: Text(item, style: TextStyle(fontSize: screenWidth * 0.04)),
+                child:
+                    Text(item, style: TextStyle(fontSize: screenWidth * 0.04)),
               );
             }).toList(),
             onChanged: onChanged,
@@ -187,7 +203,8 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
     );
   }
 
-  Widget _buildDateSelector(String formattedDate, double screenWidth, double screenHeight) {
+  Widget _buildDateSelector(
+      String formattedDate, double screenWidth, double screenHeight) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
