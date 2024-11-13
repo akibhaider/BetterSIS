@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../modules/Bus Ticket/seat_provider.dart';
 
 class SeatActions extends StatelessWidget {
-   final String userId;
+  final String userId;
 
   const SeatActions({super.key, required this.userId});
   @override
@@ -17,12 +17,24 @@ class SeatActions extends StatelessWidget {
         children: [
           ElevatedButton(
             onPressed: () {
-              seatProvider.confirmSelection(userId); // Pass the userId dynamically
+              print("Confirm button pressed");
+              seatProvider
+                  .confirmSelection(userId); // Pass the userId dynamically
             },
             child: Text('CONFIRM'),
           ),
+          // Example usage in a widget's button
+          // ElevatedButton(
+          //   onPressed: () {
+          //     Provider.of<SeatProvider>(context, listen: false)
+          //         .generateAdditionalSeats(30);
+          //   },
+          //   child: Text("Generate 30 Seats"),
+          // ),
+
           OutlinedButton(
             onPressed: () {
+              print("Cancel button pressed");
               seatProvider.cancelSelection();
             },
             child: Text('CANCEL'),

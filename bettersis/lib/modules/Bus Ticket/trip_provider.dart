@@ -1,8 +1,13 @@
 import 'dart:async';
+import 'package:bettersis/modules/Bus%20Ticket/seat_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class TripProvider with ChangeNotifier {
+
+
+
   String tripDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
   String? selectedTripType;
   Timer? _dateTimer;
@@ -29,3 +34,5 @@ class TripProvider with ChangeNotifier {
     notifyListeners();
   }
 }
+
+

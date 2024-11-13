@@ -1,7 +1,10 @@
+import 'package:bettersis/modules/Bus%20Ticket/seat_provider.dart';
 import 'package:bettersis/screens/Academics/academics.dart';
 import 'package:bettersis/screens/Academics/academics_front_page.dart';
 import 'package:bettersis/screens/Complain/complain_page.dart';
 import 'package:bettersis/screens/Internet/internet_usage.dart';
+import 'package:provider/provider.dart';
+import 'Library/library.dart';
 import 'package:bettersis/screens/Library/library_home.dart';
 import 'package:bettersis/screens/Meal-Token/buy_token.dart';
 import 'package:bettersis/utils/utils.dart';
@@ -139,6 +142,7 @@ class _DashboardState extends State<Dashboard> {
 
   // 6) Transportation Button clicking logic
   void _navigateToTransportation() {
+    ChangeNotifierProvider(create: (_) => SeatProvider(widget.userData['id']));
     Navigator.push(
       context,
       MaterialPageRoute(
