@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/utils/themes.dart';
 
 class CourseOutlinePage extends StatefulWidget {
+  final String userDept;
+  final VoidCallback onLogout;
+
+  const CourseOutlinePage({
+    Key? key,
+    required this.userDept,
+    required this.onLogout,
+  }) : super(key: key);
+
   @override
   _CourseOutlinePageState createState() => _CourseOutlinePageState();
 }
@@ -24,22 +35,25 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = AppTheme.getTheme(widget.userDept);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final double paddingValue = screenWidth * 0.05;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Course Outlines"),
+      appBar: BetterSISAppBar(
+        onLogout: widget.onLogout,
+        theme: theme,
+        title: 'Course Outlines',
       ),
       body: Padding(
         padding: EdgeInsets.all(paddingValue),
         child: ListView(
           children: [
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Program',
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
               value: _selectedProgram,
               items: programs
@@ -56,9 +70,9 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
             ),
             SizedBox(height: screenHeight * 0.02),
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Semester',
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
               value: _selectedSemester,
               items: semesters
@@ -89,9 +103,9 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
             ),
             SizedBox(height: screenHeight * 0.02),
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Course',
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
               value: _selectedCourse,
               items: currentCourses
