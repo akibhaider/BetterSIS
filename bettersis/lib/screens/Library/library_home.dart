@@ -4,7 +4,7 @@ import 'package:bettersis/screens/Library/question_bank.dart';
 import 'package:bettersis/screens/Library/course_materials.dart';
 import 'package:bettersis/screens/Library/course_outline.dart';
 import 'package:bettersis/screens/Library/lecture_notes.dart';
-import 'package:bettersis/screens/Library/engineering_village.dart'; // Import the new EngineeringVillagePage file
+import 'package:bettersis/screens/Library/engineering_village.dart';
 import 'package:flutter/material.dart';
 import 'package:bettersis/utils/themes.dart';
 
@@ -28,33 +28,27 @@ class Library extends StatelessWidget {
     if (section == "Question_Bank") {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => QuestionBankPage()),
+        MaterialPageRoute(builder: (context) => QuestionBankPage(userDept: userDept, onLogout: onLogout)),
       );
     } else if (section == "Course_Materials") {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => CourseMaterialsPage()),
+        MaterialPageRoute(builder: (context) => CourseMaterialsPage(userDept: userDept, onLogout: onLogout)),
       );
     } else if (section == "Course_Outlines") {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => CourseOutlinePage(),
-        ),
+        MaterialPageRoute(builder: (context) => CourseOutlinePage(userDept: userDept, onLogout: onLogout)),
       );
     } else if (section == "Lecture_Notes") {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => LectureNotesPage(),
-        ),
+        MaterialPageRoute(builder: (context) => LectureNotesPage(userDept: userDept, onLogout: onLogout)),
       );
     } else if (section == "Engineering_Village") {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => EngineeringVillagePage(),
-        ),
+        MaterialPageRoute(builder: (context) =>EngineeringVillagePage(userDept: userDept, onLogout: onLogout)),
       );
     } else {
       Navigator.push(
