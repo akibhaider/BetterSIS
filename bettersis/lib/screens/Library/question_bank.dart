@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/utils/themes.dart';
 
 class QuestionBankPage extends StatefulWidget {
+  final String userDept;
+  final VoidCallback onLogout;
+
+  const QuestionBankPage({
+    Key? key,
+    required this.userDept,
+    required this.onLogout,
+  }) : super(key: key);
+
   @override
   _QuestionBankPageState createState() => _QuestionBankPageState();
 }
@@ -14,17 +25,10 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
 
   final List<String> programs = ['CSE', 'SWE'];
   final List<String> semesters = [
-    'Semester 1',
-    'Semester 2',
-    'Semester 3',
-    'Semester 4',
-    'Semester 5',
-    'Semester 6',
-    'Semester 7',
-    'Semester 8'
+    'Semester 1', 'Semester 2', 'Semester 3', 'Semester 4',
+    'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8'
   ];
 
-  // Define separate course lists for each semester
   final List<String> semester1Courses = ['CSE 4105', 'CSE 4107', 'Math 4141', 'Phy 4141'];
   final List<String> semester2Courses = ['CSE 4203', 'CSE 4205', 'Math 4241', 'Phy 4241'];
   final List<String> semester3Courses = ['CSE 4301', 'CSE 4303', 'CSE 4307', 'Math 4341'];
@@ -34,38 +38,37 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
   final List<String> semester7Courses = ['CSE 4703', 'CSE 4711', 'CSE 4733', 'Math 4741'];
   final List<String> semester8Courses = ['CSE 4801', 'CSE 4803', 'CSE 4805', 'CSE 4807'];
 
-  // Variable to store the current list of courses based on selected semester
   List<String> currentCourses = [];
-
   final List<String> exams = ['Quiz: 01', 'Quiz: 02', 'Quiz: 03', 'Quiz: 04', 'Midterm', 'Final'];
   final List<String> academicYears = ['2023-24', '2022-23', '2021-22', '2020-21', '2019-20'];
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = AppTheme.getTheme(widget.userDept);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final double paddingValue = screenWidth * 0.05;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Question Bank"),
+      appBar: BetterSISAppBar(
+        onLogout: widget.onLogout,
+        theme: theme,
+        title: "Question Bank",
       ),
       body: Padding(
         padding: EdgeInsets.all(paddingValue),
         child: ListView(
           children: [
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Program',
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
               value: _selectedProgram,
-              items: programs
-                  .map((program) => DropdownMenuItem<String>(
+              items: programs.map((program) => DropdownMenuItem<String>(
                 value: program,
                 child: Text(program),
-              ))
-                  .toList(),
+              )).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedProgram = value;
@@ -74,22 +77,19 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
             ),
             SizedBox(height: screenHeight * 0.02),
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Semester',
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
               value: _selectedSemester,
-              items: semesters
-                  .map((semester) => DropdownMenuItem<String>(
+              items: semesters.map((semester) => DropdownMenuItem<String>(
                 value: semester,
                 child: Text(semester),
-              ))
-                  .toList(),
+              )).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedSemester = value;
-                  _selectedCourse = null; // Reset course selection
-                  // Update course list based on the selected semester
+                  _selectedCourse = null;
                   switch (_selectedSemester) {
                     case 'Semester 1':
                       currentCourses = semester1Courses;
@@ -123,17 +123,15 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
             ),
             SizedBox(height: screenHeight * 0.02),
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Course',
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
               value: _selectedCourse,
-              items: currentCourses
-                  .map((course) => DropdownMenuItem<String>(
+              items: currentCourses.map((course) => DropdownMenuItem<String>(
                 value: course,
                 child: Text(course),
-              ))
-                  .toList(),
+              )).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedCourse = value;
@@ -142,17 +140,15 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
             ),
             SizedBox(height: screenHeight * 0.02),
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Exam',
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
               value: _selectedExam,
-              items: exams
-                  .map((exam) => DropdownMenuItem<String>(
+              items: exams.map((exam) => DropdownMenuItem<String>(
                 value: exam,
                 child: Text(exam),
-              ))
-                  .toList(),
+              )).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedExam = value;
@@ -161,17 +157,15 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
             ),
             SizedBox(height: screenHeight * 0.02),
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Academic Year',
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
               value: _selectedAcademicYear,
-              items: academicYears
-                  .map((year) => DropdownMenuItem<String>(
+              items: academicYears.map((year) => DropdownMenuItem<String>(
                 value: year,
                 child: Text(year),
-              ))
-                  .toList(),
+              )).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedAcademicYear = value;
