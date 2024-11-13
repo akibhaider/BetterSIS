@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/utils/themes.dart';
 
 class CourseMaterialsPage extends StatefulWidget {
+  final String userDept;
+  final VoidCallback onLogout;
+
+  const CourseMaterialsPage({
+    Key? key,
+    required this.userDept,
+    required this.onLogout,
+  }) : super(key: key);
+
   @override
   _CourseMaterialsPageState createState() => _CourseMaterialsPageState();
 }
@@ -14,14 +25,8 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
 
   final List<String> programs = ['CSE', 'SWE'];
   final List<String> semesters = [
-    'Semester 1',
-    'Semester 2',
-    'Semester 3',
-    'Semester 4',
-    'Semester 5',
-    'Semester 6',
-    'Semester 7',
-    'Semester 8'
+    'Semester 1', 'Semester 2', 'Semester 3', 'Semester 4',
+    'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8'
   ];
 
   final List<String> semester1Courses = ['CSE 4105', 'CSE 4107', 'Math 4141', 'Phy 4141'];
@@ -39,20 +44,22 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
     'Semester 2': ['Data Structures', 'Digital Logic Design', 'Calculus II'],
     'Semester 3': ['Algorithms', 'Discrete Mathematics', 'Linear Algebra'],
     'Semester 4': ['Operating Systems', 'Database Systems', 'Probability and Statistics'],
-    // Additional semester books can be added as needed
   };
 
   List<String> currentBooks = [];
 
   @override
   Widget build(BuildContext context) {
+    final theme = AppTheme.getTheme(widget.userDept);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final double paddingValue = screenWidth * 0.05;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Course Materials"),
+      appBar: BetterSISAppBar(
+        onLogout: widget.onLogout,
+        theme: theme,
+        title: 'Course Materials',
       ),
       body: Padding(
         padding: EdgeInsets.all(paddingValue),
@@ -95,7 +102,6 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
                   _selectedCourse = null;
                   _selectedBook = null;
 
-                  // Update courses and books based on the selected semester
                   switch (_selectedSemester) {
                     case 'Semester 1':
                       currentCourses = semester1Courses;
@@ -112,22 +118,6 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
                     case 'Semester 4':
                       currentCourses = semester4Courses;
                       currentBooks = semesterBooks['Semester 4'] ?? [];
-                      break;
-                    case 'Semester 5':
-                      currentCourses = semester5Courses;
-                      currentBooks = semesterBooks['Semester 5'] ?? [];
-                      break;
-                    case 'Semester 6':
-                      currentCourses = semester6Courses;
-                      currentBooks = semesterBooks['Semester 6'] ?? [];
-                      break;
-                    case 'Semester 7':
-                      currentCourses = semester7Courses;
-                      currentBooks = semesterBooks['Semester 7'] ?? [];
-                      break;
-                    case 'Semester 8':
-                      currentCourses = semester8Courses;
-                      currentBooks = semesterBooks['Semester 8'] ?? [];
                       break;
                     default:
                       currentCourses = [];
@@ -171,17 +161,16 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
               onChanged: (value) {
                 setState(() {
                   _selectedBook = value;
-                  bookCoverUrl = getBookCoverUrl(value); // Update the book cover URL based on selection
+                  bookCoverUrl = getBookCoverUrl(value);
                 });
               },
             ),
             SizedBox(height: screenHeight * 0.02),
-            // Book cover preview
             if (bookCoverUrl != null)
               Container(
                 height: 200,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: theme.primaryColor),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Image.network(
@@ -194,7 +183,7 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
                 height: 200,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: theme.primaryColor),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: const Text('No Book Cover Available'),
@@ -207,6 +196,9 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
                   print('Downloading $_selectedBook...');
                 }
               },
+              // style: ElevatedButton.styleFrom(
+              //   backgroundColor: theme.primaryColor,
+              // ),
               child: const Text('Download'),
             ),
           ],
@@ -217,7 +209,6 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
 
   // Method to retrieve book cover URL (replace with actual logic to fetch URLs)
   String? getBookCoverUrl(String? bookTitle) {
-    // Placeholder URLs for demonstration purposes
     final Map<String, String> bookCovers = {
       'Introduction to Programming': 'https://example.com/programming-cover.jpg',
       'Physics Fundamentals': 'https://example.com/physics-cover.jpg',
