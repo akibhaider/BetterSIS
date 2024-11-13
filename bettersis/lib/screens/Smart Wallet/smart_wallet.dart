@@ -68,12 +68,8 @@ class smartWalletPage extends State<SmartWallet> {
       setState(() {
         transactions = tempTransactions;
         totalTransactions = transactions.length;
-      });   
-
-          /*if(totalTransactions > 4){
-            transactions = transactions.sublist(totalTransactions - 4);
-          }*/
-        
+      });
+        sortTransactionsByTimestamp();
       }
     }
 
@@ -83,20 +79,13 @@ class smartWalletPage extends State<SmartWallet> {
   }
 
 Future<void> addTransaction(String userID, String title, double amount, String type) async {
-  print('\n\n\n\n\n\n\n\n\n');
-    print('UUUUUUUUUUUUUUUUUUUU');
-    print('\n\n\n\n\n\n\n\n\n');
-  
+
   await FirebaseFirestore.instance.collection('Finance').doc(userID).collection('Transactions').add({
     'title': title,
     'type': type,
     'amount': amount,
     'timestamp': FieldValue.serverTimestamp(),
   });
-
-  print('\n\n\n\n\n\n\n\n\n');
-    print('UUUUUUUUUUUUUUUUUUUU');
-    print('\n\n\n\n\n\n\n\n\n');
 }
 
 
@@ -141,33 +130,44 @@ Future<void> addMoney(double amount) async {
   }
 }
 
-Future<double> getBalance(String userID) async {
-  try {
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('Finance')
-        .doc(userID) // use userID passed as parameter
-        .get();
+  Future<double> getBalance(String userID) async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('Finance')
+          .doc(userID) // use userID passed as parameter
+          .get();
 
-    if (userDoc.exists) {
-      // Safely access 'Balance' and convert it
-      var balanceData = userDoc.data() as Map<String, dynamic>?; // Ensure it's a Map
-      if (balanceData != null) {
-        var balance = balanceData['Balance'];
-        if (balance is int) {
-          return balance.toDouble(); // Convert int to double
-        } else if (balance is double) {
-          return balance; // Return as is if already a double
+      if (userDoc.exists) {
+        // Safely access 'Balance' and convert it
+        var balanceData = userDoc.data() as Map<String, dynamic>?; // Ensure it's a Map
+        if (balanceData != null) {
+          var balance = balanceData['Balance'];
+          if (balance is int) {
+            return balance.toDouble(); // Convert int to double
+          } else if (balance is double) {
+            return balance; // Return as is if already a double
+          }
         }
+      } else {
+        print('User document does not exist.');
       }
-    } else {
-      print('User document does not exist.');
+    } catch (error) {
+      print('Error fetching balance: $error');
     }
-  } catch (error) {
-    print('Error fetching balance: $error');
+    
+    return 0.0; // Default return if not found or an error occurs
   }
-  
-  return 0.0; // Default return if not found or an error occurs
-}
+
+  void sortTransactionsByTimestamp() {
+    transactions.sort((a, b) {
+      // Compare the 'timestamp' field for sorting
+      Timestamp timestampA = a['timestamp'];
+      Timestamp timestampB = b['timestamp'];
+      
+      // Return the comparison result (-1, 0, 1)
+      return timestampB.compareTo(timestampA);
+    });
+  }
 
   @override
   void initState() {
@@ -183,9 +183,8 @@ Future<double> getBalance(String userID) async {
 
     final String name = widget.userName;
     final String studentId = widget.userId;
-    final String email = widget.userEmail;
+    //final String email = widget.userEmail;
     //final double balance = 4180.20;
-
 
     return Scaffold(
       drawer: CustomAppDrawer(theme: theme),
@@ -214,10 +213,10 @@ Future<double> getBalance(String userID) async {
             studentId,
             style: const TextStyle(color: Colors.white70, fontSize: 16),
           ),
-          Text(
-            email,
-            style: const TextStyle(color: Colors.white70, fontSize: 16),
-          ),
+          // Text(
+          //   email,
+          //   style: const TextStyle(color: Colors.white70, fontSize: 16),
+          // ),
           const SizedBox(height: 20),
           // Balance Section
           Card(
@@ -300,14 +299,14 @@ Future<double> getBalance(String userID) async {
                   Text(
                     'LATEST TRANSACTIONS',
                     style: TextStyle(
-                        color: Colors.blue[900],
+                        color: theme.secondaryHeaderColor,
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: totalTransactions,
+                      itemCount: transactions.length,
                       itemBuilder: (context, index) {
                         String type = transactions[index]['type'];
                         return Card(
@@ -318,7 +317,7 @@ Future<double> getBalance(String userID) async {
                           ),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: Colors.blue,
+                              backgroundColor: theme.primaryColor,
                               child: Icon(
                                 type == 'meal'
                                     ? Icons.restaurant_menu // Icon for meal
