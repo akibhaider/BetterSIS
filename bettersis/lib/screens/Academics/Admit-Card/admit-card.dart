@@ -2,7 +2,7 @@ import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:flutter/material.dart';
-import '../../../modules/Admit Card/generate-admit-card.dart';
+import '../../../modules/Admit Card/generate_admit_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AdmitCard extends StatefulWidget {
