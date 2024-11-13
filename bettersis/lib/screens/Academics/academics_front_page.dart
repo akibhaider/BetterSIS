@@ -122,7 +122,19 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
         'label': 'Class Routine',
         'icon': Icons.schedule,
         'onPressed': () {
-          // Implement class routine logic here
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ClassRoutine(
+                onLogout: widget.onLogout,
+                userId: widget.userId,
+                userDept: widget.userDept,
+                userProgram: widget.userProgram,
+                userSemester: widget.userSemester,
+                userSection: widget.userSection,
+              ),
+            ),
+          );
         }
       },
       {
@@ -179,7 +191,7 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
     ];
 
     return Scaffold(
-      body: SafeArea( 
+      body: SafeArea(
         child: Padding(
           padding: EdgeInsets.only(
             top: screenSize.height * 0.03,
@@ -231,7 +243,7 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
             child: Center(
               child: Icon(
                 icon,
-                size: buttonSize * 0.4, 
+                size: buttonSize * 0.4,
                 color: Colors.white,
               ),
             ),
@@ -241,7 +253,7 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
         Text(
           label,
           style: TextStyle(
-            fontSize: buttonSize * 0.12, 
+            fontSize: buttonSize * 0.12,
             fontWeight: FontWeight.w600,
           ),
           textAlign: TextAlign.center,

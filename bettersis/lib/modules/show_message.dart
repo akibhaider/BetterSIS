@@ -6,12 +6,19 @@ class ShowMessage {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle_outlined),
+            const Icon(Icons.check_circle_outlined, color: Colors.green),
             const SizedBox(width: 10),
-            Text(message),
+            Flexible(
+              child: Text(
+                message,
+                overflow: TextOverflow.visible,
+                softWrap: true,
+              ),
+            ),
           ],
         ),
         duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -21,12 +28,19 @@ class ShowMessage {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.error_outline),
+            const Icon(Icons.error_outline, color: Colors.red),
             const SizedBox(width: 10),
-            Text(message),
+            Flexible(
+              child: Text(
+                message,
+                overflow: TextOverflow.visible,
+                softWrap: true,
+              ),
+            ),
           ],
         ),
         duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
