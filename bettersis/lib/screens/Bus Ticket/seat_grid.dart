@@ -7,9 +7,7 @@ class SeatGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final seatProvider = Provider.of<SeatProvider>(context);
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
 
-    // Adjust seat size based on screen width
     final seatSize = screenWidth * 0.1;
     final seatSpacing = screenWidth * 0.025;
     final gapBetweenSets = screenWidth * 0.07;
@@ -23,25 +21,20 @@ class SeatGrid extends StatelessWidget {
       return const Center(child: Text('No seats available.'));
     }
 
-    // Split seats into 4 columns
-    final seatColumns = _splitIntoColumns(seats.entries.toList());
+    final seatColumns = _splitIntoColumns(seats);
 
-    return SingleChildScrollView( // Make the grid scrollable
+    return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.all(screenWidth * 0.04),
-        child: Column( // Wrap in Column to support vertical scroll
+        child: Column(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // First set of 2 columns
                 _buildSeatColumn(seatColumns[0], context, seatSize, seatSpacing),
                 SizedBox(width: seatSpacing),
                 _buildSeatColumn(seatColumns[1], context, seatSize, seatSpacing),
-
-                SizedBox(width: gapBetweenSets), // Gap between two sets of columns
-
-                // Second set of 2 columns
+                SizedBox(width: gapBetweenSets),
                 _buildSeatColumn(seatColumns[2], context, seatSize, seatSpacing),
                 SizedBox(width: seatSpacing),
                 _buildSeatColumn(seatColumns[3], context, seatSize, seatSpacing),
@@ -52,59 +45,52 @@ class SeatGrid extends StatelessWidget {
       ),
     );
   }
-
-  // Split seats into 4 columns for the grid layout
-  List<List<MapEntry<String, dynamic>>> _splitIntoColumns(List<MapEntry<String, dynamic>> seats) {
-    List<List<MapEntry<String, dynamic>>> columns = [[], [], [], []];
-
+  
+  List<List<Map<String, dynamic>>> _splitIntoColumns(List<Map<String, dynamic>> seats) {
+    List<List<Map<String, dynamic>>> columns = [[], [], [], []];
     for (int i = 0; i < seats.length; i++) {
-      // Distribute seats across the 4 columns
       columns[i % 4].add(seats[i]);
     }
-
     return columns;
   }
 
-  // Helper method to build a column of seats
   Widget _buildSeatColumn(
-    List<MapEntry<String, dynamic>> seats,
+    List<Map<String, dynamic>> seats,
     BuildContext context,
     double seatSize,
     double seatSpacing,
   ) {
     return Column(
       children: [
-        for (var seatEntry in seats) ...[
-          _buildSeat(seatEntry, context, seatSize),
-          SizedBox(height: seatSpacing), // Space between seats vertically
+        for (var seat in seats) ...[
+          _buildSeat(seat, context, seatSize),
+          SizedBox(height: seatSpacing),
         ],
       ],
     );
   }
 
-  // Helper method to build individual seat widgets
   Widget _buildSeat(
-    MapEntry<String, dynamic> seatEntry,
+    Map<String, dynamic> seatData,
     BuildContext context,
     double seatSize,
   ) {
-    final seatProvider = Provider.of<SeatProvider>(context);
-    final seatKey = seatEntry.key;
-    final seatData = seatEntry.value;
+    final seatProvider = Provider.of<SeatProvider>(context, listen: false);
+    final seatIndex = seatProvider.seats.indexOf(seatData);
 
     return GestureDetector(
-      onTap: seatData['available']
-          ? () => seatProvider.toggleSeatSelection(seatKey)
+      onTap: seatData['status'] == true
+          ? () => seatProvider.toggleSeatSelection(seatIndex)
           : null,
       child: Container(
         width: seatSize,
         height: seatSize,
         decoration: BoxDecoration(
-          color: seatData['available']
-              ? seatData['selected'] == true
-                  ? Colors.green
-                  : Colors.black
-              : Colors.red,
+          color: seatData['status'] == false
+              ? Colors.red // Confirmed as unavailable
+              : seatData['selected'] == true
+                  ? Colors.green // Temporarily selected by user
+                  : Colors.black, // Available for selection
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Center(
