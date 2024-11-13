@@ -62,9 +62,9 @@ class _ViewTokensState extends State<ViewTokens> {
 
       for (var doc in querySnapshot.docs) {
         String tokenDateStr =
-        doc['date']; // Date stored in "dd-MM-yyyy HH:mm:ss"
+            doc['date']; // Date stored in "dd-MM-yyyy HH:mm:ss"
         DateTime tokenDate =
-        DateFormat('dd-MM-yyyy HH:mm:ss').parse(tokenDateStr);
+            DateFormat('dd-MM-yyyy HH:mm:ss').parse(tokenDateStr);
 
         if (tokenDate.isAfter(now)) {
           // Token is still valid, add to validTokens list
@@ -91,6 +91,119 @@ class _ViewTokensState extends State<ViewTokens> {
         isLoading = false;
       });
       print('Error fetching tokens: $e');
+    }
+  }
+
+  // Show refund dialog if the token is refundable
+  Future<void> _showRefundDialog(
+      String tokenId, Map<String, dynamic> token) async {
+    DateTime tokenDate = DateFormat('dd-MM-yyyy HH:mm:ss').parse(token['date']);
+    DateTime today = DateTime.now();
+
+    // Check if the token date is not today for refund eligibility
+    bool isRefundable = !isSameDay(tokenDate, today);
+
+    if (!isRefundable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Token cannot be refunded today.')),
+      );
+      return;
+    }
+
+    // Confirm the refund
+    bool confirmRefund = await _showConfirmationDialog('Refund this token?');
+
+    if (confirmRefund) {
+      await _processRefund(tokenId, token);
+    }
+  }
+
+  // Check if two dates are the same day
+  bool isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
+  // Confirmation dialog for refund
+  Future<bool> _showConfirmationDialog(String message) async {
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Refund'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('Refund'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Process refund logic
+  Future<void> _processRefund(
+      String tokenId, Map<String, dynamic> token) async {
+    int refundAmount = token['meal'] == 'Breakfast' ? 40 : 70;
+    DateTime timestamp = DateTime.now();
+    String formattedTimestamp = DateFormat.yMMMMd().add_jms().format(timestamp);
+
+    try {
+      // 1. Fetch the user's current balance
+      DocumentReference financeRef =
+          FirebaseFirestore.instance.collection('Finance').doc(userId);
+      DocumentSnapshot financeSnapshot = await financeRef.get();
+
+      // Ensure that balance is treated as double
+      double currentBalance = (financeSnapshot['Balance'] is int)
+          ? (financeSnapshot['Balance'] as int).toDouble()
+          : financeSnapshot['Balance'];
+
+      // 2. Update the balance
+      double newBalance = currentBalance + refundAmount;
+      await financeRef.update({'Balance': newBalance});
+
+      // 3. Log the refund transaction
+      DocumentReference transactionRef =
+          financeRef.collection('Transactions').doc();
+      await transactionRef.set({
+        'amount': refundAmount,
+        'timestamp': formattedTimestamp,
+        'title': 'Refund',
+        'type': 'meal',
+      });
+
+      // 4. Delete the refunded token
+      DocumentReference tokenRef = FirebaseFirestore.instance
+          .collection('Tokens')
+          .doc(userId)
+          .collection('userTokens')
+          .doc(tokenId);
+
+      await tokenRef.delete();
+
+      // 5. Update the UI
+      _fetchTokensFromFirestore();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Token refunded successfully!')),
+      );
+    } catch (e) {
+      print('Error processing refund: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to process refund.')),
+      );
     }
   }
 
@@ -153,7 +266,8 @@ class _ViewTokensState extends State<ViewTokens> {
       var recipientUserData = userQuerySnapshot.docs.first.data();
       String recipientName = recipientUserData['name'];
 
-      bool confirmTransfer = await _showConfirmationDialog(recipientName);
+      bool confirmTransfer =
+          await _showTransferConfirmationDialog(recipientName);
 
       if (!confirmTransfer) {
         return;
@@ -198,7 +312,7 @@ class _ViewTokensState extends State<ViewTokens> {
   }
 
   // Confirmation dialog for transfer
-  Future<bool> _showConfirmationDialog(String recipientName) async {
+  Future<bool> _showTransferConfirmationDialog(String recipientName) async {
     return await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -245,95 +359,101 @@ class _ViewTokensState extends State<ViewTokens> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : tokensList.isEmpty
-          ? const Center(child: Text('No tokens available'))
-          : GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: cardWidth / cardHeight,
-          crossAxisSpacing: 8.0,
-          mainAxisSpacing: 8.0,
-        ),
-        padding: EdgeInsets.all(screenWidth * 0.02),
-        itemCount: tokensList.length,
-        itemBuilder: (context, index) {
-          final token = tokensList[index];
+              ? const Center(child: Text('No tokens available'))
+              : GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: cardWidth / cardHeight,
+                    crossAxisSpacing: 8.0,
+                    mainAxisSpacing: 8.0,
+                  ),
+                  padding: EdgeInsets.all(screenWidth * 0.02),
+                  itemCount: tokensList.length,
+                  itemBuilder: (context, index) {
+                    final token = tokensList[index];
 
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LunchToken(
-                    userId: widget.userData['id'],
-                    userDept: widget.userData['dept'],
-                    onLogout: Utils.getLogout(),
-                    userName: widget.userData['name'],
-                    cafeteria: token['cafeteria'],
-                    date: token['date'],
-                    meal: token['meal'],
-                    tokenId: token['tokenId'],
-                  ),
-                ),
-              );
-            },
-            onLongPress: () {
-              _showTransferDialog(token['tokenId'], token);
-            },
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      theme.primaryColor,
-                      theme.secondaryHeaderColor
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: EdgeInsets.all(screenWidth * 0.04),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      token['meal'].toUpperCase(),
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.045,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    return GestureDetector(
+                      // Single-tap for view QR
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LunchToken(
+                              userId: widget.userData['id'],
+                              userDept: widget.userData['dept'],
+                              onLogout: Utils.getLogout(),
+                              userName: widget.userData['name'],
+                              cafeteria: token['cafeteria'],
+                              date: token['date'],
+                              meal: token['meal'],
+                              tokenId: token['tokenId'],
+                            ),
+                          ),
+                        );
+                      },
+                      // Double-tap for refund
+                      onDoubleTap: () {
+                        _showRefundDialog(token['tokenId'], token);
+                      },
+                      // Long press for transfer
+                      onLongPress: () {
+                        _showTransferDialog(token['tokenId'], token);
+                      },
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                theme.primaryColor,
+                                theme.secondaryHeaderColor
+                              ],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: EdgeInsets.all(screenWidth * 0.04),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                token['meal'].toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.045,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              SizedBox(height: screenHeight * 0.02),
+                              Text(
+                                token['date'],
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.045,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              SizedBox(height: screenHeight * 0.015),
+                              Text(
+                                token['tokenId'].substring(0, 8),
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.035,
+                                  color: Colors.white70,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: screenHeight * 0.02),
-                    Text(
-                      token['date'],
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.045,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: screenHeight * 0.015),
-                    Text(
-                      token['tokenId'].substring(0, 8),
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.035,
-                        color: Colors.white70,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                    );
+                  },
                 ),
-              ),
-            ),
-          );
-        },
-      ),
     );
   }
 }

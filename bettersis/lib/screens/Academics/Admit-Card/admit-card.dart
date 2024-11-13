@@ -15,19 +15,19 @@ class AdmitCard extends StatefulWidget {
 
   const AdmitCard(
       {super.key,
-        required this.onLogout,
-        required this.userDept,
-        required this.userId,
-        required this.userName,
-        required this.userProgram,
-        required this.userSemester});
+      required this.onLogout,
+      required this.userDept,
+      required this.userId,
+      required this.userName,
+      required this.userProgram,
+      required this.userSemester});
 
   @override
   State<AdmitCard> createState() => _AdmitCardState();
 }
 
 class _AdmitCardState extends State<AdmitCard> {
-  Future<List<String>> _fetchAllCourses() async {
+  Future<List<String>> _fetchAllTheoryCourses() async {
     try {
       // Fetch all course documents from the specified department and semester collections
       QuerySnapshot courseSnapshot = await FirebaseFirestore.instance
@@ -36,18 +36,25 @@ class _AdmitCardState extends State<AdmitCard> {
           .collection(widget.userSemester[0])
           .get();
 
-      // List to store course details as strings
-      List<String> coursesList = [];
+      // List to store theory course details as strings
+      List<String> theoryCoursesList = [];
 
       for (var courseDoc in courseSnapshot.docs) {
         String courseCode = courseDoc.id;
-        Map<String, dynamic>? data = courseDoc.data() as Map<String, dynamic>?;
-        String? courseName = data?['name'] ?? 'Unknown Course';
-        String courseString = '$courseCode: $courseName';
-        coursesList.add(courseString);
+
+        // Extract the last character and check if it's an odd number
+        int lastDigit = int.tryParse(courseCode[courseCode.length - 1]) ?? -1;
+
+        if (lastDigit % 2 == 1) {
+          Map<String, dynamic>? data =
+              courseDoc.data() as Map<String, dynamic>?;
+          String? courseName = data?['name'] ?? 'Unknown Course';
+          String courseString = '$courseCode: $courseName';
+          theoryCoursesList.add(courseString);
+        }
       }
 
-      return coursesList;
+      return theoryCoursesList;
     } catch (error) {
       print('Error fetching courses: $error');
       return ['Error fetching courses'];
@@ -64,7 +71,7 @@ class _AdmitCardState extends State<AdmitCard> {
         title: Text('Admit Card'),
       ),
       body: FutureBuilder<List<String>>(
-        future: _fetchAllCourses(),
+        future: _fetchAllTheoryCourses(),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -74,7 +81,9 @@ class _AdmitCardState extends State<AdmitCard> {
           }
           if (snapshot.hasData && snapshot.data != null) {
             return GenerateAdmitCard(
-              semester: "Winter",
+              semester: (int.parse(widget.userSemester[0]) % 2 == 0)
+                  ? "Summer"
+                  : "Winter",
               examination: "Mid",
               registeredCourses: snapshot.data!,
               userDept: widget.userDept,
