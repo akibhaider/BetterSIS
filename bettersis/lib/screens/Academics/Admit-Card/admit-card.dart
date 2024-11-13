@@ -67,9 +67,8 @@ class _AdmitCardState extends State<AdmitCard> {
 
     return Scaffold(
       drawer: CustomAppDrawer(theme: theme),
-      appBar: AppBar(
-        title: Text('Admit Card'),
-      ),
+      appBar: BetterSISAppBar(
+          onLogout: widget.onLogout, theme: theme, title: "Admit Card"),
       body: FutureBuilder<List<String>>(
         future: _fetchAllTheoryCourses(),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
