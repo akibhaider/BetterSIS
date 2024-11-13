@@ -31,9 +31,6 @@ class smartWalletPage extends State<SmartWallet> {
   double balance = 0.0;
   int totalTransactions = 0;
   List<Map<String, dynamic>> transactions = [];
-
-   //ThemeData theme = AppTheme.getTheme(widget.userData['dept']);
-
   //SmartWalletPage({super.key});
 
   Future<void> fetchData() async {
