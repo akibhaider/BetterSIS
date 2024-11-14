@@ -32,16 +32,6 @@ class _CourseRegistrationState extends State<CourseRegistration> {
 
   List<Map<String, dynamic>> selectedCourses = [];
 
-  // Future<void> fetchEnrolled() async {
-  //   try{
-      
-  //   }
-
-  //   catch(error){
-
-  //   }
-  // }
-
   Future<void> fetchData() async {
     try{
       List<Map<String, dynamic>> tempCourses = [];
@@ -111,7 +101,7 @@ class _CourseRegistrationState extends State<CourseRegistration> {
 
     for(var course in selectedCourses){
       total += course['credit'];
-      print('\n\n\n\n\n${course['credit']} - ${total}\n\n\n\n');
+      print('\n\n\n\n\n${course['credit']} - $total\n\n\n\n');
     }
 
     setState(() {
@@ -166,6 +156,55 @@ class _CourseRegistrationState extends State<CourseRegistration> {
     }
   }
 
+  void navigateToEnrolled() {
+    // Extract semester from user data
+    // String sem = widget.userData['semester'];
+    // String cleanSem = sem.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // Navigate to EnrolledCourses page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EnrolledCourses(
+          userDept: widget.userData['dept'],
+          userId: widget.userData['id'], 
+          userName: widget.userData['name'], 
+          userData: widget.userData,
+          onLogout: widget.onLogout,
+        ),
+      ),
+    );
+    }
+
+  void _showNavigationConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Your registration is complete."),
+          content: const Text(
+            "You can get the registration form in Enrolled Courses.\nWould you like to view your enrolled courses now?"
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss this dialog
+                navigateToEnrolled(); // Navigate to EnrolledCourses page
+              },
+              child: const Text("Yes"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss this dialog and stay on the current page
+              },
+              child: const Text("No"),
+            ),
+          ],
+        );
+      },
+    );
+  }  
+
   void _showConfirmationDialog() {
     showDialog(
       context: context,
@@ -181,8 +220,7 @@ class _CourseRegistrationState extends State<CourseRegistration> {
                 print("Submit pressed");
                 registerCourses();
                 Navigator.of(context).pop(); // Dismiss on Yes
-                
-                
+                _showNavigationConfirmationDialog();
               },
               child: const Text("Yes"),
             ),

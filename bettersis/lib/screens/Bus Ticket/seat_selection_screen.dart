@@ -14,6 +14,7 @@ class SeatSelectionScreen extends StatelessWidget {
   final String userDept;
   final VoidCallback onLogout;
   final double tripCost;
+  final String selectedType;
 
   const SeatSelectionScreen({
     super.key,
@@ -21,6 +22,7 @@ class SeatSelectionScreen extends StatelessWidget {
     required this.userDept,
     required this.onLogout,
     required this.tripCost,
+    required this.selectedType,
   });
 
   @override
@@ -104,7 +106,7 @@ class SeatSelectionScreen extends StatelessWidget {
                     //         fontWeight: FontWeight.bold,
                     //       ),
                     //     ),
-                    SeatActions(userId: userId, totalCost: totalCost),
+                    SeatActions(userId: userId, totalCost: totalCost, selectedType: selectedType),
                       ],
                      );
                   },

@@ -1,13 +1,16 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/screens/Academics/Course-Registration/crpdfscreen.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../Course-Registration/crpdfscreen.dart';
 import 'package:flutter/material.dart';
 
 class EnrolledCourses extends StatefulWidget {
   final String userDept;
   final String userId;
   final String userName;
+  final Map<String, dynamic> userData;
   final VoidCallback onLogout;
 
   const EnrolledCourses({
@@ -15,8 +18,9 @@ class EnrolledCourses extends StatefulWidget {
     required this.userId,
     required this.onLogout,
     required this.userName,
-    Key? key,
-  }) : super(key: key);
+    required this.userData,
+    super.key,
+  });
 
   @override
   _EnrolledCoursesState createState() => _EnrolledCoursesState();
@@ -27,6 +31,7 @@ class _EnrolledCoursesState extends State<EnrolledCourses> {
   List<Map<String, dynamic>> enrolledCourses = [];
   bool isLoading = false;
   bool isRegistered = false;
+  bool hasShown = false;
 
   // Function to fetch courses based on chosen semester
   Future<void> fetchCourses(int semester) async {
@@ -91,6 +96,21 @@ class _EnrolledCoursesState extends State<EnrolledCourses> {
     });
   }
 
+  void _getCourseRegistrationForm() {
+    print("Get Course Registration Form button was pressed");
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => crpdfScreen(
+          userData: widget.userData, 
+          courses: enrolledCourses, 
+          onLogout: widget.onLogout,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData theme = AppTheme.getTheme(widget.userDept);
@@ -140,6 +160,7 @@ class _EnrolledCoursesState extends State<EnrolledCourses> {
                     onChanged: (value) {
                       setState(() {
                         chosenSemester = value;
+                        hasShown = true;
                         if (chosenSemester != null) {
                           fetchCourses(chosenSemester!);
                         }
@@ -215,7 +236,7 @@ class _EnrolledCoursesState extends State<EnrolledCourses> {
                                         child: Text(
                                           '${course['credit']} Credits',
                                           style: const TextStyle(
-                                            fontSize: 16,
+                                            fontSize: 18,
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -232,6 +253,17 @@ class _EnrolledCoursesState extends State<EnrolledCourses> {
           ),
         ],
       ),
+      // Floating button to get registration form
+      floatingActionButton: (chosenSemester != null && enrolledCourses.isNotEmpty)
+      ? FloatingActionButton(
+          onPressed: _getCourseRegistrationForm,
+          backgroundColor: theme.primaryColor,
+          foregroundColor: Colors.white,
+          tooltip: 'Get Course Registration Form',
+          child: const Icon(Icons.assignment_turned_in_sharp), 
+        )
+    
+      : null
     );
   }
 }

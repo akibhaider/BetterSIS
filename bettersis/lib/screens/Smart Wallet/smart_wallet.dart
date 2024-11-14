@@ -3,6 +3,7 @@ import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
 //import 'package:bettersis/utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 //import 'package:firebase_storage/firebase_storage.dart';
 import '../../modules/bettersis_appbar.dart';
 
@@ -169,6 +170,39 @@ Future<void> addMoney(double amount) async {
     });
   }
 
+  void transDetails(int index){
+    print('\n\n\nView pressed\n\n\n');
+    final transaction = transactions[index];
+    final DateTime dateTime = transaction['timestamp'].toDate();
+    final String formattedDate = DateFormat('dd/MM/yy hh:mm a').format(dateTime);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(transaction['title']),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Type: ${transaction['type']}'),
+              Text('Amount: ৳${transaction['amount']}'),
+              Text('Date: $formattedDate'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -247,7 +281,7 @@ Future<void> addMoney(double amount) async {
           ),
           const SizedBox(height: 10),
           // Add Money Button
-          Container(
+          SizedBox(
             width: screenWidth *0.6,
             child: ElevatedButton(
             onPressed: () {},
@@ -315,39 +349,48 @@ Future<void> addMoney(double amount) async {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: theme.primaryColor,
-                              child: Icon(
-                                type == 'meal'
-                                    ? Icons.restaurant_menu // Icon for meal
-                                    : Icons.directions_bus, // Icon for bus
-                                color: Colors.white,
+                          child: Column(
+                            children: [
+                              ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: theme.primaryColor,
+                                  child: Icon(
+                                    type == 'meal' ? Icons.restaurant_menu : Icons.directions_bus,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                title: Text(transactions[index]['title']),
+                                subtitle: Text(type == 'meal' ? 'Meal Token' : 'Transportation'),
+                                trailing: Text(
+                                  '৳${transactions[index]['amount'].toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
                               ),
-                            ),
-                            title: Text(transactions[index]['title']),
-                            subtitle: Text(type == 'meal'
-                                ? 'Meal Token'
-                                : 'Transportation'),
-                            trailing: Text(
-                              '৳${transactions[index]['amount'].toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
+                              Align(
+                                alignment: Alignment.bottomRight,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
+                                  child: TextButton(
+                                    onPressed: () {
+                                      transDetails(index);
+                                    },
+                                    child: Text(
+                                      'View Details >>',
+                                      style: TextStyle(color: theme.primaryColor),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       },
                     ),
                   ),
-                  /*TextButton(
-                    onPressed: () {
-                      // Placeholder for "View More" action
-                    },
-                    child: const Text(
-                      'View More >>',
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                  ),*/
+                  
                 ],
               ),
             ),
@@ -357,4 +400,3 @@ Future<void> addMoney(double amount) async {
     );
   }
 }
-

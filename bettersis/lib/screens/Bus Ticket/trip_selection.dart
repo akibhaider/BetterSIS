@@ -136,6 +136,7 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
                           userDept: widget.userDept,
                           onLogout: widget.onLogout,
                           tripCost: selectedTripType == 'One Way' ? owPrice : rtPrice,
+                          selectedType: selectedTripType,
                         ),
                       ),
                     );
@@ -146,12 +147,6 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
                   style: TextStyle(
                     fontSize: screenWidth * 0.045,
                     color: theme.primaryColor,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screenHeight * 0.02,
-                    horizontal: screenWidth * 0.15,
                   ),
                 ),
               ),
