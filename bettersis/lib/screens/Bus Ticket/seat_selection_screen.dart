@@ -13,12 +13,14 @@ class SeatSelectionScreen extends StatelessWidget {
   final String userId;
   final String userDept;
   final VoidCallback onLogout;
+  final double tripCost;
 
   const SeatSelectionScreen({
     super.key,
     required this.userId,
     required this.userDept,
     required this.onLogout,
+    required this.tripCost,
   });
 
   @override
@@ -61,19 +63,50 @@ class SeatSelectionScreen extends StatelessWidget {
                 child: Consumer2<SeatProvider, TripProvider>(
                   builder: (context, seatProvider, tripProvider, child) {
                     final seatCount = seatProvider.getSelectedSeatCount();
-                    final tripCost = tripProvider.getTripCost(seatCount);
-                    return Column(
-                      children: [
-                        Text(
-                          'Total Cost: \$${tripCost.toString()}',
-                          style: TextStyle(
-                            fontSize: screenWidth * 0.05,
-                            fontWeight: FontWeight.bold,
+                    final totalCost = seatCount * tripCost;
+                    
+                    
+                    
+                     return Column(
+                      
+                     children: [
+                       Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: theme.primaryColor,
+                          child: Icon(
+                            // Icon for meal
+                            Icons.directions_bus, // Icon for bus
+                            color: Colors.white,
                           ),
                         ),
-                        SeatActions(userId: userId, tripCost: tripCost),
+                        title: Text('Trip Cost'),
+                        // subtitle: Text(type == 'meal'
+                        //     ? 'Meal Token'
+                        //     : 'Transportation'),
+                        trailing: Text('\$${totalCost.toString()}'
+                            // '৳${transactions[index]['amount'].toStringAsFixed(2)}',
+                            // style: const TextStyle(
+                            //     fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                      ),
+                      
+                    ),
+                    //     Text(
+                    //       'Total Cost: \$${totalCost.toString()}',
+                    //       style: TextStyle(
+                    //         fontSize: screenWidth * 0.05,
+                    //         fontWeight: FontWeight.bold,
+                    //       ),
+                    //     ),
+                    SeatActions(userId: userId, totalCost: totalCost),
                       ],
-                    );
+                     );
                   },
                 ),
               ),
