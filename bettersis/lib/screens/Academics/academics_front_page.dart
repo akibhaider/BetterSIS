@@ -1,4 +1,3 @@
-import 'package:bettersis/modules/custom_button.dart';
 import 'package:bettersis/screens/Academics/Admit-Card/admit-card.dart';
 import 'package:bettersis/screens/Academics/Announcment/announcement.dart';
 import 'package:bettersis/screens/Academics/Class-Routine/class_routine.dart';
@@ -146,6 +145,7 @@ class _AcademicsFrontPageState extends State<AcademicsFrontPage> {
             MaterialPageRoute(
               builder: (context) => EnrolledCourses(
                 onLogout: widget.onLogout,
+                userData: widget.userData,
                 userId: widget.userId,
                 userDept: widget.userDept,
                 userName: widget.userName,
