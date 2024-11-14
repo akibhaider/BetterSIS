@@ -1,9 +1,12 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/modules/show_message.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
+import 'package:bettersis/utils/permission_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../../modules/Course Registration/courseregpdf.dart'; // Import the PDF generator file
-import 'dart:io';
+import 'dart:io' as io;
 import 'package:bettersis/utils/themes.dart';
 
 class crpdfScreen extends StatefulWidget {
@@ -50,9 +53,44 @@ class _CourseRegistrationScreenState extends State<crpdfScreen> {
     });
   }
 
-  void _downloadPDF() {
+  Future<void> _downloadPDF() async {
     // Print statement for now; implement actual download functionality later
     print("Download clicked");
+
+    try{
+      bool hasPermission =
+          await PermissionsHelper.requestStoragePermission(context);
+      if (!hasPermission) {
+        ShowMessage.error(context, 'Storage permission is required');
+        return;
+      }
+
+      if (pdfFilePath == null) {
+        ShowMessage.error(context, 'PDF is not yet generated');
+        return;
+      }
+
+      final baseDir = await getExternalStorageDirectory();
+      if (baseDir != null) {
+        final customPath = io.Directory(
+            '${baseDir.parent.parent.parent.parent.path}/Download/BetterSIS');
+
+        if (!await customPath.exists()) {
+          await customPath.create(recursive: true);
+        }
+
+        String filePath =
+            '${customPath.path}/course_registration: ${widget.userData['program']}_${widget.userData['semester']}.pdf';
+        final file = io.File(pdfFilePath!);
+
+        await file.copy(filePath);
+        ShowMessage.success(context, 'Course Registration downloaded to: $filePath');
+      } else {
+        ShowMessage.error(context, 'Failed to access storage');
+      }
+    } catch (error) {
+      ShowMessage.error(context, 'Failed to download Course Registration form');
+    }
   }
 
   @override
