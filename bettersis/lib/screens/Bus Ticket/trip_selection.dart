@@ -25,6 +25,7 @@ class TripSelectionPage extends StatefulWidget {
 class _TripSelectionPageState extends State<TripSelectionPage> {
   double owPrice = 30.0;
   double rtPrice = 60.0;
+  double tripCost = 0.0;  
   String selectedTripType = 'One Way';
   DateTime today = DateTime.now();
 
@@ -70,43 +71,43 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
             Center(
               child: Container(
                 margin: EdgeInsets.only(bottom: screenHeight * 0.02),
-                child: Text(
-                  "TRANSPORTATION",
-                  style: TextStyle(
-                    color: theme.primaryColor,
-                    fontSize: screenWidth * 0.06,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                // child: Text(
+                //   "TRANSPORTATION",
+                //   style: TextStyle(
+                //     color: theme.primaryColor,
+                //     fontSize: screenWidth * 0.06,
+                //     fontWeight: FontWeight.bold,
+                //   ),
+                // ),
               ),
             ),
-            Center(
-              child: Container(
-                margin: EdgeInsets.only(bottom: screenHeight * 0.02),
-                child: TextButton(
-                  onPressed: () {},
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text("BALANCE",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: screenWidth * 0.05)),
-                      SizedBox(width: screenWidth * 0.02),
-                      Icon(Icons.visibility_off,
-                          color: Colors.white, size: screenWidth * 0.05),
-                    ],
-                  ),
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.blue[200],
-                    padding: EdgeInsets.symmetric(
-                      vertical: screenHeight * 0.02,
-                      horizontal: screenWidth * 0.05,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // Center(
+            //   child: Container(
+            //     margin: EdgeInsets.only(bottom: screenHeight * 0.02),
+            //     child: TextButton(
+            //       onPressed: () {},
+            //       child: Row(
+            //         mainAxisSize: MainAxisSize.min,
+            //         children: [
+            //           Text("BALANCE",
+            //               style: TextStyle(
+            //                   color: Colors.white,
+            //                   fontSize: screenWidth * 0.05)),
+            //           SizedBox(width: screenWidth * 0.02),
+            //           Icon(Icons.visibility_off,
+            //               color: Colors.white, size: screenWidth * 0.05),
+            //         ],
+            //       ),
+            //       style: TextButton.styleFrom(
+            //         backgroundColor: theme.primaryColor,  
+            //         padding: EdgeInsets.symmetric(
+            //           vertical: screenHeight * 0.02,
+            //           horizontal: screenWidth * 0.05,
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
             _buildDropdown(
               context,
               label: "TRIP TYPE",
@@ -116,8 +117,8 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
                 setState(() {
                   selectedTripType = newValue!;
                 });
-                Provider.of<TripProvider>(context, listen: false)
-                    .selectTripType(newValue!);
+                // Provider.of<TripProvider>(context, listen: false)
+                //     .selectTripType(newValue!);
               },
             ),
             SizedBox(height: screenHeight * 0.03),
@@ -134,7 +135,7 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
                           userId: widget.userId,
                           userDept: widget.userDept,
                           onLogout: widget.onLogout,
-                          //tripCost: selectedTripType == 'One Way' ? owPrice : rtPrice,
+                          tripCost: selectedTripType == 'One Way' ? owPrice : rtPrice,
                         ),
                       ),
                     );
@@ -142,7 +143,10 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
                 },
                 child: Text(
                   "CONFIRM",
-                  style: TextStyle(fontSize: screenWidth * 0.045),
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.045,
+                    color: theme.primaryColor,
+                  ),
                 ),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(
@@ -166,14 +170,14 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
     required void Function(String?) onChanged,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
-
+    ThemeData theme = AppTheme.getTheme(widget.userDept);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           "$label:",
           style: TextStyle(
-            color: const Color.fromARGB(255, 3, 189, 240),
+            color: theme.primaryColor,
             fontSize: screenWidth * 0.045,
             fontWeight: FontWeight.bold,
           ),
@@ -182,18 +186,19 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 223, 230, 255),
+            color: theme.primaryColor,
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: DropdownButton<String>(
             value: value,
+            dropdownColor: theme.primaryColor,
             isExpanded: true,
             underline: SizedBox(),
             items: items.map((String item) {
               return DropdownMenuItem<String>(
                 value: item,
                 child:
-                    Text(item, style: TextStyle(fontSize: screenWidth * 0.04)),
+                    Text(item, style: TextStyle(fontSize: screenWidth * 0.04,color: Colors.white)),
               );
             }).toList(),
             onChanged: onChanged,
@@ -205,13 +210,14 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
 
   Widget _buildDateSelector(
       String formattedDate, double screenWidth, double screenHeight) {
+        ThemeData theme = AppTheme.getTheme(widget.userDept);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           "TRIP DATE:",
           style: TextStyle(
-            color: const Color.fromARGB(255, 3, 189, 240),
+            color: theme.primaryColor,
             fontSize: screenWidth * 0.045,
             fontWeight: FontWeight.bold,
           ),
@@ -219,7 +225,7 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
         Expanded(
           child: Container(
             padding: EdgeInsets.symmetric(
-              horizontal: screenWidth * 0.04,
+              horizontal: screenWidth * 0.02,
               vertical: screenHeight * 0.02,
             ),
             decoration: BoxDecoration(
