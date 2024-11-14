@@ -1,5 +1,8 @@
-import 'dart:io';
+import 'dart:io' as io;
 import 'dart:typed_data';
+import 'package:bettersis/modules/show_message.dart';
+import 'package:bettersis/utils/permission_helper.dart';
+import 'package:bettersis/utils/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -255,13 +258,51 @@ class _GenerateAdmitCardState extends State<GenerateAdmitCard> {
     );
 
     // Write PDF file to the local storage
-    final file = File(filePath);
+    final file = io.File(filePath);
     await file.writeAsBytes(await pdf.save());
 
     // Update the UI with the PDF path
     setState(() {
       pdfPath = filePath; // Save the generated file path
     });
+  }
+
+  Future<void> downloadAdmitCard(BuildContext context) async {
+    try {
+      bool hasPermission =
+          await PermissionsHelper.requestStoragePermission(context);
+      if (!hasPermission) {
+        ShowMessage.error(context, 'Storage permission is required');
+        return;
+      }
+
+      if (pdfPath == null) {
+        ShowMessage.error(context, 'PDF is not yet generated');
+        return;
+      }
+
+      final baseDir = await getExternalStorageDirectory();
+      if (baseDir != null) {
+        final customPath = io.Directory(
+            '${baseDir.parent.parent.parent.parent.path}/Download/BetterSIS');
+
+        if (!await customPath.exists()) {
+          await customPath.create(recursive: true);
+        }
+
+        String filePath =
+            '${customPath.path}/admit_card_${widget.userProgram}_${widget.userSemester}_${widget.examination}.pdf';
+        final file = io.File(pdfPath!);
+
+        await file.copy(filePath);
+
+        ShowMessage.success(context, 'Admit Card downloaded to: $filePath');
+      } else {
+        ShowMessage.error(context, 'Failed to access storage');
+      }
+    } catch (e) {
+      ShowMessage.error(context, 'Failed to download admit card');
+    }
   }
 
   void _showErrorMessage(String message) {
@@ -284,24 +325,51 @@ class _GenerateAdmitCardState extends State<GenerateAdmitCard> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = AppTheme.getTheme(widget.userDept);
+
     return Scaffold(
       body: pdfPath == null
           ? Center(child: CircularProgressIndicator())
-          : PDFView(
-              filePath: pdfPath!,
-              enableSwipe: true,
-              swipeHorizontal: true,
-              autoSpacing: false,
-              pageFling: false,
-              onRender: (_pages) {
-                setState(() {});
-              },
-              onError: (error) {
-                print(error.toString());
-              },
-              onPageError: (page, error) {
-                print('$page: ${error.toString()}');
-              },
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 400,
+                      child: PDFView(
+                        filePath: pdfPath!,
+                        enableSwipe: true,
+                        swipeHorizontal: true,
+                        autoSpacing: false,
+                        pageFling: false,
+                        onRender: (_pages) {
+                          setState(() {});
+                        },
+                        onError: (error) {
+                          print(error.toString());
+                        },
+                        onPageError: (page, error) {
+                          print('$page: ${error.toString()}');
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: () => downloadAdmitCard(context),
+                      icon: const Icon(Icons.download),
+                      label: const Text('Download Admit Card'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 10),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
     );
   }
