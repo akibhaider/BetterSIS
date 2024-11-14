@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:http/http.dart' as http;
 
 class CourseMaterialsPage extends StatefulWidget {
   final String userDept;
@@ -24,7 +27,7 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
   String? _selectedSemester;
   String? _selectedCourse;
   String? _selectedBook;
-  String? pdfUrl;
+  String? imageUrl;
 
   final List<String> departments = ['cse', 'eee', 'mpe', 'cee', 'btm'];
   final Map<String, List<String>> departmentPrograms = {
@@ -34,7 +37,6 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
     'cee': ['cee'],
     'btm': ['btm'],
   };
-
   final List<String> semesters = [
     'semester 1', 'semester 2', 'semester 3', 'semester 4',
     'semester 5', 'semester 6', 'semester 7', 'semester 8'
@@ -49,7 +51,6 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
     final theme = AppTheme.getTheme(widget.userDept);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final double paddingValue = screenWidth * 0.05;
 
     return Scaffold(
       appBar: BetterSISAppBar(
@@ -58,10 +59,9 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
         title: 'Course Materials',
       ),
       body: Padding(
-        padding: EdgeInsets.all(paddingValue),
+        padding: EdgeInsets.all(screenWidth * 0.05),
         child: ListView(
           children: [
-            // Department Dropdown
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Department',
@@ -83,8 +83,6 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
               },
             ),
             SizedBox(height: screenHeight * 0.02),
-
-            // Program Dropdown
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Program',
@@ -106,8 +104,6 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
               isDense: true,
             ),
             SizedBox(height: screenHeight * 0.02),
-
-            // Semester Dropdown
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Semester',
@@ -126,7 +122,7 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
                   _selectedCourse = null;
                   _selectedBook = null;
 
-                  // Update courses based on selected department, program, and semester
+                  // Placeholder logic for updating courses based on selections
                   if (_selectedDepartment == 'cse' &&
                       _selectedProgram == 'cse' &&
                       _selectedSemester == 'semester 2') {
@@ -139,8 +135,6 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
               },
             ),
             SizedBox(height: screenHeight * 0.02),
-
-            // Course Dropdown
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Course',
@@ -156,16 +150,13 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
               onChanged: (value) {
                 setState(() {
                   _selectedCourse = value;
-                  // Show specific book for selected department, program, semester, and course
                   if (_selectedCourse == 'cse 4203') {
-                    currentBooks = ['discrete_mathematics_kenneth_rosen_8th_ed.pdf'];
+                    currentBooks = ['kenneth_rosen_8th_ed'];
                   }
                 });
               },
             ),
             SizedBox(height: screenHeight * 0.02),
-
-            // Books Dropdown
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Books',
@@ -175,45 +166,39 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
               items: currentBooks.map((book) {
                 return DropdownMenuItem<String>(
                   value: book,
-                  child: SizedBox(
-                    width: screenWidth * 0.6, // Adjust the width as needed
-                    child: Text(
-                      book,
-                      maxLines: 2, // Allows for up to two lines
-                      overflow: TextOverflow.ellipsis, // Adds ellipsis if text is too long
-                      style: TextStyle(fontSize: 14.0), // Adjust font size if needed
-                    ),
-                  ),
+                  child: Text(book),
                 );
               }).toList(),
               onChanged: (value) async {
                 setState(() {
                   _selectedBook = value;
                 });
-                pdfUrl = await getBookPdfUrl(value);
-                setState(() {}); // Update UI to reflect the PDF preview
+                imageUrl = await getImageUrl(value);
+                setState(() {}); // Refresh UI to display the image
               },
-              isExpanded: true, // Expand to the available width
             ),
             SizedBox(height: screenHeight * 0.02),
-
-            // PDF Preview
-            if (pdfUrl != null)
-              Container(
-                height: 400,
-                decoration: BoxDecoration(
-                  border: Border.all(color: theme.primaryColor),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: PDFView(
-                  filePath: pdfUrl!,
-                  autoSpacing: false,
-                  enableSwipe: true,
-                  swipeHorizontal: true,
-                  onError: (error) {
-                    print(error.toString());
-                  },
-                ),
+            if (imageUrl != null)
+              Column(
+                children: [
+                  Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: theme.primaryColor),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Image.network(
+                      imageUrl!,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  ElevatedButton.icon(
+                    onPressed: downloadImage,
+                    icon: const Icon(Icons.download),
+                    label: const Text('Download'),
+                  ),
+                ],
               )
             else
               Container(
@@ -223,42 +208,63 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
                   border: Border.all(color: theme.primaryColor),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                child: const Text('No PDF Available'),
+                child: const Text('No Image Available'),
               ),
-            SizedBox(height: screenHeight * 0.02),
-
-            // Download Button
-            ElevatedButton(
-              onPressed: () {
-                if (_selectedBook != null && pdfUrl != null) {
-                  // Logic to handle download
-                  print('Downloading $_selectedBook...');
-                }
-              },
-              child: const Text('Download'),
-            ),
           ],
         ),
       ),
     );
   }
 
-  // Method to retrieve PDF URL from Firebase Storage
-  Future<String?> getBookPdfUrl(String? bookTitle) async {
-    if (bookTitle == null || _selectedProgram == null || _selectedSemester == null || _selectedCourse == null) return null;
+  Future<String?> getImageUrl(String? bookTitle) async {
+    if (_selectedDepartment == null ||
+        _selectedProgram == null ||
+        _selectedSemester == null ||
+        _selectedCourse == null ||
+        bookTitle == null) return null;
 
-    final storageRef = FirebaseStorage.instance.ref().child(
-      'Library/Books/${widget.userDept.toLowerCase()}/${_selectedProgram!.toLowerCase()}/${_selectedSemester!}/${_selectedCourse!}/$bookTitle.pdf',
-    );
-
-    // Print the URL path for debugging
-    print('Fetching PDF URL for: Library/Books/${widget.userDept.toLowerCase()}/${_selectedProgram!.toLowerCase()}/${_selectedSemester!}/${_selectedCourse!}/$bookTitle.pdf');
+    final path = 'Library/Books/${_selectedDepartment!}/${_selectedProgram!}/${_selectedSemester!}/${_selectedCourse!}/$bookTitle.png';
+    print('Fetching image URL for path: $path');
 
     try {
-      return await storageRef.getDownloadURL();
+      final ref = FirebaseStorage.instance.ref().child(path);
+      return await ref.getDownloadURL();
     } catch (e) {
-      print('Error fetching PDF URL: $e');
+      print('Error fetching image URL: $e');
       return null;
+    }
+  }
+
+  Future<void> downloadImage() async {
+    if (imageUrl == null) return;
+
+    try {
+      // Request permission to access storage
+      final status = await Permission.storage.request();
+      if (!status.isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Storage permission is required to download files')),
+        );
+        return;
+      }
+
+      // Get directory to save the file
+      final directory = await getExternalStorageDirectory();
+      final filePath = '${directory!.path}/${_selectedBook}.png';
+
+      // Download the image
+      final response = await http.get(Uri.parse(imageUrl!));
+      final file = File(filePath);
+      await file.writeAsBytes(response.bodyBytes);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Image downloaded to $filePath')),
+      );
+    } catch (e) {
+      print('Error downloading image: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to download image')),
+      );
     }
   }
 }
