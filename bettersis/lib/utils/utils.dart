@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class Utils {
   static late Map<String, dynamic> _userData;
   static late VoidCallback _onLogout;
+  static late String _userImageURL;
 
   static void setUser(userData) {
     _userData = userData;
@@ -20,7 +21,15 @@ class Utils {
     return _onLogout;
   }
 
-   static String getOrdinal(int number) {
+  static void setUserImageURL(String url){
+    _userImageURL = url;
+  }
+
+  static String getUserImageURL() {
+    return _userImageURL;
+  }
+
+  static String getOrdinal(int number) {
     if (number % 100 >= 11 && number % 100 <= 13) {
       return '${number}th';
     }

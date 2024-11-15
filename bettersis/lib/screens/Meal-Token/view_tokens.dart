@@ -4,10 +4,11 @@ import 'package:bettersis/utils/themes.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // For parsing dates
 import 'lunchtoken.dart';
 
 class ViewTokens extends StatefulWidget {
-  final Map<String, dynamic> userData; 
+  final Map<String, dynamic> userData;
 
   const ViewTokens({
     super.key,
@@ -20,7 +21,7 @@ class ViewTokens extends StatefulWidget {
 
 class _ViewTokensState extends State<ViewTokens> {
   List<Map<String, dynamic>> tokensList = [];
-  bool isLoading = true; 
+  bool isLoading = true;
   String? userId;
 
   @override
@@ -40,7 +41,7 @@ class _ViewTokensState extends State<ViewTokens> {
     }
   }
 
-  // Fetch tokens for the current user
+  // Fetch tokens, delete expired ones, and display valid tokens
   Future<void> _fetchTokensFromFirestore() async {
     setState(() {
       isLoading = true;
@@ -53,15 +54,36 @@ class _ViewTokensState extends State<ViewTokens> {
 
     try {
       final querySnapshot = await tokenCollection.get();
+      DateTime now = DateTime.now(); // Get current time
+
+      List<Map<String, dynamic>> validTokens = [];
+      WriteBatch batch = FirebaseFirestore.instance
+          .batch(); // Batch for deleting expired tokens
+
+      for (var doc in querySnapshot.docs) {
+        String tokenDateStr =
+            doc['date']; // Date stored in "dd-MM-yyyy HH:mm:ss"
+        DateTime tokenDate =
+            DateFormat('dd-MM-yyyy HH:mm:ss').parse(tokenDateStr);
+
+        if (tokenDate.isAfter(now)) {
+          // Token is still valid, add to validTokens list
+          validTokens.add({
+            'meal': doc['meal'],
+            'date': doc['date'],
+            'cafeteria': doc['cafeteria'],
+            'tokenId': doc['tokenId'],
+          });
+        } else {
+          // Token is expired, mark for deletion
+          batch.delete(doc.reference);
+        }
+      }
+
+      await batch.commit(); // Delete expired tokens from Firestore
+
       setState(() {
-        tokensList = querySnapshot.docs
-            .map((doc) => {
-                  'meal': doc['meal'],
-                  'date': doc['date'],
-                  'cafeteria': doc['cafeteria'],
-                  'tokenId': doc['tokenId'],
-                })
-            .toList();
+        tokensList = validTokens;
         isLoading = false;
       });
     } catch (e) {
@@ -72,6 +94,120 @@ class _ViewTokensState extends State<ViewTokens> {
     }
   }
 
+  // Show refund dialog if the token is refundable
+  Future<void> _showRefundDialog(
+      String tokenId, Map<String, dynamic> token) async {
+    DateTime tokenDate = DateFormat('dd-MM-yyyy HH:mm:ss').parse(token['date']);
+    DateTime today = DateTime.now();
+
+    // Check if the token date is not today for refund eligibility
+    bool isRefundable = !isSameDay(tokenDate, today);
+
+    if (!isRefundable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Token cannot be refunded today.')),
+      );
+      return;
+    }
+
+    // Confirm the refund
+    bool confirmRefund = await _showConfirmationDialog('Refund this token?');
+
+    if (confirmRefund) {
+      await _processRefund(tokenId, token);
+    }
+  }
+
+  // Check if two dates are the same day
+  bool isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
+  // Confirmation dialog for refund
+  Future<bool> _showConfirmationDialog(String message) async {
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Refund'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('Refund'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Process refund logic
+  Future<void> _processRefund(
+      String tokenId, Map<String, dynamic> token) async {
+    int refundAmount = token['meal'] == 'Breakfast' ? 40 : 70;
+    DateTime timestamp = DateTime.now();
+    String formattedTimestamp = DateFormat.yMMMMd().add_jms().format(timestamp);
+
+    try {
+      // 1. Fetch the user's current balance
+      DocumentReference financeRef =
+          FirebaseFirestore.instance.collection('Finance').doc(userId);
+      DocumentSnapshot financeSnapshot = await financeRef.get();
+
+      // Ensure that balance is treated as double
+      double currentBalance = (financeSnapshot['Balance'] is int)
+          ? (financeSnapshot['Balance'] as int).toDouble()
+          : financeSnapshot['Balance'];
+
+      // 2. Update the balance
+      double newBalance = currentBalance + refundAmount;
+      await financeRef.update({'Balance': newBalance});
+
+      // 3. Log the refund transaction
+      DocumentReference transactionRef =
+          financeRef.collection('Transactions').doc();
+      await transactionRef.set({
+        'amount': refundAmount,
+        'timestamp': formattedTimestamp,
+        'title': 'Refund',
+        'type': 'meal',
+      });
+
+      // 4. Delete the refunded token
+      DocumentReference tokenRef = FirebaseFirestore.instance
+          .collection('Tokens')
+          .doc(userId)
+          .collection('userTokens')
+          .doc(tokenId);
+
+      await tokenRef.delete();
+
+      // 5. Update the UI
+      _fetchTokensFromFirestore();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Token refunded successfully!')),
+      );
+    } catch (e) {
+      print('Error processing refund: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to process refund.')),
+      );
+    }
+  }
+
+  // Show transfer dialog
   Future<void> _showTransferDialog(
       String tokenId, Map<String, dynamic> token) async {
     TextEditingController recipientController = TextEditingController();
@@ -111,6 +247,7 @@ class _ViewTokensState extends State<ViewTokens> {
     );
   }
 
+  // Transfer token logic
   Future<void> _transferToken(String tokenId, Map<String, dynamic> token,
       String recipientUserId) async {
     try {
@@ -129,10 +266,11 @@ class _ViewTokensState extends State<ViewTokens> {
       var recipientUserData = userQuerySnapshot.docs.first.data();
       String recipientName = recipientUserData['name'];
 
-      bool confirmTransfer = await _showConfirmationDialog(recipientName);
+      bool confirmTransfer =
+          await _showTransferConfirmationDialog(recipientName);
 
       if (!confirmTransfer) {
-        return; 
+        return;
       }
 
       WriteBatch batch = FirebaseFirestore.instance.batch();
@@ -173,7 +311,8 @@ class _ViewTokensState extends State<ViewTokens> {
     }
   }
 
-  Future<bool> _showConfirmationDialog(String recipientName) async {
+  // Confirmation dialog for transfer
+  Future<bool> _showTransferConfirmationDialog(String recipientName) async {
     return await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -184,13 +323,13 @@ class _ViewTokensState extends State<ViewTokens> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(false); 
+                Navigator.of(context).pop(false);
               },
               child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(true); 
+                Navigator.of(context).pop(true);
               },
               child: const Text('Confirm'),
             ),
@@ -234,6 +373,7 @@ class _ViewTokensState extends State<ViewTokens> {
                     final token = tokensList[index];
 
                     return GestureDetector(
+                      // Single-tap for view QR
                       onTap: () {
                         Navigator.push(
                           context,
@@ -251,6 +391,11 @@ class _ViewTokensState extends State<ViewTokens> {
                           ),
                         );
                       },
+                      // Double-tap for refund
+                      onDoubleTap: () {
+                        _showRefundDialog(token['tokenId'], token);
+                      },
+                      // Long press for transfer
                       onLongPress: () {
                         _showTransferDialog(token['tokenId'], token);
                       },

@@ -1,8 +1,13 @@
 import 'dart:async';
+import 'package:bettersis/modules/Bus%20Ticket/seat_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class TripProvider with ChangeNotifier {
+
+
+
   String tripDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
   String? selectedTripType;
   Timer? _dateTimer;
@@ -26,6 +31,17 @@ class TripProvider with ChangeNotifier {
 
   void selectTripType(String tripType) {
     selectedTripType = tripType;
+    print("Selected trip type: $selectedTripType");
     notifyListeners();
   }
+
+  double getTripCost(int seatCount) {
+    if (selectedTripType == 'Round Trip') {
+      return seatCount * 60.0;
+    } else {
+      return seatCount * 30.0;
+    }
+  }
 }
+
+

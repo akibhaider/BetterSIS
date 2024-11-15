@@ -1,56 +1,45 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class SeatProvider extends ChangeNotifier {
+class SeatProvider with ChangeNotifier {
   final String userId;
-  Map<String, Map<String, dynamic>> seats = {};
+  List<Map<String, dynamic>> seats = [];
   bool isLoading = true;
- 
+
   SeatProvider(this.userId) {
-    _scheduleDailyReset(); // Schedule seat reset for midnight
+    _initializeTodayDocument();
+    _scheduleDailyReset();
   }
 
-  // Fetch seats from Firestore
+  String get _currentDateDocPath {
+    final now = DateTime.now();
+    final year = now.year.toString();
+    final month = now.month.toString().padLeft(2, '0');
+    final day = now.day.toString();
+    return 'Bus/$year/$month/$day';
+  }
+
+  Future<void> _initializeTodayDocument() async {
+    await _createDailyDocument();
+    fetchSeats();
+  }
+
   Future<void> fetchSeats() async {
     isLoading = true;
     notifyListeners();
-    print("Fetching seats...");
 
     try {
-      CollectionReference seatCollection =
-          FirebaseFirestore.instance.collection('seats');
-      QuerySnapshot snapshot = await seatCollection.get();
+      DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
+      DocumentSnapshot snapshot = await dayDoc.get();
 
-      if (snapshot.docs.isEmpty) {
-        print("No seats found in Firestore.");
-      } else {
-        print("Seats found: ${snapshot.docs.length}");
-      }
-
-      seats = {};
-      for (var doc in snapshot.docs) {
-        print("Seat data: ${doc.data()}");
-
-        DateTime expirationTime = DateTime.parse(doc['expirationTime']);
-        bool isExpired = DateTime.now().isAfter(expirationTime);
-
-        seats[doc.id] = {
-          'available': isExpired ? true : doc['available'],
-          'selected': false,
-          'occupied': !isExpired && !doc['available'],
-        };
-
-        if (isExpired) {
-          await seatCollection.doc(doc.id).update({
-            'available': true,
-            'selectedBy': null,
-            'expirationTime':
-                _getEndOfDay().toIso8601String(), // Reset expiration time
-          });
+      if (snapshot.exists && snapshot.data() != null) {
+        seats = List<Map<String, dynamic>>.from((snapshot.data() as Map<String, dynamic>)['seats']);
+        for (var seat in seats) {
+          // Ensure each seat has a `selected` property set to false initially
+          seat['selected'] = seat['selected'] ?? false;
         }
-
-        print(
-            "Seat ${doc.id} -> Available: ${seats[doc.id]!['available']}, Occupied: ${seats[doc.id]!['occupied']}");
+      } else {
+        seats = [];
       }
     } catch (e) {
       print('Error fetching seats: $e');
@@ -60,95 +49,134 @@ class SeatProvider extends ChangeNotifier {
     }
   }
 
-  // Toggle seat selection
-  void toggleSeatSelection(String seatKey) {
-    final seat = seats[seatKey];
-    if (seat != null && seat['available'] == true) {
-      seats[seatKey]!['selected'] = !(seats[seatKey]!['selected'] ?? false);
+  Future<void> toggleSeatSelection(int seatIndex) async {
+    if (seatIndex < seats.length) {
+      // Toggle the `selected` variable for visual feedback in green
+      if (seats[seatIndex]['status'] == true && !seats[seatIndex]['selected']) {
+        seats[seatIndex]['selected'] = true; // Mark as temporarily selected
+        seats[seatIndex]['id'] = userId;
+      } else if (seats[seatIndex]['selected'] && seats[seatIndex]['id'] == userId) {
+        seats[seatIndex]['selected'] = false; // Deselect seat
+        seats[seatIndex]['id'] = '';
+      }
       notifyListeners();
     }
   }
 
-  // Confirm seat selection and update Firestore
   Future<void> confirmSelection(String userId) async {
     try {
-      WriteBatch batch = FirebaseFirestore.instance.batch();
-      for (var seatKey in seats.keys) {
-        if (seats[seatKey]?['selected'] == true) {
-          DateTime expirationTime = _getEndOfDay(); // Set expiration for today
-
-          DocumentReference seatDoc =
-              FirebaseFirestore.instance.collection('seats').doc(seatKey);
-          batch.update(seatDoc, {
-            'available': false,
-            'selectedBy': userId,
-            'expirationTime': expirationTime.toIso8601String(),
-          });
-
-          seats[seatKey]!['available'] = false;
-          seats[seatKey]!['occupied'] = true;
+      for (int i = 0; i < seats.length; i++) {
+        if (seats[i]['selected'] == true && seats[i]['id'] == userId) {
+          seats[i]['status'] = false; // Make seat unavailable
+          seats[i]['selected'] = false; // Unmark selection for confirmation
         }
       }
-      await batch.commit(); // Commit all updates at once
+
+      DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
+      await dayDoc.update({'seats': seats});
+      print("Seats confirmed by $userId.");
     } catch (e) {
       print('Error confirming seats: $e');
     }
     notifyListeners();
   }
 
-  // Cancel seat selection
   void cancelSelection() {
-    seats.forEach((seatKey, seatData) {
-      seats[seatKey]!['selected'] = false;
-    });
+    for (var seat in seats) {
+      if (seat['selected'] == true && seat['id'] == userId) {
+        seat['selected'] = false; // Deselect the seat
+        seat['status'] = true; // Mark as available again
+        seat['id'] = '';
+      }
+    }
     notifyListeners();
   }
 
-  // Schedule a task to reset seats at midnight
+  int getSelectedSeatCount() {
+    return seats.where((seat) => seat['selected'] == true && seat['id'] == userId).length;
+  }
+
   void _scheduleDailyReset() {
     final now = DateTime.now();
-    final midnight =
-        DateTime(now.year, now.month, now.day + 1, 0, 1); // 12:01 AM
+    final midnight = DateTime(now.year, now.month, now.day + 1, 0, 1); // 12:01 AM
     final timeUntilMidnight = midnight.difference(now);
 
     Future.delayed(timeUntilMidnight, () async {
-      await _resetSeats(); // Reset all seats
-      _scheduleDailyReset(); // Reschedule for the next day
+      await _createDailyDocument();
+      await _resetSeats();
+      _scheduleDailyReset();
     });
   }
 
-  // Reset all seats: set available and expiration time to 11:59 PM
+  Future<void> _createDailyDocument() async {
+    final now = DateTime.now();
+    final year = now.year.toString();
+    final month = now.month.toString().padLeft(2, '0');
+    final day = now.day.toString();
+
+    final dayDocPath = 'Bus/$year/$month/$day';
+    final dayDocRef = FirebaseFirestore.instance.doc(dayDocPath);
+
+    try {
+      final snapshot = await dayDocRef.get();
+
+      if (!snapshot.exists) {
+        List<Map<String, dynamic>> initialSeats = List.generate(
+          40, 
+          (index) => {'status': true, 'id': '', 'selected': false},
+        );
+
+        await dayDocRef.set({'seats': initialSeats});
+      }
+    } catch (e) {
+      print("Error creating daily document: $e");
+    }
+  }
+
   Future<void> _resetSeats() async {
     try {
-      final seatCollection = FirebaseFirestore.instance.collection('seats');
-      final batch = FirebaseFirestore.instance.batch();
-      QuerySnapshot snapshot = await seatCollection.get();
+      DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
+      List<Map<String, dynamic>> resetSeats = seats.map((seat) {
+        return {'status': true, 'id': '', 'selected': false}; // Reset seat data
+      }).toList();
 
-      for (var doc in snapshot.docs) {
-        batch.update(doc.reference, {
-          'available': true,
-          'selectedBy': null,
-          'expirationTime': _getEndOfDay().toIso8601String(), // Set to 11:59 PM
-        });
-
-        seats[doc.id] = {
-          'available': true,
-          'selected': false,
-          'occupied': false,
-        };
-      }
-
-      await batch.commit(); // Commit the batch update
-      print("All seats have been reset and made available.");
+      await dayDoc.update({'seats': resetSeats});
+      seats = resetSeats;
     } catch (e) {
       print('Error resetting seats: $e');
     }
     notifyListeners();
   }
 
-  // Helper method to get the end of the current day (11:59 PM)
-  DateTime _getEndOfDay() {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month, now.day, 23, 59);
+  Future<void> generateAdditionalSeats(int additionalSeatCount) async {
+  try {
+    // Fetch the current document reference
+    DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
+    DocumentSnapshot snapshot = await dayDoc.get();
+
+    if (snapshot.exists) {
+      // Fetch the existing seats
+      List<Map<String, dynamic>> existingSeats = List<Map<String, dynamic>>.from(snapshot['seats'] ?? []);
+
+      // Generate new seats and append them to the existing seats
+      List<Map<String, dynamic>> newSeats = List.generate(
+        additionalSeatCount,
+        (index) => {'status': true, 'id': '', 'selected': false},
+      );
+      existingSeats.addAll(newSeats);
+
+      // Update the Firestore document with the expanded seats array
+      await dayDoc.update({'seats': existingSeats});
+      seats = existingSeats; // Update the local seats list
+
+      print("$additionalSeatCount new seats added for today's document.");
+      notifyListeners();
+    } else {
+      print("Today's document does not exist. Please create it first.");
+    }
+  } catch (e) {
+    print("Error generating additional seats: $e");
   }
+}
+
 }

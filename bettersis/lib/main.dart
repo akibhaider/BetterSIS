@@ -1,4 +1,5 @@
 import 'package:bettersis/firebase_options.dart';
+import 'package:bettersis/modules/Bus%20Ticket/seat_provider.dart';
 import 'package:bettersis/modules/Bus%20Ticket/trip_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -17,6 +18,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => TripProvider()),
+        
       ],
       child: MyApp(),
     ),

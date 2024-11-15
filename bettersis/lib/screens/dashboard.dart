@@ -1,7 +1,10 @@
+import 'package:bettersis/modules/Bus%20Ticket/seat_provider.dart';
 import 'package:bettersis/screens/Academics/academics.dart';
+import 'package:bettersis/screens/Academics/academics_front_page.dart';
 import 'package:bettersis/screens/Complain/complain_page.dart';
 import 'package:bettersis/screens/Internet/internet_usage.dart';
-import 'package:bettersis/screens/Library/library.dart';
+import 'package:provider/provider.dart';
+import 'package:bettersis/screens/Library/library_home.dart';
 import 'package:bettersis/screens/Meal-Token/buy_token.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -58,32 +61,18 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void _navigateToInternet() {
+// 1) Result Button clicking logic
+  void _navigateToResult() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => InternetUsage(
-            userId: widget.userData['id'],
-            userDept: widget.userData['dept'],
-            userName: widget.userData['name'],
-            onLogout: _logout),
+        builder: (context) =>
+            ResultPage(onLogout: _logout, userData: widget.userData),
       ),
     );
   }
 
-  void _navigateToLibrary() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Library(
-            userId: widget.userData['id'],
-            userDept: widget.userData['dept'],
-            userName: widget.userData['name'],
-            onLogout: _logout),
-      ),
-    );
-  }
-
+  // 2) Smart Wallet Button clicking logic
   void _navigateToSmartWallet() {
     Navigator.push(
       context,
@@ -98,6 +87,27 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  // 3) Academics Button clicking logic
+  void _navigateToAcademics() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Academics(
+            onLogout: _logout,
+            userName: widget.userData['name'],
+            userId: widget.userData['id'],
+            userDept: widget.userData['dept'],
+            userProgram: widget.userData['program'],
+            userSemester: widget.userData['semester'],
+            userSection: widget.userData['section'],
+            imageUrl: imageUrl,
+            userData: widget.userData
+        ),
+      ),
+    );
+  }
+
+  // 4) Lunch Token Button clicking logic
   void _navigateToLunchToken() {
     Navigator.push(
       context,
@@ -111,28 +121,27 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void _navigateToResult() {
+// 5) E-Resource Button clicking logic
+  void _navigateToLibrary() {
+    // Fetch the theme based on the department
+    final themeData = AppTheme.getTheme(widget.userData['dept']);
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            ResultPage(onLogout: _logout, userData: widget.userData),
+        builder: (context) => Library(
+          userId: widget.userData['id'],
+          userDept: widget.userData['dept'],
+          userName: widget.userData['name'],
+          onLogout: _logout,
+          themeData: themeData, // Pass the theme data
+        ),
       ),
     );
   }
 
-  void _navigateToComplain() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => ComplainPage(
-              onLogout: _logout,
-              userId: widget.userData['id'],
-              userDept: widget.userData['dept'])),
-    );
-  }
-
+  // 6) Transportation Button clicking logic
   void _navigateToTransportation() {
+    ChangeNotifierProvider(create: (_) => SeatProvider(widget.userData['id']));
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -143,11 +152,26 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void _navigateToAcademics() {
+// 7) Internet Button clicking logic
+  void _navigateToInternet() {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => Academics(
+        builder: (context) => InternetUsage(
+            userId: widget.userData['id'],
+            userDept: widget.userData['dept'],
+            userName: widget.userData['name'],
+            onLogout: _logout),
+      ),
+    );
+  }
+
+// 9) E-Resource Button clicking logic
+  void _navigateToComplain() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => ComplainPage(
               onLogout: _logout,
               userId: widget.userData['id'],
               userDept: widget.userData['dept'])),
@@ -215,9 +239,19 @@ class _DashboardState extends State<Dashboard> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.white,
+                          color: Colors.white, 
                           width: 4.0,
                         ),
+                        boxShadow: widget.userData['cr']
+                            ? [
+                                BoxShadow(
+                                  color: Colors.white
+                                      .withOpacity(0.7), 
+                                  spreadRadius: 8, 
+                                  blurRadius: 15, 
+                                ),
+                              ]
+                            : [], 
                       ),
                       child: CircleAvatar(
                         radius: 50,
