@@ -1,4 +1,5 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
+import 'package:bettersis/screens/Teacher/Classes/course_details.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +68,18 @@ class _ClassesState extends State<Classes> {
   }
 
   void _onCourseTap(String courseCode, String courseName) {
-    print('Tapped on course $courseCode - $courseName');
+    Map<String, String> course = {
+      'code': courseCode,
+      'name': courseName
+    };
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => CourseDetails(
+              onLogout: widget.onLogout,
+              userDept: widget.userData['dept'],
+              course: course)),
+    );
   }
 
   Widget _buildCourseCard(String courseName, String courseCode, double fontSize) {
