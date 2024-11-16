@@ -22,7 +22,9 @@ class CourseDetails extends StatefulWidget {
 
 class _CourseDetailsState extends State<CourseDetails> {
   List<Map<String, dynamic>> students = [];
+  List<Map<String, dynamic>> filteredStudents = [];
   bool isLoading = true;
+  TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
@@ -73,18 +75,35 @@ class _CourseDetailsState extends State<CourseDetails> {
         }
       }
 
-      // Sort students based on their ID (parsed as int)
       studentList
           .sort((a, b) => int.parse(a['id']).compareTo(int.parse(b['id'])));
 
       setState(() {
         students = studentList;
+        filteredStudents = studentList;
         isLoading = false;
       });
     } catch (e) {
       print('Error fetching students: $e');
       setState(() {
         isLoading = false;
+      });
+    }
+  }
+
+  // Function to handle searching
+  void _filterStudents(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        filteredStudents = students;
+      });
+    } else {
+      setState(() {
+        filteredStudents = students
+            .where((student) =>
+                student['name'].toLowerCase().contains(query.toLowerCase()) ||
+                student['id'].toLowerCase().contains(query.toLowerCase()))
+            .toList();
       });
     }
   }
@@ -101,7 +120,7 @@ class _CourseDetailsState extends State<CourseDetails> {
   // Function to build student card
   Widget _buildStudentCard(Map<String, dynamic> student, BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth * 0.045; 
+    double fontSize = screenWidth * 0.045;
 
     return GestureDetector(
       child: Card(
@@ -150,7 +169,6 @@ class _CourseDetailsState extends State<CourseDetails> {
                       ],
                     ),
                   ),
-                  // Phone tap gesture
                   GestureDetector(
                     onTap: () {
                       _launchUrl('tel:${student['phone']}');
@@ -183,23 +201,48 @@ class _CourseDetailsState extends State<CourseDetails> {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = AppTheme.getTheme(widget.userDept);
-    final screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth * 0.045;
+    double fontSize = MediaQuery.of(context).size.width * 0.045;
 
     return Scaffold(
       appBar: BetterSISAppBar(
-          onLogout: widget.onLogout, theme: theme, title: "Course Details (${widget.course['code']})"),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : students.isEmpty
-              ? const Center(
-                  child: Text('No students enrolled in this course.'))
-              : ListView.builder(
-                  itemCount: students.length,
-                  itemBuilder: (context, index) {
-                    return _buildStudentCard(students[index], context);
-                  },
+          onLogout: widget.onLogout,
+          theme: theme,
+          title: "Course Details (${widget.course['code']})"),
+      body: Column(
+        children: [
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: searchController,
+              onChanged:
+                  _filterStudents, 
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: 'Search by name or ID',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
+              ),
+            ),
+          ),
+          // Student list
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : filteredStudents.isEmpty
+                    ? const Center(
+                        child: Text('No students enrolled in this course.'))
+                    : ListView.builder(
+                        itemCount: filteredStudents.length,
+                        itemBuilder: (context, index) {
+                          return _buildStudentCard(
+                              filteredStudents[index], context);
+                        },
+                      ),
+          ),
+        ],
+      ),
     );
   }
 }
