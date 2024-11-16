@@ -8,15 +8,15 @@ import 'package:bettersis/screens/Library/library_home.dart';
 import 'package:bettersis/screens/Meal-Token/buy_token.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
-import '../utils/themes.dart';
+import '../../utils/themes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'Misc/login_page.dart';
-import '../modules/bettersis_appbar.dart';
+import '../Misc/login_page.dart';
+import '../../modules/bettersis_appbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'Result/result_page.dart';
-import 'Smart Wallet/smart_wallet.dart';
-import 'Misc/appdrawer.dart';
-import 'Bus Ticket/trip_selection.dart';
+import '../Result/result_page.dart';
+import '../Smart Wallet/smart_wallet.dart';
+import '../Misc/appdrawer.dart';
+import '../Bus Ticket/trip_selection.dart';
 
 class Dashboard extends StatefulWidget {
   final Map<String, dynamic> userData;

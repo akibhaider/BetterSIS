@@ -65,8 +65,8 @@ class CourseRegistrationPDF {
                 //mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text("Student ID: $studentId               "),
-                  pw.Text("Programme: $program         "),
-                  pw.Text("Department: $department"),
+                  pw.Text("Programme: B.Sc in ${program.toUpperCase()}         "),
+                  pw.Text("Department: ${department.toUpperCase()}"),
                 ],
               ),
 

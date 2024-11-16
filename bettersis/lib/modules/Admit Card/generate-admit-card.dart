@@ -337,7 +337,7 @@ class _GenerateAdmitCardState extends State<GenerateAdmitCard> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      height: 400,
+                      height: 450,
                       child: PDFView(
                         filePath: pdfPath!,
                         enableSwipe: true,

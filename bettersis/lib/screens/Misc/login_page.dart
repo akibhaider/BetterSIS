@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../dashboard.dart';
+import '../Dashboard/dashboard.dart';
+import '../Dashboard/teacher_dashboard.dart';
 import '../../modules/custom_appbar.dart';
 
 class LoginPage extends StatefulWidget {
@@ -23,10 +24,11 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _loginAndFetchData() async {
     setState(() {
       isLoading = true;
-      errorMessage = ''; 
+      errorMessage = '';
     });
 
     try {
+      // Log in the user with email and password
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
@@ -49,12 +51,25 @@ class _LoginPageState extends State<LoginPage> {
           Utils.setUser(userData);
           print('User Data: $userData');
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => Dashboard(userData: userData),
-            ),
-          );
+          if (userData['type'] == 'student') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Dashboard(userData: userData),
+              ),
+            );
+          } else if (userData['type'] == 'teacher') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TeacherDashboard(userData: userData),
+              ),
+            );
+          } else {
+            setState(() {
+              errorMessage = 'Unknown user type';
+            });
+          }
         } else {
           setState(() {
             errorMessage = 'User not found in Firestore';
@@ -63,8 +78,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
-        errorMessage =
-            'Login error: ${e.message}'; 
+        errorMessage = 'Login error: ${e.message}';
       });
     } finally {
       setState(() {

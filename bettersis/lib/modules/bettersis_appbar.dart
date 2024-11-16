@@ -1,4 +1,4 @@
-import 'package:bettersis/screens/dashboard.dart';
+import 'package:bettersis/screens/Dashboard/dashboard.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 
