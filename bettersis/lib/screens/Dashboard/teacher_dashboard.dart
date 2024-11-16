@@ -69,8 +69,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
       MaterialPageRoute(
           builder: (context) => Classes(
               onLogout: _logout,
-              userId: widget.userData['id'],
-              userDept: widget.userData['dept'])),
+              userData: widget.userData)),
     );
   }
 
