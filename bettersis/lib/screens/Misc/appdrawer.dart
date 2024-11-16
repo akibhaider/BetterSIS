@@ -1,8 +1,8 @@
-import 'package:bettersis/screens/Notice/notice_board.dart';
+import 'package:bettersis/screens/Student/Notice/notice_board.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:flutter/material.dart';
-import '../Meal-Token/view_tokens.dart';
+import '../Student/Meal-Token/view_tokens.dart';
 
 class CustomAppDrawer extends StatefulWidget {
   final ThemeData theme;

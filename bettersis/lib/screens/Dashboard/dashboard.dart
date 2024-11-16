@@ -1,11 +1,11 @@
 import 'package:bettersis/modules/Bus%20Ticket/seat_provider.dart';
-import 'package:bettersis/screens/Academics/academics.dart';
-import 'package:bettersis/screens/Academics/academics_front_page.dart';
+import 'package:bettersis/screens/Student/Academics/academics.dart';
+import 'package:bettersis/screens/Student/Academics/academics_front_page.dart';
 import 'package:bettersis/screens/Complain/complain_page.dart';
-import 'package:bettersis/screens/Internet/internet_usage.dart';
+import 'package:bettersis/screens/Student/Internet/internet_usage.dart';
 import 'package:provider/provider.dart';
-import 'package:bettersis/screens/Library/library_home.dart';
-import 'package:bettersis/screens/Meal-Token/buy_token.dart';
+import 'package:bettersis/screens/Student/Library/library_home.dart';
+import 'package:bettersis/screens/Student/Meal-Token/buy_token.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 import '../../utils/themes.dart';
@@ -13,10 +13,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../Misc/login_page.dart';
 import '../../modules/bettersis_appbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import '../Result/result_page.dart';
-import '../Smart Wallet/smart_wallet.dart';
+import '../Student/Result/result_page.dart';
+import '../Student/Smart Wallet/smart_wallet.dart';
 import '../Misc/appdrawer.dart';
-import '../Bus Ticket/trip_selection.dart';
+import '../Student/Bus Ticket/trip_selection.dart';
 
 class Dashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -392,8 +392,8 @@ class _DashboardState extends State<Dashboard> {
                         fontSize: 14 * scaleFactor,
                       ),
                       _buildServiceButton(
-                        icon: Icons.attach_money,
-                        label: "Allowance",
+                        icon: Icons.person,
+                        label: "Attendance",
                         themeData: theme,
                         onTap: () {},
                         fontSize: 14 * scaleFactor,

@@ -1,4 +1,5 @@
 import 'package:bettersis/screens/Complain/complain_page.dart';
+import 'package:bettersis/screens/Teacher/Classes/classes.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 import '../../utils/themes.dart';
@@ -30,7 +31,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   Future<void> fetchImageUrl() async {
     try {
       String email = widget.userData['email'];
-      String fileName = '$email.png'; 
+      String fileName = '$email.png';
       Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
       String url = await storageRef.getDownloadURL();
       setState(() {
@@ -63,7 +64,14 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   }
 
   void _navigateToClasses() {
-    // Add Classes page navigation here
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => Classes(
+              onLogout: _logout,
+              userId: widget.userData['id'],
+              userDept: widget.userData['dept'])),
+    );
   }
 
   void _navigateToAcademics() {
