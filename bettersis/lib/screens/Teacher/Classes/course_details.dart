@@ -70,6 +70,7 @@ class _CourseDetailsState extends State<CourseDetails> {
               'id': userData['id'],
               'email': userData['email'],
               'phone': userData['phone'],
+              'cr': userData['cr'] ?? false, // Add the 'cr' field
             });
           }
         }
@@ -91,11 +92,16 @@ class _CourseDetailsState extends State<CourseDetails> {
     }
   }
 
-  // Function to handle searching
+  // Function to handle searching, including CR keyword
   void _filterStudents(String query) {
     if (query.isEmpty) {
       setState(() {
         filteredStudents = students;
+      });
+    } else if (query.toLowerCase() == 'cr') {
+      setState(() {
+        filteredStudents =
+            students.where((student) => student['cr'] == true).toList();
       });
     } else {
       setState(() {
@@ -118,7 +124,7 @@ class _CourseDetailsState extends State<CourseDetails> {
   }
 
   // Function to build student card
-  Widget _buildStudentCard(Map<String, dynamic> student, BuildContext context) {
+  Widget _buildStudentCard(Map<String, dynamic> student, Color color, BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = screenWidth * 0.045;
 
@@ -126,7 +132,12 @@ class _CourseDetailsState extends State<CourseDetails> {
       child: Card(
         elevation: 3,
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: student['cr'] == true
+              ? BorderSide(color: color, width: 3.0)
+              : BorderSide.none,
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -215,11 +226,10 @@ class _CourseDetailsState extends State<CourseDetails> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: searchController,
-              onChanged:
-                  _filterStudents, 
+              onChanged: _filterStudents,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.search),
-                hintText: 'Search by name or ID',
+                hintText: 'Search by name, ID, or "cr"',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -237,7 +247,7 @@ class _CourseDetailsState extends State<CourseDetails> {
                         itemCount: filteredStudents.length,
                         itemBuilder: (context, index) {
                           return _buildStudentCard(
-                              filteredStudents[index], context);
+                              filteredStudents[index], theme.primaryColor, context);
                         },
                       ),
           ),
