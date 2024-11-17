@@ -125,7 +125,7 @@ class _AttendanceState extends State<Attendance> {
 
     setState(() {
       isLoading = true;
-      attendanceTaken = false; 
+      attendanceTaken = false;
     });
 
     try {
@@ -159,8 +159,8 @@ class _AttendanceState extends State<Attendance> {
 
         setState(() {
           students = studentList;
-          presentStudents = present.cast<String>(); 
-          attendanceTaken = true; 
+          presentStudents = present.cast<String>();
+          attendanceTaken = true;
           isLoading = false;
         });
       } else {
@@ -194,7 +194,7 @@ class _AttendanceState extends State<Attendance> {
 
           setState(() {
             students = studentList;
-            presentStudents.clear(); 
+            presentStudents.clear();
             isLoading = false;
           });
         } else {
@@ -291,7 +291,7 @@ class _AttendanceState extends State<Attendance> {
             .where((student) => !presentStudents.contains(student['id']))
             .map((student) => student['id'])
             .toList(),
-        'taken': true, 
+        'taken': true,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(

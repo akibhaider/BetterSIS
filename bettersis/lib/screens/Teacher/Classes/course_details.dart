@@ -32,58 +32,54 @@ class _CourseDetailsState extends State<CourseDetails> {
     _fetchStudentsInCourse();
   }
 
-  // Function to fetch students enrolled in the course
+  // Fetch students for this course from the Admin collection
   Future<void> _fetchStudentsInCourse() async {
     try {
-      List<Map<String, dynamic>> studentList = [];
-      QuerySnapshot userSnapshot = await FirebaseFirestore.instance
-          .collection('Users')
-          .where('type', isEqualTo: 'student')
+      // Fetch the list of enrolled students from "Admin" collection
+      DocumentSnapshot courseDoc = await FirebaseFirestore.instance
+          .collection('Admin')
+          .doc('courses')
+          .collection('Enrolled')
+          .doc(widget.course['code']) 
           .get();
 
-      String courseCode = widget.course['code']!;
-      String courseNumber = courseCode.split('-').last;
-      String semesterNumber = courseNumber[1];
+      if (courseDoc.exists) {
+        List<dynamic> enrolledStudentIds = courseDoc['students'] ?? [];
 
-      // Loop through all students and check if they are enrolled in this course
-      for (var userDoc in userSnapshot.docs) {
-        var userData = userDoc.data() as Map<String, dynamic>;
-
-        // Check enrolled courses for this student
-        DocumentSnapshot enrolledCourseDoc = await FirebaseFirestore.instance
+        // Fetch user details for the enrolled students using their IDs
+        QuerySnapshot studentSnapshot = await FirebaseFirestore.instance
             .collection('Users')
-            .doc(userDoc.id)
-            .collection('Enrolled Courses')
-            .doc(semesterNumber)
+            .where('id', whereIn: enrolledStudentIds)
             .get();
 
-        if (enrolledCourseDoc.exists) {
-          // Check if the student is enrolled in the current course
-          DocumentSnapshot courseDoc = await enrolledCourseDoc.reference
-              .collection('Course List')
-              .doc(courseCode)
-              .get();
-
-          if (courseDoc.exists) {
-            studentList.add({
-              'name': userData['name'],
-              'id': userData['id'],
-              'email': userData['email'],
-              'phone': userData['phone'],
-              'cr': userData['cr'] ?? false, // Add the 'cr' field
-            });
-          }
+        List<Map<String, dynamic>> studentList = [];
+        for (var studentDoc in studentSnapshot.docs) {
+          var data = studentDoc.data() as Map<String, dynamic>;
+          studentList.add({
+            'name': data['name'],
+            'id': data['id'],
+            'email': data['email'],
+            'phone': data['phone'],
+            'cr': data['cr'] ?? false, 
+          });
         }
+
+        // Sort students by ID (converted to int for proper sorting)
+        studentList
+            .sort((a, b) => int.parse(a['id']).compareTo(int.parse(b['id'])));
+
+        setState(() {
+          students = studentList;
+          filteredStudents = studentList;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          students = [];
+          filteredStudents = [];
+          isLoading = false;
+        });
       }
-
-      studentList
-          .sort((a, b) => int.parse(a['id']).compareTo(int.parse(b['id'])));
-
-      setState(() {
-        students = studentList;
-        filteredStudents = studentList;
-        isLoading = false;
-      });
     } catch (e) {
       print('Error fetching students: $e');
       setState(() {
@@ -124,7 +120,8 @@ class _CourseDetailsState extends State<CourseDetails> {
   }
 
   // Function to build student card
-  Widget _buildStudentCard(Map<String, dynamic> student, Color color, BuildContext context) {
+  Widget _buildStudentCard(
+      Map<String, dynamic> student, Color color, BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = screenWidth * 0.045;
 
@@ -246,8 +243,8 @@ class _CourseDetailsState extends State<CourseDetails> {
                     : ListView.builder(
                         itemCount: filteredStudents.length,
                         itemBuilder: (context, index) {
-                          return _buildStudentCard(
-                              filteredStudents[index], theme.primaryColor, context);
+                          return _buildStudentCard(filteredStudents[index],
+                              theme.primaryColor, context);
                         },
                       ),
           ),
