@@ -2,6 +2,7 @@ import 'package:bettersis/modules/Bus%20Ticket/seat_provider.dart';
 import 'package:bettersis/screens/Student/Academics/academics.dart';
 import 'package:bettersis/screens/Student/Academics/academics_front_page.dart';
 import 'package:bettersis/screens/Complain/complain_page.dart';
+import 'package:bettersis/screens/Student/Attendance/attendance.dart';
 import 'package:bettersis/screens/Student/Internet/internet_usage.dart';
 import 'package:provider/provider.dart';
 import 'package:bettersis/screens/Student/Library/library_home.dart';
@@ -161,6 +162,18 @@ class _DashboardState extends State<Dashboard> {
             userId: widget.userData['id'],
             userDept: widget.userData['dept'],
             userName: widget.userData['name'],
+            onLogout: _logout),
+      ),
+    );
+  }
+
+  // 8) Attendance Button clicking logic
+  void _navigateToAttendance() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Attendance(
+            userData: widget.userData,
             onLogout: _logout),
       ),
     );
@@ -395,7 +408,7 @@ class _DashboardState extends State<Dashboard> {
                         icon: Icons.person,
                         label: "Attendance",
                         themeData: theme,
-                        onTap: () {},
+                        onTap: _navigateToAttendance,
                         fontSize: 14 * scaleFactor,
                       ),
                       _buildServiceButton(
