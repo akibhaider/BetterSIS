@@ -1,4 +1,5 @@
 import 'package:bettersis/screens/Complain/complain_page.dart';
+import 'package:bettersis/screens/Teacher/Attendance/attendance.dart';
 import 'package:bettersis/screens/Teacher/Classes/classes.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +57,12 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   }
 
   void _navigateToAttendance() {
-    // Add Attendance page navigation here
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              Attendance(onLogout: _logout, userData: widget.userData)),
+    );
   }
 
   void _navigateToAnnouncement() {
@@ -67,9 +73,8 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => Classes(
-              onLogout: _logout,
-              userData: widget.userData)),
+          builder: (context) =>
+              Classes(onLogout: _logout, userData: widget.userData)),
     );
   }
 
@@ -78,7 +83,14 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   }
 
   void _navigateToComplain() {
-    // Add Complaim Page navigation here
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => ComplainPage(
+              onLogout: _logout,
+              userDept: widget.userData['dept'],
+              userId: widget.userData['id'])),
+    );
   }
 
   Widget _buildServiceButton({
