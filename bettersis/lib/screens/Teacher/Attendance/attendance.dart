@@ -129,80 +129,92 @@ class _AttendanceState extends State<Attendance> {
     });
 
     try {
-      String formattedDate = DateFormat('dd-MM-yyyy').format(_selectedDate);
-      DocumentReference attendanceDoc = FirebaseFirestore.instance
+      // Fetch the last three attendance records for the selected course and section
+      QuerySnapshot attendanceSnapshot = await FirebaseFirestore.instance
           .collection('Attendance')
           .doc(selectedCourse)
           .collection('Sections')
           .doc(selectedSection)
           .collection('Attendance')
-          .doc(formattedDate);
+          .limit(3) // Limit to the last three records
+          .get();
 
-      DocumentSnapshot attendanceSnapshot = await attendanceDoc.get();
+      Map<String, List<bool>> studentAttendanceStatus = {};
 
-      if (attendanceSnapshot.exists && attendanceSnapshot['taken'] == true) {
-        // Attendance has been taken, show present students
-        List<dynamic> present = attendanceSnapshot['present'] ?? [];
+      // Initialize attendance status for each student for 3 days
+      for (var doc in attendanceSnapshot.docs) {
+        List<dynamic> present = doc['present'] ?? [];
+        List<dynamic> absent = doc['absent'] ?? [];
+
+        // Mark students who were present
+        for (var studentId in present) {
+          if (!studentAttendanceStatus.containsKey(studentId)) {
+            studentAttendanceStatus[studentId] = [true];
+          } else {
+            studentAttendanceStatus[studentId]!.add(true);
+          }
+        }
+
+        // Mark students who were absent
+        for (var studentId in absent) {
+          if (!studentAttendanceStatus.containsKey(studentId)) {
+            studentAttendanceStatus[studentId] = [false];
+          } else {
+            studentAttendanceStatus[studentId]!.add(false);
+          }
+        }
+      }
+
+      // Fetch student data for those enrolled in this course and section
+      DocumentSnapshot courseDoc = await FirebaseFirestore.instance
+          .collection('Admin')
+          .doc('courses')
+          .collection('Enrolled')
+          .doc(selectedCourse)
+          .get();
+
+      if (courseDoc.exists) {
+        List<dynamic> enrolledStudentIds = courseDoc['students'] ?? [];
+
         QuerySnapshot studentSnapshot = await FirebaseFirestore.instance
             .collection('Users')
-            .where('id', whereIn: present)
+            .where('id', whereIn: enrolledStudentIds)
+            .where('section', isEqualTo: selectedSection)
             .get();
 
         List<Map<String, dynamic>> studentList = [];
         for (var studentDoc in studentSnapshot.docs) {
           var data = studentDoc.data() as Map<String, dynamic>;
+          String studentId = data['id'];
+          List<bool> previousAttendance =
+              studentAttendanceStatus[studentId] ?? [false, false, false];
+
+          if (previousAttendance.length < 3) {
+            previousAttendance =
+                List<bool>.filled(3 - previousAttendance.length, false) +
+                    previousAttendance;
+          }
+
           studentList.add({
             'name': data['name'],
             'id': data['id'],
+            'previousAttendance': previousAttendance, 
           });
         }
+
+        studentList
+            .sort((a, b) => int.parse(a['id']).compareTo(int.parse(b['id'])));
 
         setState(() {
           students = studentList;
-          presentStudents = present.cast<String>();
-          attendanceTaken = true;
+          presentStudents.clear();
           isLoading = false;
         });
       } else {
-        DocumentSnapshot courseDoc = await FirebaseFirestore.instance
-            .collection('Admin')
-            .doc('courses')
-            .collection('Enrolled')
-            .doc(selectedCourse)
-            .get();
-
-        if (courseDoc.exists) {
-          List<dynamic> enrolledStudentIds = courseDoc['students'] ?? [];
-
-          QuerySnapshot studentSnapshot = await FirebaseFirestore.instance
-              .collection('Users')
-              .where('id', whereIn: enrolledStudentIds)
-              .where('section', isEqualTo: selectedSection)
-              .get();
-
-          List<Map<String, dynamic>> studentList = [];
-          for (var studentDoc in studentSnapshot.docs) {
-            var data = studentDoc.data() as Map<String, dynamic>;
-            studentList.add({
-              'name': data['name'],
-              'id': data['id'],
-            });
-          }
-
-          studentList
-              .sort((a, b) => int.parse(a['id']).compareTo(int.parse(b['id'])));
-
-          setState(() {
-            students = studentList;
-            presentStudents.clear();
-            isLoading = false;
-          });
-        } else {
-          setState(() {
-            students = [];
-            isLoading = false;
-          });
-        }
+        setState(() {
+          students = [];
+          isLoading = false;
+        });
       }
     } catch (e) {
       print("Error fetching students: $e");
@@ -212,7 +224,7 @@ class _AttendanceState extends State<Attendance> {
     }
   }
 
-  // Build the student list with checkboxes
+  // Build the student list with checkboxes and last 3 days' attendance
   Widget _buildStudentList(double screenWidth) {
     double fontSize = screenWidth * 0.045;
 
@@ -223,6 +235,9 @@ class _AttendanceState extends State<Attendance> {
       itemBuilder: (context, index) {
         var student = students[index];
         bool isPresent = presentStudents.contains(student['id']);
+        List<bool> previousAttendance =
+            student['previousAttendance'] ?? [false, false, false];
+
         return Card(
           elevation: 3,
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -249,6 +264,19 @@ class _AttendanceState extends State<Attendance> {
                           color: Colors.grey[600],
                         ),
                       ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          _buildAttendanceCircle(
+                              previousAttendance[0]), // 3 days ago
+                          const SizedBox(width: 5),
+                          _buildAttendanceCircle(
+                              previousAttendance[1]), // 2 days ago
+                          const SizedBox(width: 5),
+                          _buildAttendanceCircle(
+                              previousAttendance[2]), // 1 day ago
+                        ],
+                      )
                     ],
                   ),
                 ),
@@ -270,6 +298,19 @@ class _AttendanceState extends State<Attendance> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildAttendanceCircle(bool isPresent) {
+    return Container(
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isPresent
+            ? Colors.green
+            : Colors.red,
+      ),
     );
   }
 
