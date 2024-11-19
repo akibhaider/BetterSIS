@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../Misc/login_page.dart';
 import '../../modules/bettersis_appbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:intl/intl.dart';
 
 class TeacherDashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -21,12 +22,81 @@ class TeacherDashboard extends StatefulWidget {
 class _TeacherDashboardState extends State<TeacherDashboard> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String imageUrl = '';
+  String nextClassInfo = "No Classes for Today";
 
   @override
   void initState() {
     super.initState();
     fetchImageUrl();
     Utils.setLogout(_logout);
+    _checkNextClass();
+  }
+
+  void _checkNextClass() {
+    String today = DateFormat('EEEE')
+        .format(DateTime.now())
+        .toLowerCase(); // Get today's day
+    DateTime now = DateTime.now();
+
+    Map<String, dynamic> routine = widget.userData['routine'] ?? {};
+    List<Map<String, dynamic>> todayClasses = [];
+
+    // Filter classes for today's day
+    routine.forEach((courseCode, schedule) {
+      for (String classInfo in schedule) {
+        List<String> parts = classInfo.split('-');
+        if (parts[0] == today) {
+          // Add classes for today
+          DateTime startTime = _parseTime(parts[1]);
+          DateTime endTime = _parseTime(parts[2]);
+          todayClasses.add({
+            'courseCode': courseCode,
+            'startTime': startTime,
+            'endTime': endTime,
+            'room': parts[3]
+          });
+        }
+      }
+    });
+
+    // Sort classes by start time
+    todayClasses.sort((a, b) => a['startTime'].compareTo(b['startTime']));
+
+    // Determine the closest class
+    for (var classData in todayClasses) {
+      DateTime startTime = classData['startTime'];
+      DateTime endTime = classData['endTime'];
+
+      if (now.isBefore(startTime)) {
+        // Next class to take
+        setState(() {
+          nextClassInfo =
+              "Next Class: ${classData['courseCode']} in ${classData['room']} at ${DateFormat('h:mm a').format(startTime)}";
+        });
+        return;
+      } else if (now.isAfter(startTime) && now.isBefore(endTime)) {
+        // Currently taking this class
+        setState(() {
+          nextClassInfo =
+              "Currently Taking: ${classData['courseCode']} in ${classData['room']}";
+        });
+        return;
+      }
+    }
+
+    // No classes remaining for today
+    setState(() {
+      nextClassInfo = "No Classes for Today";
+    });
+  }
+
+  // Helper function to parse time (hh:mm:ss) to DateTime with today's date
+  DateTime _parseTime(String time) {
+    DateTime now = DateTime.now();
+    List<String> timeParts = time.split(':');
+    int hour = int.parse(timeParts[0]);
+    int minute = int.parse(timeParts[1]);
+    return DateTime(now.year, now.month, now.day, hour, minute);
   }
 
   Future<void> fetchImageUrl() async {
@@ -206,6 +276,20 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                       ),
                     ),
                   ],
+                ),
+              ),
+              Container(
+                color: theme.primaryColor,
+                padding: const EdgeInsets.all(10.0),
+                child: Center(
+                  child: Text(
+                    nextClassInfo,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16 * scaleFactor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 30),
