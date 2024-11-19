@@ -10,13 +10,14 @@ import 'seat_selection_screen.dart';
 class TripSelectionPage extends StatefulWidget {
   final String userId;
   final String userDept;
+  final String userName;
   final VoidCallback onLogout;
 
   const TripSelectionPage(
       {super.key,
       required this.userId,
       required this.onLogout,
-      required this.userDept});
+      required this.userDept, required this.userName});
 
   @override
   _TripSelectionPageState createState() => _TripSelectionPageState();
@@ -134,6 +135,7 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
                         builder: (context) => SeatSelectionScreen(
                           userId: widget.userId,
                           userDept: widget.userDept,
+                          userName: widget.userName,  
                           onLogout: widget.onLogout,
                           tripCost: selectedTripType == 'One Way' ? owPrice : rtPrice,
                           selectedType: selectedTripType,

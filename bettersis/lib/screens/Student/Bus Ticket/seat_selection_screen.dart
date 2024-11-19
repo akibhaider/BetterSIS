@@ -12,6 +12,7 @@ import '../../../modules/Bus Ticket/trip_provider.dart';
 class SeatSelectionScreen extends StatelessWidget {
   final String userId;
   final String userDept;
+  final String userName;
   final VoidCallback onLogout;
   final double tripCost;
   final String selectedType;
@@ -22,7 +23,7 @@ class SeatSelectionScreen extends StatelessWidget {
     required this.userDept,
     required this.onLogout,
     required this.tripCost,
-    required this.selectedType,
+    required this.selectedType, required this.userName,
   });
 
   @override
@@ -106,7 +107,7 @@ class SeatSelectionScreen extends StatelessWidget {
                     //         fontWeight: FontWeight.bold,
                     //       ),
                     //     ),
-                    SeatActions(userId: userId, totalCost: totalCost, selectedType: selectedType),
+                    SeatActions(userId: userId, totalCost: totalCost, selectedType: selectedType, userName: userName,userDept: userDept),
                       ],
                      );
                   },
