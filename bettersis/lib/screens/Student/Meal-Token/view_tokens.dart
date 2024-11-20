@@ -1,5 +1,6 @@
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
+import 'package:bettersis/screens/Student/Smart%20Wallet/smart_wallet.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,6 +24,7 @@ class _ViewTokensState extends State<ViewTokens> {
   List<Map<String, dynamic>> tokensList = [];
   bool isLoading = true;
   String? userId;
+  smartWalletPage walletP = smartWalletPage();
 
   @override
   void initState() {
@@ -158,31 +160,41 @@ class _ViewTokensState extends State<ViewTokens> {
     int refundAmount = token['meal'] == 'Breakfast' ? 40 : 70;
     DateTime timestamp = DateTime.now();
     String formattedTimestamp = DateFormat.yMMMMd().add_jms().format(timestamp);
+    
 
     try {
       // 1. Fetch the user's current balance
-      DocumentReference financeRef =
-          FirebaseFirestore.instance.collection('Finance').doc(userId);
-      DocumentSnapshot financeSnapshot = await financeRef.get();
+      double currentBalance = await walletP.getBalance(widget.userData['id']);
+      
+      // DocumentReference financeRef =
+      //     FirebaseFirestore.instance.collection('Finance').doc(userId);
+      // DocumentSnapshot financeSnapshot = await financeRef.get();
 
-      // Ensure that balance is treated as double
-      double currentBalance = (financeSnapshot['Balance'] is int)
-          ? (financeSnapshot['Balance'] as int).toDouble()
-          : financeSnapshot['Balance'];
+      // // Ensure that balance is treated as double
+      // double currentBalance = (financeSnapshot['Balance'] is int)
+      //     ? (financeSnapshot['Balance'] as int).toDouble()
+      //     : financeSnapshot['Balance'];
+
 
       // 2. Update the balance
-      double newBalance = currentBalance + refundAmount;
-      await financeRef.update({'Balance': newBalance});
+      double refundAmountasDouble = refundAmount.toDouble();
+      double newBalance = currentBalance + refundAmountasDouble;
+      await walletP.updateBalance(widget.userData['id'], newBalance);
+
+      // double newBalance = currentBalance + refundAmount;
+      // await financeRef.update({'Balance': newBalance});
 
       // 3. Log the refund transaction
-      DocumentReference transactionRef =
-          financeRef.collection('Transactions').doc();
-      await transactionRef.set({
-        'amount': refundAmount,
-        'timestamp': formattedTimestamp,
-        'title': 'Refund',
-        'type': 'meal',
-      });
+      await walletP.addTransaction(widget.userData['id'], 'Refund', refundAmountasDouble, 'meal');
+      print('- Refund Successful');
+      // DocumentReference transactionRef =
+      //     financeRef.collection('Transactions').doc();
+      // await transactionRef.set({
+      //   'amount': refundAmount,
+      //   'timestamp': formattedTimestamp,
+      //   'title': 'Refund',
+      //   'type': 'meal',
+      // });
 
       // 4. Delete the refunded token
       DocumentReference tokenRef = FirebaseFirestore.instance
