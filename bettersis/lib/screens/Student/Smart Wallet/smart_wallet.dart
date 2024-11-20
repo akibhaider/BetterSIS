@@ -48,11 +48,12 @@ class smartWalletPage extends State<SmartWallet> {
           balance = (userDoc['Balance'] is int)
                 ? (userDoc['Balance'] as int).toDouble()
                 : userDoc['Balance'];
-      });
+        });
+      }
 
       print('\n\n\n\n\n\n\n\n\n');
-    print(balance);
-    print('\n\n\n\n\n\n\n\n\n');      
+      print(balance);
+      print('\n\n\n\n\n\n\n\n\n');      
       // Fetch all the documents from the "Transactions" subcollection
       QuerySnapshot transactionsSnapshot = await FirebaseFirestore.instance
           .collection('Finance')
@@ -70,7 +71,23 @@ class smartWalletPage extends State<SmartWallet> {
         transactions = tempTransactions;
         totalTransactions = transactions.length;
       });
-        sortTransactionsByTimestamp();
+
+      int i=6;
+      print('\n\n\n\n');
+      for(var trans in transactions){
+        print('${trans['title']} - ${trans['timestamp']} - ${trans['amount']}\n\n');
+        i--;
+        if(i==0) break;
+      }print('\n----- soort-----\n');
+
+      sortTransactionsByTimestamp();
+      
+      i=6;
+      print('\n\n\n\n');
+      for(var trans in transactions){
+        print('$i. ${trans['title']} - ${trans['timestamp']} - ${trans['amount']}\n\n');
+        i--;
+        if(i==0) break;
       }
     }
 
@@ -79,57 +96,57 @@ class smartWalletPage extends State<SmartWallet> {
     }
   }
 
-Future<void> addTransaction(String userID, String title, double amount, String type) async {
+  Future<void> addTransaction(String userID, String title, double amount, String type) async {
 
-  await FirebaseFirestore.instance.collection('Finance').doc(userID).collection('Transactions').add({
-    'title': title,
-    'type': type,
-    'amount': amount,
-    'timestamp': FieldValue.serverTimestamp(),
-  });
-}
+    await FirebaseFirestore.instance.collection('Finance').doc(userID).collection('Transactions').add({
+      'title': title,
+      'type': type,
+      'amount': amount,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
 
 
   Future<void> updateBalance(String userID, double newBalance) async {
-  try {
-    print('\n\n\n\n\n\n\n\n\n');
-    print(balance);
-    print('\n\n\n\n\n\n\n\n\n');
-    // Update the balance in Firestore
-    await FirebaseFirestore.instance
-        .collection('Finance')
-        .doc(userID)
-        .update({
-          'Balance': newBalance,
-        });
-  } catch (error) {
-    print('Error updating balance: $error');
+    try {
+      print('\n\n\n\n\n\n\n\n\n');
+      print(balance);
+      print('\n\n\n\n\n\n\n\n\n');
+      // Update the balance in Firestore
+      await FirebaseFirestore.instance
+          .collection('Finance')
+          .doc(userID)
+          .update({
+            'Balance': newBalance,
+          });
+    } catch (error) {
+      print('Error updating balance: $error');
+    }
   }
-}
 
-Future<void> addMoney(double amount) async {
-  try {
-    // Update the balance by adding the specified amount
-    setState(() {
-      balance += amount;
-    });
+  Future<void> addMoney(double amount) async {
+    try {
+      // Update the balance by adding the specified amount
+      setState(() {
+        balance += amount;
+      });
 
-    // Also update the balance in Firestore
-    await FirebaseFirestore.instance
-        .collection('Finance')
-        .doc(widget.userId)
-        .update({
-          'Balance': balance,
-        });
+      // Also update the balance in Firestore
+      await FirebaseFirestore.instance
+          .collection('Finance')
+          .doc(widget.userId)
+          .update({
+            'Balance': balance,
+          });
 
-    // After adding money, add a transaction to the user's list
-    await addTransaction(widget.userId, 'Money Added', amount, 'add');
+      // After adding money, add a transaction to the user's list
+      await addTransaction(widget.userId, 'Money Added', amount, 'add');
 
-    print('Money added successfully');
-  } catch (error) {
-    print('Error adding money: $error');
+      print('Money added successfully');
+    } catch (error) {
+      print('Error adding money: $error');
+    }
   }
-}
 
   Future<double> getBalance(String userID) async {
     try {
@@ -203,6 +220,10 @@ Future<void> addMoney(double amount) async {
     );
   }
 
+  void addMoneyToWallet(){
+    print('Add Money pressed');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -228,6 +249,42 @@ Future<void> addMoney(double amount) async {
         theme: theme,
         title: 'Smart Wallet',
       ),
+
+      floatingActionButton:
+        Container(
+          decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: FloatingActionButton.extended(
+                onPressed: addMoneyToWallet,
+                label: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.white, // White circle
+                      radius: screenWidth * 0.04, // Adjust the radius for the circle size
+                      child: Image.asset(
+                        'assets/bKash.png',
+                        height: screenWidth * 0.05, // Icon size
+                        width: screenWidth * 0.05,
+                        //fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                  "Add Money",
+                  style: TextStyle(
+                      fontSize: screenWidth * 0.04,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                  ),
+                ),
+                ],
+                ),
+                //icon: const Icon(Icons.check),
+                backgroundColor: theme.primaryColor,
+              ),
+        ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -251,13 +308,13 @@ Future<void> addMoney(double amount) async {
           //   email,
           //   style: const TextStyle(color: Colors.white70, fontSize: 16),
           // ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 5),
           // Balance Section
           Card(
             color: Colors.white,
-            margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+            margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
             child: Padding(
-              padding: EdgeInsets.all(screenWidth * 0.05),
+              padding: EdgeInsets.all(screenWidth * 0.04),
               child: Column(
                 children: [
                   Text(
@@ -272,54 +329,19 @@ Future<void> addMoney(double amount) async {
                     '৳${balance.toStringAsFixed(2)}',
                     style: TextStyle(
                         color: theme.secondaryHeaderColor,
-                        fontSize: screenWidth * 0.08,
+                        fontSize: screenWidth * 0.05,
                         fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 10),
-          // Add Money Button
-          SizedBox(
-            width: screenWidth *0.6,
-            child: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: theme.secondaryHeaderColor,
-              padding: EdgeInsets.symmetric(vertical: screenHeight *0.02),
-              //maximumSize: const Size(150, 50),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/bKash.png',
-                  height: screenWidth * 0.1, // Responsive height
-                  width: screenWidth * 0.1,
-                ),
-                const SizedBox(width: 10),
-                Text(
-              "Add Money",
-              style: TextStyle(
-                  fontSize: screenWidth * 0.05,
-                  fontWeight: FontWeight.bold,
-                  color: theme.secondaryHeaderColor,
-              ),
-            ),
-            ],
-            ),
-
-          ),
-          ),
-
-          const SizedBox(height: 20),
+          const SizedBox(height: 15),
 
           // Transactions Section
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -330,14 +352,17 @@ Future<void> addMoney(double amount) async {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'LATEST TRANSACTIONS',
-                    style: TextStyle(
-                        color: theme.secondaryHeaderColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+                    child: Text(
+                      'LATEST TRANSACTIONS',
+                      style: TextStyle(
+                          color: theme.secondaryHeaderColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
+                    ),
                   ),
-                  const SizedBox(height: 10),
+                  //const SizedBox(height: 10),
                   Expanded(
                     child: ListView.builder(
                       itemCount: transactions.length,
@@ -345,7 +370,7 @@ Future<void> addMoney(double amount) async {
                         String type = transactions[index]['type'];
                         return Card(
                           margin: const EdgeInsets.symmetric(vertical: 8.0),
-                          elevation: 3,
+                          elevation: 5,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
@@ -361,11 +386,23 @@ Future<void> addMoney(double amount) async {
                                 ),
                                 title: Text(transactions[index]['title']),
                                 subtitle: Text(type == 'meal' ? 'Meal Token' : 'Transportation'),
-                                trailing: Text(
-                                  '৳${transactions[index]['amount'].toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                trailing: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                  decoration: BoxDecoration(
+                                    color: transactions[index]['title'] == 'Refund'
+                                        ? Colors.green
+                                        : const Color.fromARGB(255, 219, 58, 47),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    '৳${transactions[index]['amount'].toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: transactions[index]['title'] == 'Refund'
+                                          ? Colors.white
+                                          : Colors.white,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -373,11 +410,12 @@ Future<void> addMoney(double amount) async {
                                 alignment: Alignment.bottomRight,
                                 child: Padding(
                                   padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
-                                  child: TextButton(
+                                  child: TextButton.icon(
                                     onPressed: () {
                                       transDetails(index);
                                     },
-                                    child: Text(
+                                    icon: const Icon(Icons.info_outline, size: 18),
+                                    label: Text(
                                       'View Details >>',
                                       style: TextStyle(color: theme.primaryColor),
                                     ),
