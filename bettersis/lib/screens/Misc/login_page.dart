@@ -51,14 +51,16 @@ class _LoginPageState extends State<LoginPage> {
           Utils.setUser(userData);
           print('User Data: $userData');
 
-          if (userData['type'] == 'student') {
+          // Safety checks for user data
+          final userType = userData['type'] ?? '';
+          if (userType == 'student') {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => Dashboard(userData: userData),
               ),
             );
-          } else if (userData['type'] == 'teacher') {
+          } else if (userType == 'teacher') {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -67,12 +69,12 @@ class _LoginPageState extends State<LoginPage> {
             );
           } else {
             setState(() {
-              errorMessage = 'Unknown user type';
+              errorMessage = 'Unknown user type.';
             });
           }
         } else {
           setState(() {
-            errorMessage = 'User not found in Firestore';
+            errorMessage = 'User not found in Firestore.';
           });
         }
       }

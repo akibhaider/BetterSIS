@@ -135,7 +135,8 @@ class _AttendanceState extends State<Attendance> {
           .doc(selectedCourse)
           .collection('Sections')
           .doc(selectedSection)
-          .collection('Attendance')
+          .collection("Attendance")
+          .orderBy("taken", descending: true)
           .limit(3) // Limit to the last three records
           .get();
 
@@ -198,7 +199,7 @@ class _AttendanceState extends State<Attendance> {
           studentList.add({
             'name': data['name'],
             'id': data['id'],
-            'previousAttendance': previousAttendance, 
+            'previousAttendance': previousAttendance,
           });
         }
 
@@ -307,9 +308,7 @@ class _AttendanceState extends State<Attendance> {
       height: 12,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isPresent
-            ? Colors.green
-            : Colors.red,
+        color: isPresent ? Colors.green : Colors.red,
       ),
     );
   }
