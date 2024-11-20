@@ -149,6 +149,7 @@ class _DashboardState extends State<Dashboard> {
           builder: (context) => TripSelectionPage(
               onLogout: _logout,
               userId: widget.userData['id'],
+              userName: widget.userData['name'],
               userDept: widget.userData['dept'])),
     );
   }
