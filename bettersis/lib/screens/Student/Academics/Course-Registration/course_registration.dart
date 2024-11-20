@@ -282,7 +282,7 @@ class _CourseRegistrationState extends State<CourseRegistration> {
                 children: [
                   Container(
                   color: theme.primaryColor,
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.only(left: 12.0),
                   child: Row(
                     children: [
                       Container(
@@ -437,6 +437,7 @@ class _CourseRegistrationState extends State<CourseRegistration> {
 
                         Expanded(
                           child: ListView.builder(
+                            padding: EdgeInsets.only(bottom: 70.0),
                             itemCount: offeredCourses.length,
                             itemBuilder: (context, index) {
                               final course = offeredCourses[index];

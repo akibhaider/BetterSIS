@@ -193,7 +193,8 @@ class _EnrolledCoursesState extends State<EnrolledCourses> {
                         ),
                       )
                     : ListView.builder(
-                        padding: const EdgeInsets.all(16),
+                        //padding: const EdgeInsets.all(16),
+                        padding:  const EdgeInsets.only(top:14, right: 10, left: 10, bottom: 60.0),
                         itemCount: enrolledCourses.length,
                         itemBuilder: (context, index) {
                           final course = enrolledCourses[index];

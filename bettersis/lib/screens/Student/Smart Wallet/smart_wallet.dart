@@ -33,6 +33,8 @@ class smartWalletPage extends State<SmartWallet> {
   int totalTransactions = 0;
   List<Map<String, dynamic>> transactions = [];
   //SmartWalletPage({super.key});
+  bool isLoading = true;
+  final ValueNotifier<bool> isBalanceVisible = ValueNotifier(false);
 
   Future<void> fetchData() async {
     //first balance is fetched.
@@ -51,9 +53,9 @@ class smartWalletPage extends State<SmartWallet> {
         });
       }
 
-      print('\n\n\n\n\n\n\n\n\n');
+      print('\n\n\n');
       print(balance);
-      print('\n\n\n\n\n\n\n\n\n');      
+      print('\n\n\n');      
       // Fetch all the documents from the "Transactions" subcollection
       QuerySnapshot transactionsSnapshot = await FirebaseFirestore.instance
           .collection('Finance')
@@ -70,25 +72,18 @@ class smartWalletPage extends State<SmartWallet> {
       setState(() {
         transactions = tempTransactions;
         totalTransactions = transactions.length;
+        isLoading = false;
       });
 
-      int i=6;
-      print('\n\n\n\n');
-      for(var trans in transactions){
-        print('${trans['title']} - ${trans['timestamp']} - ${trans['amount']}\n\n');
-        i--;
-        if(i==0) break;
-      }print('\n----- soort-----\n');
+      // int i=6;
+      // print('\n\n\n\n');
+      // for(var trans in transactions){
+      //   print('${trans['title']} - ${trans['timestamp']} - ${trans['amount']}\n\n');
+      //   i--;
+      //   if(i==0) break;
+      // }print('\n----- soort-----\n');
 
       sortTransactionsByTimestamp();
-      
-      i=6;
-      print('\n\n\n\n');
-      for(var trans in transactions){
-        print('$i. ${trans['title']} - ${trans['timestamp']} - ${trans['amount']}\n\n');
-        i--;
-        if(i==0) break;
-      }
     }
 
     catch(error){
@@ -250,8 +245,8 @@ class smartWalletPage extends State<SmartWallet> {
         title: 'Smart Wallet',
       ),
 
-      floatingActionButton:
-        Container(
+      floatingActionButton: !isLoading
+        ? Container(
           decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(50),
               ),
@@ -284,8 +279,11 @@ class smartWalletPage extends State<SmartWallet> {
                 //icon: const Icon(Icons.check),
                 backgroundColor: theme.primaryColor,
               ),
-        ),
-      body: Column(
+        )
+        : null,
+      body: isLoading
+      ? const Center(child: CircularProgressIndicator(color: Colors.white),)
+      : Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Profile Section
@@ -324,14 +322,36 @@ class smartWalletPage extends State<SmartWallet> {
                         fontSize: screenWidth * 0.04,
                         fontWeight: FontWeight.bold),
                   ),
-                  Text(
-
-                    '৳${balance.toStringAsFixed(2)}',
-                    style: TextStyle(
-                        color: theme.secondaryHeaderColor,
-                        fontSize: screenWidth * 0.05,
-                        fontWeight: FontWeight.bold),
+                  
+                  GestureDetector(
+                    onTap: () {
+                      isBalanceVisible.value = !isBalanceVisible.value;
+                    },
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: isBalanceVisible,
+                      builder: (context, value, child) {
+                        return Text(
+                          value
+                              ? '৳${balance.toStringAsFixed(2)}' // Show balance
+                              : '****', // Hide balance
+                          style: TextStyle(
+                            color: theme.secondaryHeaderColor,
+                            fontSize: screenWidth * 0.05,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        );
+                      },
+                    ),
                   ),
+
+                  // Text(
+
+                  //   '৳${balance.toStringAsFixed(2)}',
+                  //   style: TextStyle(
+                  //       color: theme.secondaryHeaderColor,
+                  //       fontSize: screenWidth * 0.05,
+                  //       fontWeight: FontWeight.bold),
+                  // ),
                 ],
               ),
             ),
@@ -353,7 +373,7 @@ class smartWalletPage extends State<SmartWallet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
                     child: Text(
                       'LATEST TRANSACTIONS',
                       style: TextStyle(
@@ -365,6 +385,7 @@ class smartWalletPage extends State<SmartWallet> {
                   //const SizedBox(height: 10),
                   Expanded(
                     child: ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 80.0),
                       itemCount: transactions.length,
                       itemBuilder: (context, index) {
                         String type = transactions[index]['type'];
@@ -435,6 +456,7 @@ class smartWalletPage extends State<SmartWallet> {
           ),
         ],
       ),
+      
     );
   }
 }
