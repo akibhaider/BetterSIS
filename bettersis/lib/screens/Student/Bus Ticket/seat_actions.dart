@@ -1,5 +1,6 @@
 import 'package:bettersis/screens/Student/Bus%20Ticket/busToken.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../modules/Bus Ticket/seat_provider.dart';
 import '../Smart Wallet/smart_wallet.dart';
@@ -12,21 +13,29 @@ class SeatActions extends StatelessWidget {
   final String selectedType;
   smartWalletPage walletP = smartWalletPage();
 
-  SeatActions({super.key, required this.userId, required this.totalCost, required this.selectedType, required this.userDept, required this.userName});
-  
-  Future<void> buyTicket(BuildContext context, String userID, double tokenCost, int seatCount) async {
+  SeatActions(
+      {super.key,
+      required this.userId,
+      required this.totalCost,
+      required this.selectedType,
+      required this.userDept,
+      required this.userName});
+
+  Future<void> buyTicket(BuildContext context, String userID, double tokenCost,
+      int seatCount) async {
     print('\n\n\n\n$userID - $tokenCost - $seatCount\n\n\n');
     SeatProvider seatPage = SeatProvider(userID);
     //final seatProvider = Provider.of<SeatProvider>(context);
     double currentBalance = await walletP.getBalance(userID);
 
-    if(currentBalance < tokenCost) {
+    if (currentBalance < tokenCost) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text("Insufficient Funds"),
-            content: const Text("You do not have enough balance in your Smart Wallet."),
+            content: const Text(
+                "You do not have enough balance in your Smart Wallet."),
             actions: [
               TextButton(
                 onPressed: () {
@@ -38,20 +47,18 @@ class SeatActions extends StatelessWidget {
           );
         },
       );
-    }
-
-    else{
+    } else {
       bool confirmation = await showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text("Confirm Purchase"),
-            content: Text("You are about to purchase $seatCount token(s) for a total of $tokenCost Taka. Do you want to continue?"),
+            content: Text(
+                "You are about to purchase $seatCount token(s) for a total of $tokenCost Taka. Do you want to continue?"),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(true); // Confirm purchase
-                  
                 },
                 child: const Text("Confirm"),
               ),
@@ -75,7 +82,8 @@ class SeatActions extends StatelessWidget {
         await walletP.updateBalance(userID, newBalance);
 
         // Log the transaction in Firestore
-        await walletP.addTransaction(userID, 'Bus - $selectedType', tokenCost, 'Transportation');
+        await walletP.addTransaction(
+            userID, 'Bus - $selectedType', tokenCost, 'Transportation');
 
         // Show success dialog before navigation
         showDialog(
@@ -87,27 +95,34 @@ class SeatActions extends StatelessWidget {
               actions: [
                 TextButton(
                   onPressed: () {
-
                     print('\n\nOK\n\n');
                     Navigator.of(context).pop();
-                    
-                        final selectedSeatIndices = seatPage.getSelectedSeatIndices();
-              final seatId = selectedSeatIndices.isNotEmpty ? selectedSeatIndices.toString() : 'N/A';
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BusToken(
-                    userId: userId,
-                    userDept: userDept, // Replace with actual department
-                    onLogout: () {}, // Replace with actual logout function
-                    userName: userName, // Replace with actual user name
-                    bus: 'Bus', // Replace with actual bus name
-                    date: DateTime.now().toString(), // Replace with actual date
-                    seatId: seatId,
-                  ),
-                ),
-              ); 
+                    final selectedSeatIndices =
+                        seatPage.getSelectedSeatIndices();
+                    final seatId = selectedSeatIndices.isNotEmpty
+                        ? selectedSeatIndices.toString()
+                        : 'N/A';
+                    seatPage.clearIndices();
+                    final now = DateTime.now();
+                    final formattedDate =
+                        DateFormat('dd-MM-yyyy HH:mm:ss').format(now);
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BusToken(
+                          userId: userId,
+                          userDept: userDept, // Replace with actual department
+                          onLogout:
+                              () {}, // Replace with actual logout function
+                          userName: userName, // Replace with actual user name
+                          bus: 'Bus', // Replace with actual bus name
+                          date: formattedDate, // Replace with actual date
+                          seatId: seatId,
+                        ),
+                      ),
+                    );
                   },
                   child: const Text("OK"),
                 ),
@@ -118,7 +133,7 @@ class SeatActions extends StatelessWidget {
       }
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final seatProvider = Provider.of<SeatProvider>(context);
@@ -133,9 +148,10 @@ class SeatActions extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               print("Confirm button pressed $totalCost");
-              
+
               buyTicket(context, userId, totalCost, numSeat);
-               seatProvider.confirmSelection(userId);// Pass the userId dynamically
+              seatProvider
+                  .confirmSelection(userId); // Pass the userId dynamically
               // final selectedSeatIndices = seatProvider.getSelectedSeatIndices();
               // final seatId = selectedSeatIndices.isNotEmpty ? selectedSeatIndices.toString() : 'N/A';
 
@@ -152,7 +168,7 @@ class SeatActions extends StatelessWidget {
               //       seatId: seatId,
               //     ),
               //   ),
-              // ); 
+              // );
             },
             child: Text('CONFIRM'),
           ),
@@ -165,13 +181,13 @@ class SeatActions extends StatelessWidget {
           //   child: Text("Generate 30 Seats"),
           // ),
 
-          OutlinedButton(
-            onPressed: () {
-              print("Cancel button pressed");
-              seatProvider.cancelSelection();
-            },
-            child: Text('CANCEL'),
-          ),
+          // OutlinedButton(
+          //   onPressed: () {
+          //     print("Cancel button pressed");
+          //     seatProvider.cancelSelection();
+          //   },
+          //   child: Text('CANCEL'),
+          // ),
         ],
       ),
     );
