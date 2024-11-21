@@ -128,8 +128,8 @@ class _GenerateAdmitCardState extends State<GenerateAdmitCard> {
     final filePath = "${output.path}/admit_card.pdf";
 
     // Load logos
-    final ByteData iutLogoData = await rootBundle.load('assets/iut_logo.png');
-    final ByteData oicLogoData = await rootBundle.load('assets/oic_logo.jpg');
+    final iutLogo = (await rootBundle.load('assets/iut_logo.png')).buffer.asUint8List();
+    final oicLogo = (await rootBundle.load('assets/oic_logo.jpg')).buffer.asUint8List();
 
     // Get the current timestamp
     final String generatedDate =
@@ -147,38 +147,30 @@ class _GenerateAdmitCardState extends State<GenerateAdmitCard> {
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Image(pw.MemoryImage(iutLogoData.buffer.asUint8List()),
-                      width: 50, height: 50),
-                  pw.Image(pw.MemoryImage(oicLogoData.buffer.asUint8List()),
-                      width: 50, height: 50),
+                  pw.Image(pw.MemoryImage(iutLogo), width: 40),
+                  pw.Column(
+                    children: [
+                      pw.Text("Islamic University of Technology(IUT)",
+                          style: pw.TextStyle(fontSize: 18)),
+                      pw.Text("(A Subsidiary Organ of the OIC)",
+                          style: pw.TextStyle(fontSize: 12)),
+                      pw.SizedBox(height: 10),
+                      pw.Text("Admit Card",
+                          style: pw.TextStyle(
+                              fontSize: 16,
+                              fontWeight: pw.FontWeight.bold,
+                              decoration: pw.TextDecoration.underline)),
+                    ],
+                  ),
+                  pw.Image(pw.MemoryImage(oicLogo), width: 50),
                 ],
               ),
               pw.SizedBox(height: 10),
-
-              // Main title
-              pw.Center(
-                child: pw.Text(
-                  'Islamic University of Technology (IUT)',
-                  style: pw.TextStyle(
-                      fontSize: 17, fontWeight: pw.FontWeight.bold),
-                ),
-              ),
-              pw.SizedBox(height: 5),
-
               // Subtitle
               pw.Center(
                 child: pw.Text(
                   '${widget.semester} Semester 2023-2024 (${widget.examination} Examination)',
                   style: pw.TextStyle(fontSize: 12),
-                ),
-              ),
-              pw.SizedBox(height: 5),
-
-              // Admit Card title
-              pw.Center(
-                child: pw.Text(
-                  'Admit Card',
-                  style: pw.TextStyle(fontSize: 18),
                 ),
               ),
               pw.SizedBox(height: 10),
@@ -337,7 +329,7 @@ class _GenerateAdmitCardState extends State<GenerateAdmitCard> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      height: 400,
+                      height: 450,
                       child: PDFView(
                         filePath: pdfPath!,
                         enableSwipe: true,

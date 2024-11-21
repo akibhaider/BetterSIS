@@ -14,7 +14,7 @@ class CourseRegistrationPDF {
   final String department;
   final String academicYear;
   final String semester;
-  final List<Map<String, dynamic>> courses; // Each course has 'code', 'title', 'credit'
+  final List<Map<String, dynamic>> courses; 
 
   CourseRegistrationPDF({
     required this.studentId,
@@ -43,7 +43,6 @@ class CourseRegistrationPDF {
         build: (pw.Context context) {
           return pw.Column(
             children: [
-              // Header with logos and title
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
@@ -65,8 +64,8 @@ class CourseRegistrationPDF {
                 //mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text("Student ID: $studentId               "),
-                  pw.Text("Programme: $program         "),
-                  pw.Text("Department: $department"),
+                  pw.Text("Programme: B.Sc in ${program.toUpperCase()}         "),
+                  pw.Text("Department: ${department.toUpperCase()}"),
                 ],
               ),
 

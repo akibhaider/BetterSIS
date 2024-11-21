@@ -6,6 +6,9 @@ class SeatProvider with ChangeNotifier {
   List<Map<String, dynamic>> seats = [];
   bool isLoading = true;
 
+  // Temporary variable to store indices of seats selected by the current user
+  List<int> _selectedSeatIndices = [];
+
   SeatProvider(this.userId) {
     _initializeTodayDocument();
     _scheduleDailyReset();
@@ -35,7 +38,6 @@ class SeatProvider with ChangeNotifier {
       if (snapshot.exists && snapshot.data() != null) {
         seats = List<Map<String, dynamic>>.from((snapshot.data() as Map<String, dynamic>)['seats']);
         for (var seat in seats) {
-          // Ensure each seat has a `selected` property set to false initially
           seat['selected'] = seat['selected'] ?? false;
         }
       } else {
@@ -51,14 +53,17 @@ class SeatProvider with ChangeNotifier {
 
   Future<void> toggleSeatSelection(int seatIndex) async {
     if (seatIndex < seats.length) {
-      // Toggle the `selected` variable for visual feedback in green
+      // Toggle selection and update status
       if (seats[seatIndex]['status'] == true && !seats[seatIndex]['selected']) {
         seats[seatIndex]['selected'] = true; // Mark as temporarily selected
         seats[seatIndex]['id'] = userId;
+        _selectedSeatIndices.add(seatIndex); // Add index to the temporary list
       } else if (seats[seatIndex]['selected'] && seats[seatIndex]['id'] == userId) {
         seats[seatIndex]['selected'] = false; // Deselect seat
         seats[seatIndex]['id'] = '';
+        _selectedSeatIndices.remove(seatIndex); // Remove index from the temporary list
       }
+     // print("Currently selected seat indices: $_selectedSeatIndices");
       notifyListeners();
     }
   }
@@ -68,12 +73,13 @@ class SeatProvider with ChangeNotifier {
       for (int i = 0; i < seats.length; i++) {
         if (seats[i]['selected'] == true && seats[i]['id'] == userId) {
           seats[i]['status'] = false; // Make seat unavailable
-          seats[i]['selected'] = false; // Unmark selection for confirmation
+          seats[i]['selected'] = true; // Unmark selection for confirmation
         }
       }
 
       DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
       await dayDoc.update({'seats': seats});
+      _selectedSeatIndices.clear(); // Clear the temporary list after confirmation
       print("Seats confirmed by $userId.");
     } catch (e) {
       print('Error confirming seats: $e');
@@ -89,16 +95,30 @@ class SeatProvider with ChangeNotifier {
         seat['id'] = '';
       }
     }
+    _selectedSeatIndices.clear(); // Clear the temporary list on cancel
     notifyListeners();
   }
 
   int getSelectedSeatCount() {
-    return seats.where((seat) => seat['selected'] == true && seat['id'] == userId).length;
+    return _selectedSeatIndices.length;
   }
+
+List<int> getSelectedSeatIndices() {
+  // Rebuild the selected indices from the seats list for consistency
+  _selectedSeatIndices = [];
+  for (int i = 0; i < seats.length; i++) {
+    if (seats[i]['selected'] == true && seats[i]['id'] == userId) {
+      _selectedSeatIndices.add(i);
+    }
+  }
+  print("Currently selected seat indices: $_selectedSeatIndices");
+  return List<int>.from(_selectedSeatIndices); // Return a copy of the list
+}
+
 
   void _scheduleDailyReset() {
     final now = DateTime.now();
-    final midnight = DateTime(now.year, now.month, now.day + 1, 0, 1); // 12:01 AM
+    final midnight = DateTime(now.year, now.month, now.day + 1, 0, 1);
     final timeUntilMidnight = midnight.difference(now);
 
     Future.delayed(timeUntilMidnight, () async {
@@ -137,7 +157,7 @@ class SeatProvider with ChangeNotifier {
     try {
       DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
       List<Map<String, dynamic>> resetSeats = seats.map((seat) {
-        return {'status': true, 'id': '', 'selected': false}; // Reset seat data
+        return {'status': true, 'id': '', 'selected': false};
       }).toList();
 
       await dayDoc.update({'seats': resetSeats});
@@ -149,34 +169,29 @@ class SeatProvider with ChangeNotifier {
   }
 
   Future<void> generateAdditionalSeats(int additionalSeatCount) async {
-  try {
-    // Fetch the current document reference
-    DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
-    DocumentSnapshot snapshot = await dayDoc.get();
+    try {
+      DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
+      DocumentSnapshot snapshot = await dayDoc.get();
 
-    if (snapshot.exists) {
-      // Fetch the existing seats
-      List<Map<String, dynamic>> existingSeats = List<Map<String, dynamic>>.from(snapshot['seats'] ?? []);
+      if (snapshot.exists) {
+        List<Map<String, dynamic>> existingSeats = List<Map<String, dynamic>>.from(snapshot['seats'] ?? []);
 
-      // Generate new seats and append them to the existing seats
-      List<Map<String, dynamic>> newSeats = List.generate(
-        additionalSeatCount,
-        (index) => {'status': true, 'id': '', 'selected': false},
-      );
-      existingSeats.addAll(newSeats);
+        List<Map<String, dynamic>> newSeats = List.generate(
+          additionalSeatCount,
+          (index) => {'status': true, 'id': '', 'selected': false},
+        );
+        existingSeats.addAll(newSeats);
 
-      // Update the Firestore document with the expanded seats array
-      await dayDoc.update({'seats': existingSeats});
-      seats = existingSeats; // Update the local seats list
+        await dayDoc.update({'seats': existingSeats});
+        seats = existingSeats;
 
-      print("$additionalSeatCount new seats added for today's document.");
-      notifyListeners();
-    } else {
-      print("Today's document does not exist. Please create it first.");
+        print("$additionalSeatCount new seats added for today's document.");
+        notifyListeners();
+      } else {
+        print("Today's document does not exist. Please create it first.");
+      }
+    } catch (e) {
+      print("Error generating additional seats: $e");
     }
-  } catch (e) {
-    print("Error generating additional seats: $e");
   }
-}
-
 }
