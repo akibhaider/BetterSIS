@@ -65,7 +65,7 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
               value: _selectedDepartment,
               items: departments.map((department) => DropdownMenuItem<String>(
                 value: department,
-                child: Text(department),
+                child: Text(department.toUpperCase()),
               )).toList(),
               onChanged: (value) {
                 setState(() {
@@ -87,7 +87,7 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
               value: _selectedProgram,
               items: programs.map((program) => DropdownMenuItem<String>(
                 value: program,
-                child: Text(program),
+                child: Text(program.toUpperCase()),
               )).toList(),
               onChanged: (value) {
                 setState(() {
@@ -108,7 +108,7 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
               value: _selectedSemester,
               items: semesters.map((semester) => DropdownMenuItem<String>(
                 value: semester,
-                child: Text(semester),
+                child: Text(semester.toUpperCase()),
               )).toList(),
               onChanged: (value) {
                 setState(() {
@@ -128,7 +128,7 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
               value: _selectedCourse,
               items: currentCourses.map((course) => DropdownMenuItem<String>(
                 value: course,
-                child: Text(course),
+                child: Text(course.toUpperCase()),
               )).toList(),
               onChanged: (value) {
                 setState(() {

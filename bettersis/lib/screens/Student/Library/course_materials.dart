@@ -71,7 +71,7 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
               items: departments.map((department) {
                 return DropdownMenuItem<String>(
                   value: department,
-                  child: Text(department),
+                  child: Text(department.toUpperCase()),
                 );
               }).toList(),
               onChanged: (value) {
@@ -92,7 +92,7 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
               items: currentPrograms.map((program) {
                 return DropdownMenuItem<String>(
                   value: program,
-                  child: Text(program),
+                  child: Text(program.toUpperCase()),
                 );
               }).toList(),
               onChanged: (value) {
@@ -113,7 +113,7 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
               items: semesters.map((semester) {
                 return DropdownMenuItem<String>(
                   value: semester,
-                  child: Text(semester),
+                  child: Text(semester.toUpperCase()),
                 );
               }).toList(),
               onChanged: (value) {
@@ -144,7 +144,7 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
               items: currentCourses.map((course) {
                 return DropdownMenuItem<String>(
                   value: course,
-                  child: Text(course),
+                  child: Text(course.toUpperCase()),
                 );
               }).toList(),
               onChanged: (value) {
@@ -166,7 +166,7 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
               items: currentBooks.map((book) {
                 return DropdownMenuItem<String>(
                   value: book,
-                  child: Text(book),
+                  child: Text(book.toUpperCase()),
                 );
               }).toList(),
               onChanged: (value) async {

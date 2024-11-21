@@ -69,7 +69,7 @@ class _LectureNotesPageState extends State<LectureNotesPage> {
               items: departments
                   .map((department) => DropdownMenuItem<String>(
                 value: department,
-                child: Text(department),
+                child: Text(department.toUpperCase()),
               ))
                   .toList(),
               onChanged: (value) {
@@ -94,7 +94,7 @@ class _LectureNotesPageState extends State<LectureNotesPage> {
               items: programs
                   .map((program) => DropdownMenuItem<String>(
                 value: program,
-                child: Text(program),
+                child: Text(program.toUpperCase()),
               ))
                   .toList(),
               onChanged: (value) {
@@ -113,7 +113,7 @@ class _LectureNotesPageState extends State<LectureNotesPage> {
               items: semesters
                   .map((semester) => DropdownMenuItem<String>(
                 value: semester,
-                child: Text(semester),
+                child: Text(semester.toUpperCase()),
               ))
                   .toList(),
               onChanged: (value) {
@@ -136,7 +136,7 @@ class _LectureNotesPageState extends State<LectureNotesPage> {
               items: currentCourses
                   .map((course) => DropdownMenuItem<String>(
                 value: course,
-                child: Text(course),
+                child: Text(course.toUpperCase()),
               ))
                   .toList(),
               onChanged: (value) {
@@ -157,7 +157,7 @@ class _LectureNotesPageState extends State<LectureNotesPage> {
               items: currentNotes
                   .map((note) => DropdownMenuItem<String>(
                 value: note,
-                child: Text(note),
+                child: Text(note.toUpperCase()),
               ))
                   .toList(),
               onChanged: (value) {

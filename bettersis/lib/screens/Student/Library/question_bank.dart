@@ -69,7 +69,7 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
               value: _selectedDepartment,
               items: departments.map((department) => DropdownMenuItem<String>(
                 value: department,
-                child: Text(department),
+                child: Text(department.toUpperCase()),
               )).toList(),
               onChanged: (value) {
                 setState(() {
@@ -91,7 +91,7 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
               value: _selectedProgram,
               items: currentPrograms.map((program) => DropdownMenuItem<String>(
                 value: program,
-                child: Text(program),
+                child: Text(program.toUpperCase()),
               )).toList(),
               onChanged: (value) {
                 setState(() {
@@ -108,7 +108,7 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
               value: _selectedSemester,
               items: semesters.map((semester) => DropdownMenuItem<String>(
                 value: semester,
-                child: Text(semester),
+                child: Text(semester.toUpperCase()),
               )).toList(),
               onChanged: (value) {
                 setState(() {
@@ -133,7 +133,7 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
               value: _selectedCourse,
               items: currentCourses.map((course) => DropdownMenuItem<String>(
                 value: course,
-                child: Text(course),
+                child: Text(course.toUpperCase()),
               )).toList(),
               onChanged: (value) {
                 setState(() {
@@ -150,7 +150,7 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
               value: _selectedExam,
               items: exams.map((exam) => DropdownMenuItem<String>(
                 value: exam,
-                child: Text(exam),
+                child: Text(exam.toUpperCase()),
               )).toList(),
               onChanged: (value) {
                 setState(() {
