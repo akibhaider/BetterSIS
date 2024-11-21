@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/utils/themes.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class CourseOutlinePage extends StatefulWidget {
   final String userDept;
@@ -17,19 +18,25 @@ class CourseOutlinePage extends StatefulWidget {
 }
 
 class _CourseOutlinePageState extends State<CourseOutlinePage> {
+  String? _selectedDepartment;
   String? _selectedProgram;
   String? _selectedSemester;
   String? _selectedCourse;
+  String? imageUrl;
 
-  final List<String> programs = ['CSE', 'SWE'];
+  final List<String> departments = ['cse', 'eee', 'mpe', 'cee', 'btm'];
+  final List<String> programs = ['cse', 'swe'];
   final List<String> semesters = [
-    'Semester 1', 'Semester 2', 'Semester 3', 'Semester 4',
-    'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8'
+    'semester 1', 'semester 2', 'semester 3', 'semester 4',
+    'semester 5', 'semester 6', 'semester 7', 'semester 8'
   ];
 
-  final List<String> semester1Courses = ['CSE 4105', 'CSE 4107', 'Math 4141', 'Phy 4141'];
-  final List<String> semester2Courses = ['CSE 4203', 'CSE 4205', 'Math 4241', 'Phy 4241'];
-  // Repeat for other semesters as needed
+  final Map<String, List<String>> coursesBySemester = {
+    'semester 1': ['cse 4105', 'cse 4107', 'math 4141', 'phy 4141'],
+    'semester 2': ['cse 4203', 'cse 4205', 'math 4241', 'phy 4241'],
+    'semester 3': ['cse 4301', 'cse 4303', 'math 4341', 'sta 4341'],
+    // Add more semesters and their courses as needed
+  };
 
   List<String> currentCourses = [];
 
@@ -52,19 +59,43 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
           children: [
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
+                labelText: 'Department',
+                border: OutlineInputBorder(),
+              ),
+              value: _selectedDepartment,
+              items: departments.map((department) => DropdownMenuItem<String>(
+                value: department,
+                child: Text(department),
+              )).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedDepartment = value;
+                  _selectedProgram = null;
+                  _selectedSemester = null;
+                  _selectedCourse = null;
+                  currentCourses = [];
+                  imageUrl = null;
+                });
+              },
+            ),
+            SizedBox(height: screenHeight * 0.02),
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
                 labelText: 'Program',
                 border: OutlineInputBorder(),
               ),
               value: _selectedProgram,
-              items: programs
-                  .map((program) => DropdownMenuItem<String>(
+              items: programs.map((program) => DropdownMenuItem<String>(
                 value: program,
                 child: Text(program),
-              ))
-                  .toList(),
+              )).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedProgram = value;
+                  _selectedSemester = null;
+                  _selectedCourse = null;
+                  currentCourses = [];
+                  imageUrl = null;
                 });
               },
             ),
@@ -75,29 +106,16 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
                 border: OutlineInputBorder(),
               ),
               value: _selectedSemester,
-              items: semesters
-                  .map((semester) => DropdownMenuItem<String>(
+              items: semesters.map((semester) => DropdownMenuItem<String>(
                 value: semester,
                 child: Text(semester),
-              ))
-                  .toList(),
+              )).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedSemester = value;
                   _selectedCourse = null;
-
-                  // Update courses based on the selected semester
-                  switch (_selectedSemester) {
-                    case 'Semester 1':
-                      currentCourses = semester1Courses;
-                      break;
-                    case 'Semester 2':
-                      currentCourses = semester2Courses;
-                      break;
-                  // Repeat for other semesters as needed
-                    default:
-                      currentCourses = [];
-                  }
+                  currentCourses = coursesBySemester[_selectedSemester!] ?? [];
+                  imageUrl = null;
                 });
               },
             ),
@@ -108,31 +126,85 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
                 border: OutlineInputBorder(),
               ),
               value: _selectedCourse,
-              items: currentCourses
-                  .map((course) => DropdownMenuItem<String>(
+              items: currentCourses.map((course) => DropdownMenuItem<String>(
                 value: course,
                 child: Text(course),
-              ))
-                  .toList(),
+              )).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedCourse = value;
                 });
+                fetchImageUrl();
               },
             ),
             SizedBox(height: screenHeight * 0.02),
-            ElevatedButton(
-              onPressed: () {
-                if (_selectedCourse != null) {
-                  // Logic to handle outline download
-                  print('Downloading outline for $_selectedCourse...');
-                }
-              },
-              child: const Text('Download Outline'),
-            ),
+            if (imageUrl != null)
+              Column(
+                children: [
+                  Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: theme.primaryColor),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Image.network(
+                      imageUrl!,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  ElevatedButton(
+                    onPressed: downloadImage,
+                    child: const Text('Download'),
+                  ),
+                ],
+              )
+            else
+              Container(
+                height: 200,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  border: Border.all(color: theme.primaryColor),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: const Text('No Image Available'),
+              ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> fetchImageUrl() async {
+    if (_selectedDepartment == null ||
+        _selectedProgram == null ||
+        _selectedSemester == null ||
+        _selectedCourse == null) return;
+
+    final path = 'Library/course_outlines/${_selectedDepartment!}/${_selectedProgram!}/${_selectedSemester!}/${_selectedCourse!}/${_selectedCourse!} co.png';
+    print('Fetching image URL for path: $path');
+
+    try {
+      final ref = FirebaseStorage.instance.ref().child(path);
+      imageUrl = await ref.getDownloadURL();
+      setState(() {}); // Refresh UI to display the image
+    } catch (e) {
+      print('Error fetching image URL: $e');
+      imageUrl = null;
+      setState(() {});
+    }
+  }
+
+  Future<void> downloadImage() async {
+    if (imageUrl == null) return;
+
+    try {
+      final ref = FirebaseStorage.instance.refFromURL(imageUrl!);
+      final data = await ref.getData();
+      // Here you can save `data` locally using a package like `path_provider` to access the device's file system.
+      print('Image downloaded successfully');
+    } catch (e) {
+      print('Error downloading image: $e');
+    }
   }
 }
