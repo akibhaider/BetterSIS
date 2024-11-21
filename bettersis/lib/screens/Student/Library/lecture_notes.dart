@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/utils/themes.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class LectureNotesPage extends StatefulWidget {
   final String userDept;
@@ -17,28 +18,30 @@ class LectureNotesPage extends StatefulWidget {
 }
 
 class _LectureNotesPageState extends State<LectureNotesPage> {
+  String? _selectedDepartment;
   String? _selectedProgram;
   String? _selectedSemester;
   String? _selectedCourse;
-  String? _selectedLectureTopic;
+  String? _selectedNote;
+  String? imageUrl;
 
-  final List<String> programs = ['CSE', 'SWE'];
+  final List<String> departments = ['cse', 'eee', 'cee', 'mpe', 'btm'];
+  final List<String> programs = ['cse', 'swe'];
   final List<String> semesters = [
-    'Semester 1', 'Semester 2', 'Semester 3', 'Semester 4',
-    'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8'
+    'semester 1', 'semester 2', 'semester 3', 'semester 4',
+    'semester 5', 'semester 6', 'semester 7', 'semester 8'
   ];
 
-  final List<String> semester1Courses = ['CSE 4105', 'CSE 4107', 'Math 4141', 'Phy 4141'];
-  final List<String> semester2Courses = ['CSE 4203', 'CSE 4205', 'Math 4241', 'Phy 4241'];
-  final List<String> semester3Courses = ['CSE 4301', 'CSE 4303', 'CSE 4307', 'Math 4341'];
-  final List<String> semester4Courses = ['CSE 4403', 'CSE 4405', 'CSE 4407', 'Math 4441'];
-  final List<String> semester5Courses = ['CSE 4501', 'CSE 4503', 'CSE 4511', 'CSE 4513'];
-  final List<String> semester6Courses = ['CSE 4615', 'CSE 4619', 'CSE 4621', 'Math 4641'];
-  final List<String> semester7Courses = ['CSE 4703', 'CSE 4711', 'CSE 4733', 'Math 4741'];
-  final List<String> semester8Courses = ['CSE 4801', 'CSE 4803', 'CSE 4805', 'CSE 4807'];
+  final Map<String, List<String>> coursesBySemester = {
+    'semester 5': ['cse 4501', 'cse 4503', 'cse 4511', 'cse 4513']
+  };
+
+  final Map<String, List<String>> notesByCourse = {
+    'cse 4501': ['Aashnan os quiz 1', 'Ishmam os quiz 3'],
+  };
 
   List<String> currentCourses = [];
-  final List<String> lectureTopics = ['Introduction', 'Advanced Concepts', 'Review']; // Example topics
+  List<String> currentNotes = [];
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +60,31 @@ class _LectureNotesPageState extends State<LectureNotesPage> {
         padding: EdgeInsets.all(paddingValue),
         child: ListView(
           children: [
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Department',
+                border: OutlineInputBorder(),
+              ),
+              value: _selectedDepartment,
+              items: departments
+                  .map((department) => DropdownMenuItem<String>(
+                value: department,
+                child: Text(department),
+              ))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedDepartment = value;
+                  _selectedProgram = null;
+                  _selectedSemester = null;
+                  _selectedCourse = null;
+                  _selectedNote = null;
+                  currentCourses = [];
+                  currentNotes = [];
+                });
+              },
+            ),
+            SizedBox(height: screenHeight * 0.02),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
                 labelText: 'Program',
@@ -92,36 +120,9 @@ class _LectureNotesPageState extends State<LectureNotesPage> {
                 setState(() {
                   _selectedSemester = value;
                   _selectedCourse = null;
-
-                  // Update course list based on the selected semester
-                  switch (_selectedSemester) {
-                    case 'Semester 1':
-                      currentCourses = semester1Courses;
-                      break;
-                    case 'Semester 2':
-                      currentCourses = semester2Courses;
-                      break;
-                    case 'Semester 3':
-                      currentCourses = semester3Courses;
-                      break;
-                    case 'Semester 4':
-                      currentCourses = semester4Courses;
-                      break;
-                    case 'Semester 5':
-                      currentCourses = semester5Courses;
-                      break;
-                    case 'Semester 6':
-                      currentCourses = semester6Courses;
-                      break;
-                    case 'Semester 7':
-                      currentCourses = semester7Courses;
-                      break;
-                    case 'Semester 8':
-                      currentCourses = semester8Courses;
-                      break;
-                    default:
-                      currentCourses = [];
-                  }
+                  _selectedNote = null;
+                  currentCourses = coursesBySemester[_selectedSemester!] ?? [];
+                  currentNotes = [];
                 });
               },
             ),
@@ -141,41 +142,101 @@ class _LectureNotesPageState extends State<LectureNotesPage> {
               onChanged: (value) {
                 setState(() {
                   _selectedCourse = value;
+                  _selectedNote = null;
+                  currentNotes = notesByCourse[_selectedCourse!] ?? [];
                 });
               },
             ),
             SizedBox(height: screenHeight * 0.02),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
-                labelText: 'Lecture Topic',
+                labelText: 'Notes',
                 border: OutlineInputBorder(),
               ),
-              value: _selectedLectureTopic,
-              items: lectureTopics
-                  .map((topic) => DropdownMenuItem<String>(
-                value: topic,
-                child: Text(topic),
+              value: _selectedNote,
+              items: currentNotes
+                  .map((note) => DropdownMenuItem<String>(
+                value: note,
+                child: Text(note),
               ))
                   .toList(),
               onChanged: (value) {
                 setState(() {
-                  _selectedLectureTopic = value;
+                  _selectedNote = value;
                 });
+                fetchImageUrl();
               },
             ),
             SizedBox(height: screenHeight * 0.02),
-            ElevatedButton(
-              onPressed: () {
-                print('Program: $_selectedProgram');
-                print('Semester: $_selectedSemester');
-                print('Course: $_selectedCourse');
-                print('Lecture Topic: $_selectedLectureTopic');
-              },
-              child: const Text('Submit'),
-            ),
+            if (imageUrl != null)
+              Column(
+                children: [
+                  Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: theme.primaryColor),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Image.network(
+                      imageUrl!,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  ElevatedButton(
+                    onPressed: downloadImage,
+                    child: const Text('Download'),
+                  ),
+                ],
+              )
+            else
+              Container(
+                height: 200,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  border: Border.all(color: theme.primaryColor),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: const Text('No Image Available'),
+              ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> fetchImageUrl() async {
+    if (_selectedDepartment == null ||
+        _selectedProgram == null ||
+        _selectedSemester == null ||
+        _selectedCourse == null ||
+        _selectedNote == null) return;
+
+    final path =
+        'Library/notes/${_selectedDepartment!}/${_selectedProgram!}/${_selectedSemester!}/${_selectedCourse!}/${_selectedNote!}.png';
+    print('Fetching image URL for path: $path');
+
+    try {
+      final ref = FirebaseStorage.instance.ref().child(path);
+      imageUrl = await ref.getDownloadURL();
+      setState(() {}); // Refresh UI to display the image
+    } catch (e) {
+      print('Error fetching image URL: $e');
+      imageUrl = null;
+      setState(() {});
+    }
+  }
+
+  Future<void> downloadImage() async {
+    if (imageUrl == null) return;
+
+    try {
+      final ref = FirebaseStorage.instance.refFromURL(imageUrl!);
+      final data = await ref.getData();
+      // Save `data` locally using appropriate file handling packages
+      print('Image downloaded successfully');
+    } catch (e) {
+      print('Error downloading image: $e');
+    }
   }
 }
