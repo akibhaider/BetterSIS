@@ -28,6 +28,11 @@ class AppTheme {
           primaryColor: Colors.green,
           secondaryHeaderColor: const Color.fromARGB(255, 102, 175, 50),
         );
+      case 'tve':
+      return ThemeData(
+          primaryColor: Colors.black87,
+          secondaryHeaderColor: Colors.black,
+        );
       default:
         // Default theme if no department matches
         return ThemeData(
