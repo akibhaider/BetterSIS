@@ -34,8 +34,8 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
   final Map<String, List<String>> coursesBySemester = {
     'semester 1': ['cse 4105', 'cse 4107', 'math 4141', 'phy 4141'],
     'semester 2': ['cse 4203', 'cse 4205', 'math 4241', 'phy 4241'],
-    'semester 3': ['cse 4301', 'cse 4303', 'math 4341', 'sta 4341'],
-    // Add more semesters and their courses as needed
+    'semester 3': ['cse 4301', 'cse 4303', 'math 4341', 'cse 4305'],
+    // Add more semesters and their courses as needed, 
   };
 
   List<String> currentCourses = [];
