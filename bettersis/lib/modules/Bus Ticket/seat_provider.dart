@@ -115,6 +115,9 @@ List<int> getSelectedSeatIndices() {
   return List<int>.from(_selectedSeatIndices); // Return a copy of the list
 }
 
+void clearIndices() {
+  _selectedSeatIndices.clear();
+}
 
   void _scheduleDailyReset() {
     final now = DateTime.now();

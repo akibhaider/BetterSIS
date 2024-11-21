@@ -29,7 +29,7 @@ class BusToken extends StatelessWidget {
   });
 
   Future<void> _contactTransport() async {
-    const phoneNumber = 'tel:+8801234567890';
+    const phoneNumber = 'tel:+8801937313639';
     if (await canLaunch(phoneNumber)) {
       await launch(phoneNumber);
     } else {
@@ -47,14 +47,17 @@ class BusToken extends StatelessWidget {
     if (date != null) {
       try {
         currentTimestamp = DateFormat('dd-MM-yyyy HH:mm:ss').parse(date!);
+        print("Parsed date: $currentTimestamp");
       } catch (e) {
         currentTimestamp = DateTime.now();
+         print("Error parsing date: $e. Using current date: $currentTimestamp");
       }
     } else {
       currentTimestamp = DateTime.now();
     }
 
     final expiryDate = currentTimestamp.add(const Duration(days: 1));
+    print("Expiry date: $expiryDate");
 
     ThemeData theme = AppTheme.getTheme(userDept);
 
