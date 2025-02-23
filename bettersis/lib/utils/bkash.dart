@@ -2,6 +2,7 @@ import 'package:bettersis/utils/bkash_helper.dart';
 import 'package:bkash/bkash.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void bkashAddMoney(BuildContext context, double amount) async {
   try {
@@ -13,7 +14,7 @@ void bkashAddMoney(BuildContext context, double amount) async {
     final response = await bkash.pay(
       context: context,
       amount: amount,
-      merchantInvoiceNumber: 'test123456',
+      merchantInvoiceNumber: dotenv.env['invoice']!,
     );
 
     print(response);
