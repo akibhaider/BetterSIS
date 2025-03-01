@@ -142,7 +142,7 @@ class _DashboardState extends State<Dashboard> {
 
   // 6) Transportation Button clicking logic
   void _navigateToTransportation() {
-    ChangeNotifierProvider(create: (_) => SeatProvider(widget.userData['id']));
+    //ChangeNotifierProvider(create: (_) => SeatProvider(widget.userData['id']));
     Navigator.push(
       context,
       MaterialPageRoute(

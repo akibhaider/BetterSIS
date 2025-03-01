@@ -15,6 +15,7 @@ class BusToken extends StatelessWidget {
   final String? date;
   //final String meal;
   final String seatId;
+  final String selectedType;
 
   const BusToken({
     super.key,
@@ -25,7 +26,8 @@ class BusToken extends StatelessWidget {
     required this.bus,
     required this.date,
     //required this.meal,
-    required this.seatId,
+    required this.seatId, 
+    required this.selectedType,
   });
 
   Future<void> _contactTransport() async {
@@ -50,7 +52,7 @@ class BusToken extends StatelessWidget {
         print("Parsed date: $currentTimestamp");
       } catch (e) {
         currentTimestamp = DateTime.now();
-         print("Error parsing date: $e. Using current date: $currentTimestamp");
+        print("Error parsing date: $e. Using current date: $currentTimestamp");
       }
     } else {
       currentTimestamp = DateTime.now();
@@ -62,7 +64,7 @@ class BusToken extends StatelessWidget {
     ThemeData theme = AppTheme.getTheme(userDept);
 
     String qrData =
-        '$seatId\n$userId\n${bus.toUpperCase()}\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(currentTimestamp)}\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(expiryDate)}';
+        '$seatId\n$userId\n${bus.toUpperCase()}\n$selectedType\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(currentTimestamp)}\n${DateFormat('dd-MM-yyyy HH:mm:ss').format(expiryDate)}';
 
     return Scaffold(
       drawer: CustomAppDrawer(theme: theme),

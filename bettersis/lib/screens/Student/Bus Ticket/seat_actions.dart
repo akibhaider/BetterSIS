@@ -24,7 +24,7 @@ class SeatActions extends StatelessWidget {
   Future<void> buyTicket(BuildContext context, String userID, double tokenCost,
       int seatCount) async {
     print('\n\n\n\n$userID - $tokenCost - $seatCount\n\n\n');
-    SeatProvider seatPage = SeatProvider(userID);
+    final seatPage = Provider.of<SeatProvider>(context, listen: false);
     //final seatProvider = Provider.of<SeatProvider>(context);
     double currentBalance = await walletP.getBalance(userID);
 
@@ -58,12 +58,14 @@ class SeatActions extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () {
+                  seatPage.confirmSelection(userId);
                   Navigator.of(context).pop(true); // Confirm purchase
                 },
                 child: const Text("Confirm"),
               ),
               TextButton(
                 onPressed: () {
+                  seatPage.cancelSelection();
                   Navigator.of(context).pop(false); // Cancel purchase
                 },
                 child: const Text("Cancel"),
@@ -120,6 +122,7 @@ class SeatActions extends StatelessWidget {
                           bus: 'Bus', // Replace with actual bus name
                           date: formattedDate, // Replace with actual date
                           seatId: seatId,
+                          selectedType: selectedType,
                         ),
                       ),
                     );
@@ -150,8 +153,7 @@ class SeatActions extends StatelessWidget {
               print("Confirm button pressed $totalCost");
 
               buyTicket(context, userId, totalCost, numSeat);
-              seatProvider
-                  .confirmSelection(userId); // Pass the userId dynamically
+              //seatProvider.confirmSelection(userId); // Pass the userId dynamically
               // final selectedSeatIndices = seatProvider.getSelectedSeatIndices();
               // final seatId = selectedSeatIndices.isNotEmpty ? selectedSeatIndices.toString() : 'N/A';
 
