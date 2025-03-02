@@ -1,3 +1,4 @@
+import 'package:bettersis/screens/Dashboard/admin_dashboard.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -65,6 +66,13 @@ class _LoginPageState extends State<LoginPage> {
               context,
               MaterialPageRoute(
                 builder: (context) => TeacherDashboard(userData: userData),
+              ),
+            );
+          } else if (userType == 'admin') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AdminDashboard(userData: userData),
               ),
             );
           } else {
