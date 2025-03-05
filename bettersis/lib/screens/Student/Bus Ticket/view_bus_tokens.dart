@@ -145,41 +145,69 @@ class _ViewBusTokensState extends State<ViewBusTokens> {
     DateTime tokenDate = DateFormat('dd-MM-yyyy HH:mm:ss').parse(token['date']);
     DateTime today = DateTime.now();
 
-    // Create 7:00 AM time for the token date
-    DateTime morningDepartureTime = DateTime(
-        tokenDate.year, tokenDate.month, tokenDate.day, 7, 0, 0 // 7:00 AM
-        );
+    // Extract the date part only from token date (ignore the time)
+    DateTime tokenDateOnly =
+        DateTime(tokenDate.year, tokenDate.month, tokenDate.day);
+    DateTime todayDateOnly = DateTime(today.year, today.month, today.day);
 
-    // Create cutoff time (6:30 AM - 30 minutes before departure)
-    DateTime cutoffTime = morningDepartureTime.subtract(Duration(minutes: 30));
+    // Set the departure time to 7:00 AM on token's date
+    DateTime departureTime = DateTime(
+        tokenDateOnly.year, tokenDateOnly.month, tokenDateOnly.day, 7, 0, 0);
+
+    // Create the cutoff time (6:30 AM on the same day)
+    DateTime cutoffTime = DateTime(
+        tokenDateOnly.year, tokenDateOnly.month, tokenDateOnly.day, 6, 30, 0);
 
     bool isRefundable = false;
+    String refundMessage = '';
 
-    // Check if this is the morning bus (7:00 AM)
-    if (tokenDate.hour == 7 && tokenDate.minute == 0) {
-      // If current time is before the cutoff (6:30 AM)
-      isRefundable = today.isBefore(cutoffTime);
-      print(
-          "Morning bus check: Current time: ${today.hour}:${today.minute}, Cutoff: 6:30 AM");
-      print("Is refundable: $isRefundable");
+    // Check if token is for today
+    bool isToday = tokenDateOnly.isAtSameMomentAs(todayDateOnly);
+
+    // If it's today's ticket
+    if (isToday) {
+      // Check current time against the restricted window
+      if (today.hour == 6 && today.minute >= 30 ||
+          today.hour == 7 && today.minute == 0) {
+        // Current time is between 6:30 AM and 7:00 AM - NOT refundable
+        isRefundable = false;
+        refundMessage =
+            'Tickets cannot be refunded between 6:30 AM and 7:00 AM.';
+        print(
+            "Current time is in restricted window (6:30-7:00 AM) - refund NOT allowed");
+      } else if (departureTime.difference(today).inMinutes <= 30) {
+        // Less than 30 minutes before departure - NOT refundable
+        isRefundable = false;
+        refundMessage =
+            'Token cannot be refunded less than 30 minutes before departure.';
+        print("Less than 30 minutes before departure - refund NOT allowed");
+      } else {
+        // Outside restricted window and more than 30 mins before departure - refundable
+        isRefundable = true;
+        print(
+            "Outside restricted window and >30 mins before departure - refund allowed");
+      }
+    } else if (tokenDateOnly.isAfter(todayDateOnly)) {
+      // Future ticket - always refundable
+      isRefundable = true;
+      print("Future ticket - refund allowed");
     } else {
-      // For other bus times, use the standard 30-minute rule
-      isRefundable = tokenDate.difference(today).inMinutes > 30;
-      print(
-          "Standard check: ${tokenDate.difference(today).inMinutes} minutes remaining");
-      print("Is refundable: $isRefundable");
+      // Past ticket - not refundable
+      isRefundable = false;
+      refundMessage = 'Past tickets cannot be refunded.';
+      print("Past ticket - refund NOT allowed");
     }
+
+    print("Is refundable: $isRefundable");
 
     if (!isRefundable) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text(
-                'Token cannot be refunded less than 30 minutes before departure.')),
+        SnackBar(content: Text(refundMessage)),
       );
       return;
     }
 
-    // Confirm the refund
+    // Continue with refund process if allowed
     bool confirmRefund =
         await _showConfirmationDialog('Refund this bus token?');
 
@@ -216,6 +244,7 @@ class _ViewBusTokensState extends State<ViewBusTokens> {
   }
 
   // Process refund logic for bus tokens
+  // Process refund logic for bus tokens
   Future<void> _processRefund(
       String tokenId, Map<String, dynamic> token) async {
     int refundAmount = 0;
@@ -242,7 +271,10 @@ class _ViewBusTokensState extends State<ViewBusTokens> {
           refundAmountAsDouble, 'transportation');
       print('- Bus Token Refund Successful');
 
-      // 4. Delete the refunded token
+      // 4. FREE UP THE REFUNDED SEATS IN THE DATABASE - This is the new part
+      await _freeUpRefundedSeats(token);
+
+      // 5. Delete the refunded token
       DocumentReference tokenRef = FirebaseFirestore.instance
           .collection('BusTokens')
           .doc(userId)
@@ -251,7 +283,7 @@ class _ViewBusTokensState extends State<ViewBusTokens> {
 
       await tokenRef.delete();
 
-      // 5. Update the UI
+      // 6. Update the UI
       _fetchTokensFromFirestore();
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -262,6 +294,117 @@ class _ViewBusTokensState extends State<ViewBusTokens> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to process refund.')),
       );
+    }
+  }
+
+// New method to free up seats after refund
+  Future<void> _freeUpRefundedSeats(Map<String, dynamic> token) async {
+    try {
+      // Parse the token date to get the correct day document
+      DateTime tokenDate =
+          DateFormat('dd-MM-yyyy HH:mm:ss').parse(token['date']);
+
+      // Format the date in the correct path structure: Bus/YYYY/MM/DD
+      final year = tokenDate.year.toString();
+      final month = tokenDate.month.toString().padLeft(2, '0');
+      final day =
+          tokenDate.day.toString(); // Day WITHOUT padding as per SeatProvider
+      final dayDocPath = 'Bus/$year/$month/$day';
+
+      print("DEBUG: Attempting to free up seats in document: $dayDocPath");
+      print("DEBUG: Token date: ${tokenDate.toString()}");
+      print("DEBUG: Formatted path: $dayDocPath");
+
+      // Reference to the day document with the correct path
+      DocumentReference dayDocRef = FirebaseFirestore.instance.doc(dayDocPath);
+
+      // First check if document exists
+      final docSnapshot = await dayDocRef.get();
+      print("DEBUG: Document exists: ${docSnapshot.exists}");
+
+      if (!docSnapshot.exists) {
+        print("ERROR: Document does not exist at path: $dayDocPath");
+        throw Exception("Document not found at path: $dayDocPath");
+      }
+
+      // Get the seats array from the document
+      Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
+      List<dynamic> seats = List.from(data['seats']);
+      print("DEBUG: Found ${seats.length} seats in document");
+
+      // Get the seatId value and handle various possible formats
+      var rawSeatId = token['seatId'];
+      print(
+          "DEBUG: Raw seatId type: ${rawSeatId.runtimeType}, value: $rawSeatId");
+
+      List<String> seatStrings = [];
+
+      // Handle different possible formats of seatId
+      if (rawSeatId is String) {
+        // If it's a string (comma-separated), split it
+        seatStrings = rawSeatId.split(',').map((s) => s.trim()).toList();
+      } else if (rawSeatId is List) {
+        // If it's already a list, convert elements to strings
+        seatStrings = rawSeatId.map((item) => item.toString().trim()).toList();
+      } else {
+        print("ERROR: Unexpected seatId format: $rawSeatId");
+        throw Exception("Invalid seat ID format");
+      }
+
+      print("DEBUG: Parsed seat strings: $seatStrings");
+
+      // Convert to 0-based indices (seat numbers to array indices)
+      List<int> seatIndices = [];
+      for (String seatStr in seatStrings) {
+        int? seatNumber = int.tryParse(seatStr);
+        if (seatNumber != null) {
+          // Convert from 1-based to 0-based if these are seat numbers
+          // If they're already indices, use them directly
+          int arrayIndex = seatNumber - 1;
+          seatIndices.add(arrayIndex);
+          print("DEBUG: Adding index $arrayIndex to free up");
+        }
+      }
+
+      if (seatIndices.isEmpty) {
+        print("WARNING: No valid seat indices found to free up");
+        return;
+      }
+
+      print("DEBUG: Final seat indices to update: $seatIndices");
+
+      // Update ONLY the specific seats from the token
+      for (int index in seatIndices) {
+        if (index >= 0 && index < seats.length) {
+          print("DEBUG: Before update, seat $index has data: ${seats[index]}");
+
+          // Update the seat data to make it available again
+          seats[index] = {
+            'status': true, // Available
+            'selected': false, // Not selected
+            'id': '', // No user ID
+            'tripTypeValue': 0 // Reset trip type
+          };
+
+          print("DEBUG: After update, seat $index has data: ${seats[index]}");
+        } else {
+          print(
+              "WARNING: Seat index $index is out of range (0-${seats.length - 1})");
+        }
+      }
+
+      // Update the seats in the Firestore document
+      print("DEBUG: Updating Firestore document with modified seats array");
+      await dayDocRef.update({'seats': seats});
+      print("SUCCESS: Updated seats in Firestore document: $dayDocPath");
+    } catch (e) {
+      print("ERROR in _freeUpRefundedSeats: ${e.toString()}");
+      // More detailed error info
+      if (e is FirebaseException) {
+        print("Firebase error code: ${e.code}");
+        print("Firebase error message: ${e.message}");
+      }
+      throw e; // Re-throw to handle in the calling method
     }
   }
 
