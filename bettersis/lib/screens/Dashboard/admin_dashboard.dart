@@ -1,6 +1,11 @@
 import 'package:bettersis/screens/Complain/complain_page.dart';
 import 'package:bettersis/screens/Teacher/Attendance/attendance.dart';
 import 'package:bettersis/screens/Teacher/Classes/classes.dart';
+import 'package:bettersis/screens/Admin/accountCreator.dart';
+import 'package:bettersis/screens/Admin/Course/addCourse.dart';
+import 'package:bettersis/screens/Admin/Course/mainCoursePage.dart';
+import 'package:bettersis/screens/Admin/Course/deleteCourse.dart';
+import 'package:bettersis/screens/Admin/Course/editCourse.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 import '../../utils/themes.dart';
@@ -52,6 +57,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   void _navigateToAdminTest() {
+    // Add Submit Result page navigation here
+  }
+
+  void _navigateToAccountCreation() {
+    // Add Submit Result page navigation here
+  }
+
+  void _navigateToCourse() {
     // Add Submit Result page navigation here
   }
 
@@ -191,6 +204,21 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         onTap: _navigateToAdminTest,
                         fontSize: 14 * scaleFactor,
                       ),
+                      _buildServiceButton(
+                        icon: Icons.account_circle_rounded,
+                        label: "Create Account",
+                        themeData: theme,
+                        onTap: _navigateToAccountCreation,
+                        fontSize: 14 * scaleFactor,
+                      ),
+                      _buildServiceButton(
+                        icon: Icons.school_rounded,
+                        label: "Course",
+                        themeData: theme,
+                        onTap: _navigateToCourse,
+                        fontSize: 14 * scaleFactor,
+                      ),
+                
                     ],
                   );
                 },
