@@ -1,0 +1,2 @@
+/home/akib/Documents/BetterSIS/bettersis/android/app/.cxx/Debug/04k6j5v3/armeabi-v7a/CMakeFiles/edit_cache.dir
+/home/akib/Documents/BetterSIS/bettersis/android/app/.cxx/Debug/04k6j5v3/armeabi-v7a/CMakeFiles/rebuild_cache.dir

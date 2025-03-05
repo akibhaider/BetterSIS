@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:http/http.dart' as http;
+import 'package:bettersis/modules/show_message.dart';
 
 class CourseOutlinePage extends StatefulWidget {
   final String userDept;
@@ -199,12 +204,37 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
     if (imageUrl == null) return;
 
     try {
-      final ref = FirebaseStorage.instance.refFromURL(imageUrl!);
-      final data = await ref.getData();
-      // Here you can save `data` locally using a package like `path_provider` to access the device's file system.
-      print('Image downloaded successfully');
+      final status = await Permission.storage.request();
+      if (!status.isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Storage permission is required to download files')),
+        );
+        return;
+      }
+
+      final directory = await getExternalStorageDirectory();
+      if (directory == null) {
+        ShowMessage.error(context, 'Failed to access storage');
+        return;
+      }
+
+      final customPath = Directory(
+          '${directory.parent.parent.parent.parent.path}/Download/BetterSIS/Course Outlines');
+
+      if (!await customPath.exists()) {
+        await customPath.create(recursive: true);
+      }
+
+      final filePath = '${customPath.path}/${_selectedCourse}_course_outline.png';
+
+      final response = await http.get(Uri.parse(imageUrl!));
+      final file = File(filePath);
+      await file.writeAsBytes(response.bodyBytes);
+
+      ShowMessage.success(context, 'Course outline downloaded to: $filePath');
     } catch (e) {
       print('Error downloading image: $e');
+      ShowMessage.error(context, 'Failed to download course outline');
     }
   }
 }
