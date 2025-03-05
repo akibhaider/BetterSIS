@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SeatProvider with ChangeNotifier {
   final String userId;
   final String tripType;
   List<Map<String, dynamic>> seats = [];
   bool isLoading = true;
-
+  static bool _hasResetToday = false;
   // Temporary variable to store indices of seats selected by the current user
   List<int> _selectedSeatIndices = [];
 
@@ -15,21 +16,53 @@ class SeatProvider with ChangeNotifier {
     _checkAndResetIfAfter1130AM();
     _scheduleDailyReset();
   }
-  
+
+  // New method to check reset status from shared prefs
+  Future<void> _checkResetStatusAndReset() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final lastResetDate = prefs.getString('lastResetDate') ?? '';
+      final today =
+          DateTime.now().toString().split(' ')[0]; // Just the date part
+
+      if (lastResetDate == today) {
+        // Already reset today, update the static flag
+        _hasResetToday = true;
+        print(
+            "Seats were already reset today at $lastResetDate. Skipping reset.");
+        return;
+      }
+
+      await _checkAndResetIfAfter1130AM();
+    } catch (e) {
+      print("Error checking reset status: $e");
+    }
+  }
+
   // Check if current time is after 11:30 AM and reset if needed
   Future<void> _checkAndResetIfAfter1130AM() async {
     final now = DateTime.now();
     final elevenThirtyAM = DateTime(now.year, now.month, now.day, 11, 30);
-    
+
     print("Checking time: Current time is ${now.hour}:${now.minute}");
-    
-    if (now.isAfter(elevenThirtyAM)) {
-      print("Current time is after 11:30 AM. Automatically resetting seats with tripTypeValue 1");
+
+    if (now.isAfter(elevenThirtyAM) && !_hasResetToday) {
+      print(
+          "Current time is after 11:30 AM. Automatically resetting seats with tripTypeValue 1");
       // Wait for seats to be loaded
       await Future.delayed(Duration(seconds: 1));
       await resetSeatsWithTripTypeValue(1);
+
+      // Update shared prefs
+      final prefs = await SharedPreferences.getInstance();
+      final today = now.toString().split(' ')[0]; // Just the date part
+      await prefs.setString('lastResetDate', today);
+
+      _hasResetToday = true;
+      print("Reset completed and date saved in preferences: $today");
     } else {
-      print("Current time is before 11:30 AM. No automatic reset needed now");
+      print(
+          "Current time is before 11:30 AM or reset already done today. No reset needed");
     }
   }
 
@@ -51,11 +84,13 @@ class SeatProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
+      DocumentReference dayDoc =
+          FirebaseFirestore.instance.doc(_currentDateDocPath);
       DocumentSnapshot snapshot = await dayDoc.get();
 
       if (snapshot.exists && snapshot.data() != null) {
-        seats = List<Map<String, dynamic>>.from((snapshot.data() as Map<String, dynamic>)['seats']);
+        seats = List<Map<String, dynamic>>.from(
+            (snapshot.data() as Map<String, dynamic>)['seats']);
         for (var seat in seats) {
           seat['selected'] = seat['selected'] ?? false;
         }
@@ -116,7 +151,8 @@ class SeatProvider with ChangeNotifier {
 
   Future<void> resetSeats() async {
     try {
-      DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
+      DocumentReference dayDoc =
+          FirebaseFirestore.instance.doc(_currentDateDocPath);
       List<Map<String, dynamic>> resetSeats = List.generate(
         40,
         (index) => {
@@ -139,7 +175,8 @@ class SeatProvider with ChangeNotifier {
 
   Future<void> _resetSeats() async {
     try {
-      DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
+      DocumentReference dayDoc =
+          FirebaseFirestore.instance.doc(_currentDateDocPath);
       List<Map<String, dynamic>> resetSeats = seats.map((seat) {
         return {
           'status': true,
@@ -161,15 +198,17 @@ class SeatProvider with ChangeNotifier {
 
   Future<void> resetSeatsWithTripTypeValue(int tripTypeValue) async {
     try {
-      print("resetSeatsWithTripTypeValue called at ${DateTime.now()} for tripTypeValue $tripTypeValue");
-      
+      print(
+          "resetSeatsWithTripTypeValue called at ${DateTime.now()} for tripTypeValue $tripTypeValue");
+
       // Ensure seats are loaded
       if (seats.isEmpty) {
         print("Seats list is empty, fetching seats first");
         await fetchSeats();
-        await Future.delayed(Duration(milliseconds: 500)); // Small delay to ensure seats are loaded
+        await Future.delayed(Duration(
+            milliseconds: 500)); // Small delay to ensure seats are loaded
       }
-      
+
       // Count seats with tripTypeValue 1 before reset (for logging)
       int countBeforeReset = 0;
       for (var seat in seats) {
@@ -177,9 +216,11 @@ class SeatProvider with ChangeNotifier {
           countBeforeReset++;
         }
       }
-      print("Found $countBeforeReset seats with tripTypeValue = $tripTypeValue before reset");
-      
-      DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
+      print(
+          "Found $countBeforeReset seats with tripTypeValue = $tripTypeValue before reset");
+
+      DocumentReference dayDoc =
+          FirebaseFirestore.instance.doc(_currentDateDocPath);
       List<Map<String, dynamic>> resetSeats = seats.map((seat) {
         if (seat['tripTypeValue'] == tripTypeValue) {
           return {
@@ -196,7 +237,7 @@ class SeatProvider with ChangeNotifier {
         'seats': resetSeats,
       });
       seats = resetSeats;
-      
+      _hasResetToday = true;
       print("Successfully reset seats with tripTypeValue $tripTypeValue");
     } catch (e) {
       print('Error resetting seats with tripTypeValue $tripTypeValue: $e');
@@ -211,10 +252,12 @@ class SeatProvider with ChangeNotifier {
         seats[seatIndex]['selected'] = true; // Mark as temporarily selected
         seats[seatIndex]['id'] = userId;
         _selectedSeatIndices.add(seatIndex); // Add index to the temporary list
-      } else if (seats[seatIndex]['selected'] && seats[seatIndex]['id'] == userId) {
+      } else if (seats[seatIndex]['selected'] &&
+          seats[seatIndex]['id'] == userId) {
         seats[seatIndex]['selected'] = false; // Deselect seat
         seats[seatIndex]['id'] = '';
-        _selectedSeatIndices.remove(seatIndex); // Remove index from the temporary list
+        _selectedSeatIndices
+            .remove(seatIndex); // Remove index from the temporary list
       }
       notifyListeners();
     }
@@ -227,14 +270,17 @@ class SeatProvider with ChangeNotifier {
           seats[i]['status'] = false; // Make seat unavailable
           seats[i]['selected'] = true; // Unmark selection for confirmation
           if (seats[i]['tripTypeValue'] == 0) {
-            seats[i]['tripTypeValue'] = getTripTypeValue(); // Update tripTypeValue only if it's 0
+            seats[i]['tripTypeValue'] =
+                getTripTypeValue(); // Update tripTypeValue only if it's 0
           }
         }
       }
 
-      DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
+      DocumentReference dayDoc =
+          FirebaseFirestore.instance.doc(_currentDateDocPath);
       await dayDoc.update({'seats': seats});
-      _selectedSeatIndices.clear(); // Clear the temporary list after confirmation
+      _selectedSeatIndices
+          .clear(); // Clear the temporary list after confirmation
       print("Seats confirmed by $userId.");
     } catch (e) {
       print('Error confirming seats: $e');
@@ -259,15 +305,21 @@ class SeatProvider with ChangeNotifier {
   }
 
   List<int> getSelectedSeatIndices() {
-    // Rebuild the selected indices from the seats list for consistency
+    print("Direct _selectedSeatIndices before rebuild: $_selectedSeatIndices");
+
+    // Actually rebuild the list from the current seat states
     _selectedSeatIndices = [];
     for (int i = 0; i < seats.length; i++) {
-      if (seats[i]['selected'] == true && seats[i]['id'] == userId) {
+      // Only include seats that are both selected AND still available (not already purchased)
+      if (seats[i]['selected'] == true &&
+          seats[i]['id'] == userId &&
+          seats[i]['status'] == true) {
         _selectedSeatIndices.add(i);
       }
     }
-    print("Currently selected seat indices: $_selectedSeatIndices");
-    return List<int>.from(_selectedSeatIndices); // Return a copy of the list
+
+    print("Rebuilt _selectedSeatIndices: $_selectedSeatIndices");
+    return List<int>.from(_selectedSeatIndices);
   }
 
   void clearIndices() {
@@ -282,6 +334,11 @@ class SeatProvider with ChangeNotifier {
     Future.delayed(timeUntilMidnight, () async {
       await _createDailyDocument();
       await _resetSeats();
+      _hasResetToday = false;
+
+      // Clear the saved date
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('lastResetDate');
       _scheduleDailyReset();
     });
 
@@ -292,18 +349,28 @@ class SeatProvider with ChangeNotifier {
         : elevenThirtyAM.add(Duration(days: 1)).difference(now);
 
     Future.delayed(timeUntilElevenThirtyAM, () async {
-      print("Scheduled daily reset of seats with tripTypeValue 1 triggered at ${DateTime.now()}");
-      await resetSeatsWithTripTypeValue(1); // Reset seats with tripTypeValue 1
+      // Only reset if we haven't already reset today
+      if (!_hasResetToday) {
+        print(
+            "Scheduled daily reset of seats with tripTypeValue 1 triggered at ${DateTime.now()}");
+        await resetSeatsWithTripTypeValue(
+            1); // Reset seats with tripTypeValue 1
+        _hasResetToday = true;
+      } else {
+        print("Daily reset already performed today, skipping scheduled reset");
+      }
     });
   }
 
   Future<void> generateAdditionalSeats(int additionalSeatCount) async {
     try {
-      DocumentReference dayDoc = FirebaseFirestore.instance.doc(_currentDateDocPath);
+      DocumentReference dayDoc =
+          FirebaseFirestore.instance.doc(_currentDateDocPath);
       DocumentSnapshot snapshot = await dayDoc.get();
 
       if (snapshot.exists) {
-        List<Map<String, dynamic>> existingSeats = List<Map<String, dynamic>>.from(snapshot['seats'] ?? []);
+        List<Map<String, dynamic>> existingSeats =
+            List<Map<String, dynamic>>.from(snapshot['seats'] ?? []);
 
         List<Map<String, dynamic>> newSeats = List.generate(
           additionalSeatCount,
@@ -323,10 +390,11 @@ class SeatProvider with ChangeNotifier {
       print("Error generating additional seats: $e");
     }
   }
-  
+
   // For testing - can be removed in production
   Future<void> testResetNow() async {
-    print("Manually triggering reset of seats with tripTypeValue 1 for testing");
+    print(
+        "Manually triggering reset of seats with tripTypeValue 1 for testing");
     await resetSeatsWithTripTypeValue(1);
   }
 }
