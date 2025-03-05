@@ -36,7 +36,7 @@ class SeatSelectionScreen extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<SeatProvider>(
-          create: (_) => SeatProvider(userId)..fetchSeats(),
+          create: (_) => SeatProvider(userId, selectedType)..fetchSeats(),
         ),
         ChangeNotifierProvider<TripProvider>(
           create: (_) => TripProvider(),
@@ -108,6 +108,13 @@ class SeatSelectionScreen extends StatelessWidget {
                     //       ),
                     //     ),
                     SeatActions(userId: userId, totalCost: totalCost, selectedType: selectedType, userName: userName,userDept: userDept),
+                      // SizedBox(height: screenHeight * 0.02),
+                      //   ElevatedButton(
+                      //     onPressed: () async {
+                      //       await seatProvider.resetSeats();
+                      //     },
+                      //     child: Text('Reset Seats'),
+                      //   ),
                       ],
                      );
                   },

@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
+import 'package:bettersis/modules/show_message.dart';
 
 class CourseMaterialsPage extends StatefulWidget {
   final String userDept;
@@ -239,32 +240,37 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
     if (imageUrl == null) return;
 
     try {
-      // Request permission to access storage
       final status = await Permission.storage.request();
       if (!status.isGranted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Storage permission is required to download files')),
+          const SnackBar(content: Text('Storage permission is required to download files')),
         );
         return;
       }
 
-      // Get directory to save the file
       final directory = await getExternalStorageDirectory();
-      final filePath = '${directory!.path}/${_selectedBook}.png';
+      if (directory == null) {
+        ShowMessage.error(context, 'Failed to access storage');
+        return;
+      }
 
-      // Download the image
+      final customPath = Directory(
+          '${directory.parent.parent.parent.parent.path}/Download/BetterSIS/Course Materials');
+
+      if (!await customPath.exists()) {
+        await customPath.create(recursive: true);
+      }
+
+      final filePath = '${customPath.path}/${_selectedCourse}_${_selectedBook}.png';
+
       final response = await http.get(Uri.parse(imageUrl!));
       final file = File(filePath);
       await file.writeAsBytes(response.bodyBytes);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Image downloaded to $filePath')),
-      );
+      ShowMessage.success(context, 'Course material downloaded to: $filePath');
     } catch (e) {
       print('Error downloading image: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to download image')),
-      );
+      ShowMessage.error(context, 'Failed to download course material');
     }
   }
 }

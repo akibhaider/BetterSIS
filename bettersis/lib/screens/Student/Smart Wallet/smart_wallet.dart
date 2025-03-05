@@ -123,12 +123,12 @@ class smartWalletPage extends State<SmartWallet> {
 
   Future<void> addMoney(double amount) async {
     try {
-      // Update the balance by adding the specified amount
+      // Update balance
       setState(() {
         balance += amount;
       });
 
-      // Also update the balance in Firestore
+      // updating balance in firestore
       await FirebaseFirestore.instance
           .collection('Finance')
           .doc(widget.userId)
@@ -136,7 +136,6 @@ class smartWalletPage extends State<SmartWallet> {
         'Balance': balance,
       });
 
-      // After adding money, add a transaction to the user's list
       await addTransaction(widget.userId, 'Money Added', amount, 'add');
 
       print('Money added successfully');
@@ -149,19 +148,18 @@ class smartWalletPage extends State<SmartWallet> {
     try {
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('Finance')
-          .doc(userID) // use userID passed as parameter
+          .doc(userID) 
           .get();
 
       if (userDoc.exists) {
-        // Safely access 'Balance' and convert it
         var balanceData =
-            userDoc.data() as Map<String, dynamic>?; // Ensure it's a Map
+            userDoc.data() as Map<String, dynamic>?;
         if (balanceData != null) {
           var balance = balanceData['Balance'];
           if (balance is int) {
-            return balance.toDouble(); // Convert int to double
+            return balance.toDouble(); 
           } else if (balance is double) {
-            return balance; // Return as is if already a double
+            return balance; 
           }
         }
       } else {

@@ -1,4 +1,5 @@
 import 'package:bettersis/screens/Student/Bus%20Ticket/busToken.dart';
+import 'package:bettersis/screens/Student/Bus%20Ticket/display_bus_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -24,10 +25,18 @@ class SeatActions extends StatelessWidget {
   Future<void> buyTicket(BuildContext context, String userID, double tokenCost,
       int seatCount) async {
     print('\n\n\n\n$userID - $tokenCost - $seatCount\n\n\n');
-    SeatProvider seatPage = SeatProvider(userID);
+    final seatPage = Provider.of<SeatProvider>(context, listen: false);
     //final seatProvider = Provider.of<SeatProvider>(context);
     double currentBalance = await walletP.getBalance(userID);
-
+    // Get the selected seat indices BEFORE confirming selection
+  final selectedSeatIndices = seatPage.getSelectedSeatIndices();
+  
+  // Format the seat numbers for display - add 1 to convert from 0-based to 1-based
+  final seatNumbers = selectedSeatIndices.map((index) => (index + 1).toString()).toList();
+  final seatId = seatNumbers.isNotEmpty ? seatNumbers.join(', ') : 'N/A';
+  
+  print("Selected seat indices BEFORE confirmation: $selectedSeatIndices");
+  print("Formatted seat ID string BEFORE confirmation: $seatId");
     if (currentBalance < tokenCost) {
       showDialog(
         context: context,
@@ -58,12 +67,14 @@ class SeatActions extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () {
+                  seatPage.confirmSelection(userId);
                   Navigator.of(context).pop(true); // Confirm purchase
                 },
                 child: const Text("Confirm"),
               ),
               TextButton(
                 onPressed: () {
+                  seatPage.cancelSelection();
                   Navigator.of(context).pop(false); // Cancel purchase
                 },
                 child: const Text("Cancel"),
@@ -98,12 +109,8 @@ class SeatActions extends StatelessWidget {
                     print('\n\nOK\n\n');
                     Navigator.of(context).pop();
 
-                    final selectedSeatIndices =
-                        seatPage.getSelectedSeatIndices();
-                    final seatId = selectedSeatIndices.isNotEmpty
-                        ? selectedSeatIndices.toString()
-                        : 'N/A';
-                    seatPage.clearIndices();
+                    // Get currently selected seat indices
+                   
                     final now = DateTime.now();
                     final formattedDate =
                         DateFormat('dd-MM-yyyy HH:mm:ss').format(now);
@@ -111,7 +118,7 @@ class SeatActions extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => BusToken(
+                        builder: (context) => DisplayBusTokens(
                           userId: userId,
                           userDept: userDept, // Replace with actual department
                           onLogout:
@@ -120,6 +127,7 @@ class SeatActions extends StatelessWidget {
                           bus: 'Bus', // Replace with actual bus name
                           date: formattedDate, // Replace with actual date
                           seatId: seatId,
+                          selectedType: selectedType,
                         ),
                       ),
                     );
@@ -150,8 +158,7 @@ class SeatActions extends StatelessWidget {
               print("Confirm button pressed $totalCost");
 
               buyTicket(context, userId, totalCost, numSeat);
-              seatProvider
-                  .confirmSelection(userId); // Pass the userId dynamically
+              //seatProvider.confirmSelection(userId); // Pass the userId dynamically
               // final selectedSeatIndices = seatProvider.getSelectedSeatIndices();
               // final seatId = selectedSeatIndices.isNotEmpty ? selectedSeatIndices.toString() : 'N/A';
 

@@ -1,3 +1,4 @@
+import 'package:bettersis/modules/Bus%20Ticket/seat_provider.dart';
 import 'package:bettersis/modules/Bus%20Ticket/trip_provider.dart';
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
@@ -17,7 +18,8 @@ class TripSelectionPage extends StatefulWidget {
       {super.key,
       required this.userId,
       required this.onLogout,
-      required this.userDept, required this.userName});
+      required this.userDept,
+      required this.userName});
 
   @override
   _TripSelectionPageState createState() => _TripSelectionPageState();
@@ -26,14 +28,18 @@ class TripSelectionPage extends StatefulWidget {
 class _TripSelectionPageState extends State<TripSelectionPage> {
   double owPrice = 30.0;
   double rtPrice = 60.0;
-  double tripCost = 0.0;  
-  String selectedTripType = 'One Way';
+  double tripCost = 0.0;
+  String? selectedTripType = null;
   DateTime today = DateTime.now();
+
+ // late SeatProvider _seatProvider;
 
   @override
   void initState() {
     super.initState();
     _scheduleDateUpdate();
+    // Initialize the SeatProvider
+    //_seatProvider = SeatProvider(widget.userId, selectedTripType ?? '');
   }
 
   void _scheduleDateUpdate() {
@@ -100,7 +106,7 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
             //         ],
             //       ),
             //       style: TextButton.styleFrom(
-            //         backgroundColor: theme.primaryColor,  
+            //         backgroundColor: theme.primaryColor,
             //         padding: EdgeInsets.symmetric(
             //           vertical: screenHeight * 0.02,
             //           horizontal: screenWidth * 0.05,
@@ -113,13 +119,23 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
               context,
               label: "TRIP TYPE",
               value: selectedTripType,
-              items: ['One Way', 'Round Trip'],
+              items: [
+                'One Way (Uttara - IUT)',
+                'One Way (IUT - Uttara)',
+                'Round Trip'
+              ],
               onChanged: (String? newValue) {
                 setState(() {
                   selectedTripType = newValue!;
                 });
                 // Provider.of<TripProvider>(context, listen: false)
                 //     .selectTripType(newValue!);
+                if (selectedTripType == 'One Way (Uttara - IUT)' ||
+                    selectedTripType == 'One Way (IUT - Uttara)') {
+                  tripCost = owPrice;
+                } else {
+                  tripCost = rtPrice;
+                }
               },
             ),
             SizedBox(height: screenHeight * 0.03),
@@ -128,17 +144,18 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  if (selectedTripType.isNotEmpty) {
+                  if (selectedTripType!.isNotEmpty &&
+                      selectedTripType != null) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => SeatSelectionScreen(
                           userId: widget.userId,
                           userDept: widget.userDept,
-                          userName: widget.userName,  
+                          userName: widget.userName,
                           onLogout: widget.onLogout,
-                          tripCost: selectedTripType == 'One Way' ? owPrice : rtPrice,
-                          selectedType: selectedTripType,
+                          tripCost: tripCost,
+                          selectedType: selectedTripType!,
                         ),
                       ),
                     );
@@ -153,6 +170,31 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
                 ),
               ),
             ),
+
+            ///For Testing Purposes
+//             SizedBox(height: 20), // Add spacing between buttons
+// Center(
+//   child: ElevatedButton(
+//     style: ElevatedButton.styleFrom(
+//       backgroundColor: Colors.amber, // Use a different color for testing button
+//       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+//     ),
+//     onPressed: () {
+//       // Call the test function
+//       _seatProvider.testResetNow();
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text('Seat reset test triggered! Check console logs.')),
+//       );
+//     },
+//     child: Text(
+//       "TEST RESET SEATS (TYPE 1)",
+//       style: TextStyle(
+//         fontSize: screenWidth * 0.04,
+//         fontWeight: FontWeight.bold,
+//       ),
+//     ),
+//   ),
+// ),
           ],
         ),
       ),
@@ -194,8 +236,9 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
             items: items.map((String item) {
               return DropdownMenuItem<String>(
                 value: item,
-                child:
-                    Text(item, style: TextStyle(fontSize: screenWidth * 0.04,color: Colors.white)),
+                child: Text(item,
+                    style: TextStyle(
+                        fontSize: screenWidth * 0.04, color: Colors.white)),
               );
             }).toList(),
             onChanged: onChanged,
@@ -207,7 +250,7 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
 
   Widget _buildDateSelector(
       String formattedDate, double screenWidth, double screenHeight) {
-        ThemeData theme = AppTheme.getTheme(widget.userDept);
+    ThemeData theme = AppTheme.getTheme(widget.userDept);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
