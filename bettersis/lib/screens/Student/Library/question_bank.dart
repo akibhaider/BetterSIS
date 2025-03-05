@@ -49,6 +49,20 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
   final List<String> exams = ['quiz 1', 'mid', 'final'];
   final List<String> academicYears = ['swe_2020-21'];
 
+  void _resetForm() {
+    setState(() {
+      _selectedDepartment = null;
+      _selectedProgram = null;
+      _selectedSemester = null;
+      _selectedCourse = null;
+      _selectedExam = null;
+      _selectedAcademicYear = null;
+      imageUrl = null;
+      currentPrograms = [];
+      currentCourses = [];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData theme = AppTheme.getTheme(widget.userDept);
@@ -66,6 +80,18 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
         padding: EdgeInsets.all(paddingValue),
         child: ListView(
           children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: TextButton.icon(
+                onPressed: _resetForm,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Reset Form'),
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.primaryColor,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
                 labelText: 'Department',

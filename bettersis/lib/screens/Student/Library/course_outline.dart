@@ -45,6 +45,17 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
 
   List<String> currentCourses = [];
 
+  void _resetForm() {
+    setState(() {
+      _selectedDepartment = null;
+      _selectedProgram = null;
+      _selectedSemester = null;
+      _selectedCourse = null;
+      imageUrl = null;
+      currentCourses = [];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = AppTheme.getTheme(widget.userDept);
@@ -62,6 +73,18 @@ class _CourseOutlinePageState extends State<CourseOutlinePage> {
         padding: EdgeInsets.all(paddingValue),
         child: ListView(
           children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: TextButton.icon(
+                onPressed: _resetForm,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Reset Form'),
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.primaryColor,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
                 labelText: 'Department',
