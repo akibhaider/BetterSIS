@@ -67,7 +67,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   void _navigateToCourse() {
-    // Add Submit Result page navigation here
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => 
+          mainCoursePage(onLogout: _logout, userData: widget.userData),
+      )
+    );
   }
 
   void _navigateToLibraryCatalog() {
