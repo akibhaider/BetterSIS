@@ -1,3 +1,4 @@
+import 'package:bettersis/screens/Student/Bus%20Ticket/view_bus_tokens.dart';
 import 'package:bettersis/screens/Student/Notice/notice_board.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
@@ -200,19 +201,19 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
                       builder: (context) => ViewTokens(userData: userData),
                     ));
               }),
-            // ListTile(
-            //   leading: const Icon(Icons.qr_code),
-            //   title: Text(
-            //     'My Bus Tokens',
-            //     style: TextStyle(fontSize: fontSize),
-            //   ),
-            //   onTap: () {
-            //     Navigator.push(
-            //         context,
-            //         MaterialPageRoute(
-            //           builder: (context) => ViewTokens(userData: userData),
-            //         ));
-            //   }),  
+            ListTile(
+              leading: const Icon(Icons.qr_code),
+              title: Text(
+                'My Bus Tokens',
+                style: TextStyle(fontSize: fontSize),
+              ),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ViewBusTokens(userData: userData),
+                    ));
+              }),  
           ListTile(
             leading: const Icon(Icons.settings),
             title: Text(
