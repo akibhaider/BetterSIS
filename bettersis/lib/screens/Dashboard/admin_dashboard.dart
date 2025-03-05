@@ -14,6 +14,7 @@ import '../Misc/login_page.dart';
 import '../../modules/bettersis_appbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:bettersis/screens/Admin/libraryCatalog.dart';
 
 class AdminDashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -68,6 +69,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
     // Add Submit Result page navigation here
   }
 
+  void _navigateToLibraryCatalog() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LibraryCatalogPage(
+          onLogout: _logout,
+        ),
+      ),
+    );
+  }
+
   Widget _buildServiceButton({
     required IconData icon,
     required String label,
@@ -82,15 +94,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundColor: themeData.primaryColor,
+            backgroundColor: const Color(0xFF1F1C2C),
             child: Icon(icon, color: Colors.white, size: 30),
           ),
           const SizedBox(height: 8),
           Text(
             label,
             style: TextStyle(
-              fontSize: fontSize, // Dynamic font size
-              color: Colors.black,
+              fontSize: fontSize,
+              color: const Color(0xFF1F1C2C),
             ),
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
@@ -107,7 +119,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
     double scaleFactor = screenWidth / 375;
 
     return Theme(
-      data: theme,
+      data: theme.copyWith(
+        primaryColor: const Color(0xFF1F1C2C),
+      ),
       child: Scaffold(
         appBar: BetterSISAppBar(
           onLogout: _logout,
@@ -218,7 +232,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         onTap: _navigateToCourse,
                         fontSize: 14 * scaleFactor,
                       ),
-                
+                      _buildServiceButton(
+                        icon: Icons.library_books,
+                        label: "Library Catalogue",
+                        themeData: theme,
+                        onTap: _navigateToLibraryCatalog,
+                        fontSize: 14 * scaleFactor,
+                      ),
                     ],
                   );
                 },

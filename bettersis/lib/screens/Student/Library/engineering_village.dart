@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:bettersis/modules/show_message.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EngineeringVillagePage extends StatefulWidget {
   final String userDept;
@@ -26,60 +27,51 @@ class _EngineeringVillagePageState extends State<EngineeringVillagePage> {
   final TextEditingController _searchController = TextEditingController();
   bool hasSearched = false;
   List<Map<String, String>> filteredBooks = [];
-
-  final List<Map<String, String>> books = [
-    {
-      'title': 'Engineering Mathematics',
-      'author': 'K.A. Stroud',
-      'edition': '7th Edition',
-      'category': 'Mathematics',
-      'imagePath': 'Library/Engineering/Mathematics/stroud_math.png'
-    },
-    {
-      'title': 'Fundamentals of Electric Circuits',
-      'author': 'Charles K. Alexander',
-      'edition': '6th Edition',
-      'category': 'Electrical',
-      'imagePath': 'Library/Engineering/Electrical/electric_circuits.png'
-    },
-    {
-      'title': 'Engineering Mechanics: Statics',
-      'author': 'R.C. Hibbeler',
-      'edition': '14th Edition',
-      'category': 'Mechanical',
-      'imagePath': 'Library/Engineering/Mechanical/statics.png'
-    },
-    {
-      'title': 'Introduction to Chemical Engineering',
-      'author': 'William D. Callister',
-      'edition': '5th Edition',
-      'category': 'Chemical',
-      'imagePath': 'Library/Engineering/Chemical/intro_chemical.png'
-    },
-    {
-      'title': 'Structural Analysis',
-      'author': 'Russell C. Hibbeler',
-      'edition': '10th Edition',
-      'category': 'Civil',
-      'imagePath': 'Library/Engineering/Civil/structural.png'
-    },
-  ];
+  List<Map<String, String>> books = [];
+  bool _isLoading = true;
 
   Map<String, String> bookImageUrls = {};
 
   @override
   void initState() {
     super.initState();
-    filteredBooks = books;
-    for (var book in books) {
-      _loadBookImage(book);
-    }
+    _loadBooks();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadBooks() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('library_books')
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      setState(() {
+        books = snapshot.docs.map((doc) {
+          final data = doc.data();
+          return {
+            'title': data['title'] as String,
+            'author': data['author'] as String,
+            'edition': data['edition'] as String,
+            'category': data['category'] as String,
+            'imagePath': data['imagePath'] as String,
+            'imageUrl': data['imageUrl'] as String,
+          };
+        }).toList();
+        filteredBooks = books;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading books: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _loadBookImage(Map<String, String> book) async {
@@ -121,7 +113,9 @@ class _EngineeringVillagePageState extends State<EngineeringVillagePage> {
         theme: theme,
         title: 'Engineering Village',
       ),
-      body: Padding(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -181,34 +175,33 @@ class _EngineeringVillagePageState extends State<EngineeringVillagePage> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           // Book cover image
-                          Container(
-                            width: 100,
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(12),
-                                bottomLeft: Radius.circular(12),
-                              ),
-                              color: Colors.grey.shade200,
+                          ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(12),
+                              bottomLeft: Radius.circular(12),
                             ),
-                            child: bookImageUrls.containsKey(book['title'])
-                                ? ClipRRect(
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(12),
-                                      bottomLeft: Radius.circular(12),
+                            child: SizedBox(
+                              width: 100,
+                              child: Image.network(
+                                book['imageUrl'] ?? '',
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey.shade200,
+                                    child: const Icon(Icons.book, size: 40),
+                                  );
+                                },
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Container(
+                                    color: Colors.grey.shade200,
+                                    child: const Center(
+                                      child: CircularProgressIndicator(),
                                     ),
-                                    child: Image.network(
-                                      bookImageUrls[book['title']]!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return const Center(
-                                          child: Icon(Icons.engineering, size: 40),
-                                        );
-                                      },
-                                    ),
-                                  )
-                                : const Center(
-                                    child: Icon(Icons.engineering, size: 40),
-                                  ),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                           // Book details
                           Expanded(
@@ -247,7 +240,13 @@ class _EngineeringVillagePageState extends State<EngineeringVillagePage> {
                             padding: const EdgeInsets.all(8),
                             child: IconButton(
                               icon: const Icon(Icons.download),
-                              onPressed: () => downloadBook(book),
+                              onPressed: () async {
+                                if (await _requestStoragePermission()) {
+                                  downloadBook(book);
+                                } else {
+                                  ShowMessage.error(context, 'Storage permission is required to download files');
+                                }
+                              },
                               color: theme.primaryColor,
                             ),
                           ),
@@ -266,35 +265,46 @@ class _EngineeringVillagePageState extends State<EngineeringVillagePage> {
 
   Future<void> downloadBook(Map<String, String> book) async {
     try {
-      final status = await Permission.storage.request();
-      if (!status.isGranted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Storage permission is required to download files')),
-        );
-        return;
+      // Request storage permission
+      if (await _requestStoragePermission()) {
+        final directory = await getExternalStorageDirectory();
+        if (directory == null) {
+          ShowMessage.error(context, 'Failed to access storage');
+          return;
+        }
+
+        final customPath = Directory(
+            '${directory.parent.parent.parent.parent.path}/Download/BetterSIS/Books');
+
+        if (!await customPath.exists()) {
+          await customPath.create(recursive: true);
+        }
+
+        final fileName = '${book['title']}_${book['author']}.jpg'.replaceAll(RegExp(r'[^\w\s.-]'), '_');
+        final filePath = '${customPath.path}/$fileName';
+
+        // Download the image
+        final response = await http.get(Uri.parse(book['imageUrl']!));
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
+
+        ShowMessage.success(context, 'Book cover downloaded to Downloads/BetterSIS/Books');
       }
-
-      final directory = await getExternalStorageDirectory();
-      if (directory == null) {
-        ShowMessage.error(context, 'Failed to access storage');
-        return;
-      }
-
-      final customPath = Directory(
-          '${directory.parent.parent.parent.parent.path}/Download/BetterSIS/Engineering');
-
-      if (!await customPath.exists()) {
-        await customPath.create(recursive: true);
-      }
-
-      final filePath = '${customPath.path}/${book['title']}.pdf';
-
-      // Here you would normally download the actual file
-      // For now, we'll just show a success message
-      ShowMessage.success(context, 'Book downloaded to: $filePath');
     } catch (e) {
       print('Error downloading book: $e');
-      ShowMessage.error(context, 'Failed to download book');
+      ShowMessage.error(context, 'Failed to download book cover');
     }
+  }
+
+  Future<bool> _requestStoragePermission() async {
+    if (Platform.isAndroid) {
+      final status = await Permission.storage.status;
+      if (status.isDenied) {
+        final result = await Permission.storage.request();
+        return result.isGranted;
+      }
+      return status.isGranted;
+    }
+    return true; // For iOS, return true as we handle it differently
   }
 }

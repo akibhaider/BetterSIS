@@ -28,6 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  image_picker: ^1.0.7
   flutter:
     sdk: flutter
   html: ^0.15.0

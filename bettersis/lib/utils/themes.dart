@@ -28,6 +28,11 @@ class AppTheme {
           primaryColor: Colors.green,
           secondaryHeaderColor: const Color.fromARGB(255, 102, 175, 50),
         );
+      case 'admin':
+        return ThemeData(
+          primaryColor: const Color(0xFF1F1C2C),
+          secondaryHeaderColor: const Color(0x102542),
+        );
       default:
         // Default theme if no department matches
         return ThemeData(
