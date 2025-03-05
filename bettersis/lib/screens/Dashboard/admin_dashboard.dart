@@ -15,6 +15,7 @@ import '../../modules/bettersis_appbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:bettersis/screens/Admin/libraryCatalog.dart';
+import 'package:bettersis/screens/Admin/manageRoutine.dart';
 
 class AdminDashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -74,6 +75,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
       context,
       MaterialPageRoute(
         builder: (context) => LibraryCatalogPage(
+          onLogout: _logout,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToManageRoutine() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ManageRoutinePage(
           onLogout: _logout,
         ),
       ),
@@ -237,6 +249,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         label: "Library Catalogue",
                         themeData: theme,
                         onTap: _navigateToLibraryCatalog,
+                        fontSize: 14 * scaleFactor,
+                      ),
+                      _buildServiceButton(
+                        icon: Icons.schedule,
+                        label: "Manage Routine",
+                        themeData: theme,
+                        onTap: _navigateToManageRoutine,
                         fontSize: 14 * scaleFactor,
                       ),
                     ],
