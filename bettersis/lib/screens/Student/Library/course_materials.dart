@@ -47,6 +47,20 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
   List<String> currentCourses = [];
   List<String> currentBooks = [];
 
+  void _resetForm() {
+    setState(() {
+      _selectedDepartment = null;
+      _selectedProgram = null;
+      _selectedSemester = null;
+      _selectedCourse = null;
+      _selectedBook = null;
+      imageUrl = null;
+      currentPrograms = [];
+      currentCourses = [];
+      currentBooks = [];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = AppTheme.getTheme(widget.userDept);
@@ -63,6 +77,18 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
         padding: EdgeInsets.all(screenWidth * 0.05),
         child: ListView(
           children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: TextButton.icon(
+                onPressed: _resetForm,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Reset Form'),
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.primaryColor,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Department',
