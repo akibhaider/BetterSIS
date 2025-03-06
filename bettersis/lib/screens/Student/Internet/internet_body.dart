@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:bettersis/modules/loading_spinner.dart';
 import 'package:bettersis/screens/Student/Internet/usage_details_modal.dart';
@@ -5,6 +6,7 @@ import 'package:bettersis/utils/themes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:html/parser.dart' as parser;
 
 class InternetBody extends StatefulWidget {
   final String userName;
@@ -42,32 +44,97 @@ class _InternetBodyState extends State<InternetBody> {
   }
 
   Future<void> _fetchInternetUsage(String username, String password) async {
-    final url = Uri.parse('http://127.0.0.1:8000/api/get-usage/');
+    var client = http.Client();
+    String sessionCookie = '';
 
     try {
-      final response = await http.post(
-        url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8'
+      // **Step 1: Load Login Page**
+      var loginPageUrl = Uri.parse("http://10.220.20.12/index.php/home/login");
+      var loginPageResponse = await client.get(loginPageUrl);
+
+      print("Login Page Status: ${loginPageResponse.statusCode}");
+
+      // **Step 1.1: Extract Session Cookie**
+      sessionCookie = _extractSessionCookie(loginPageResponse);
+      print("Extracted Session Cookie: $sessionCookie");
+
+      // **Step 2: Submit Login Form**
+      var loginUrl =
+          Uri.parse("http://10.220.20.12/index.php/home/loginProcess");
+      var loginResponse = await client.post(
+        loginUrl,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          'Referer': 'http://10.220.20.12/index.php/home/login',
+          'Cookie': sessionCookie, // Attach session cookie
         },
-        body: json.encode({'username': username, 'password': password}),
+        body: {
+          'username': username,
+          'password': password,
+        },
       );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        var minutesUsed = data['usage'][0].toString();
+      // **Step 3: Check If Login Was Successful**
+      if (loginResponse.statusCode == 200 &&
+          !loginResponse.body.contains("Invalid username or password")) {
+        print("✅ Login successful!");
 
-        if (minutesUsed.length == 4) {
-          minutesUsed =
-              '${minutesUsed[0]},${minutesUsed[1]}${minutesUsed[2]}${minutesUsed[3]}';
-        } else if (minutesUsed.length == 5) {
-          minutesUsed =
-              '${minutesUsed[0]}${minutesUsed[1]},${minutesUsed[2]}${minutesUsed[3]}${minutesUsed[4]}';
-        }
+        // **Step 4: Navigate to Dashboard**
+        var dashboardUrl =
+            Uri.parse("http://10.220.20.12/index.php/home/dashboard");
+        var dashboardResponse = await client.get(dashboardUrl, headers: {
+          'Cookie': sessionCookie,
+        });
 
-        List<Map<String, dynamic>> formattedUsageHistory =
-            List<Map<String, dynamic>>.from(
-                (data['usage'].sublist(1) as List).map((item) => {
+        print("Dashboard Response Status: ${dashboardResponse.statusCode}");
+        if (dashboardResponse.statusCode == 200) {
+          final html1 = parser.parse(dashboardResponse.body);
+          final scrap1 = html1.querySelectorAll('tbody').toList();
+          print("total Usage: $scrap1");
+
+          List<List<String>> dashboardData = [];
+
+          for (var tbody in scrap1) {
+            var rows = tbody.querySelectorAll('tr');
+
+            for (var row in rows) {
+              var cells = row.querySelectorAll('td');
+              List<String> rowData =
+                  cells.map((cell) => cell.text.trim()).toList();
+              dashboardData.add(rowData);
+            }
+          }
+
+          var usageTableUrl =
+              Uri.parse("http://10.220.20.12/index.php/home/usageTable");
+          var usageTableResponse = await client.get(usageTableUrl, headers: {
+            'Cookie': sessionCookie, // Use session cookie
+          });
+
+          if (usageTableResponse.statusCode == 200) {
+            print("Navigated to usage table successfully.");
+            final html2 = parser.parse(usageTableResponse.body);
+
+            final scrap2 = html2.querySelectorAll('tbody').toList();
+
+            List<List<String>> tableData = [];
+
+            for (var tbody in scrap2) {
+              var rows = tbody.querySelectorAll('tr');
+
+              for (var row in rows) {
+                var cells = row.querySelectorAll('td');
+                List<String> rowData =
+                    cells.map((cell) => cell.text.trim()).toList();
+                tableData.add(rowData);
+              }
+            }
+
+            // **Sorting the 2D array based on the first column**
+            tableData.sort((a, b) => b[0].compareTo(a[0]));
+            List<Map<String, dynamic>> formattedUsageHistory =
+                List<Map<String, dynamic>>.from(tableData.map((item) => {
                       'start': item[0],
                       'end': item[1],
                       'duration': item[2],
@@ -76,23 +143,92 @@ class _InternetBodyState extends State<InternetBody> {
                       'mac': item[5],
                     }));
 
-        setState(() {
-          totalUsage = minutesUsed;
-          usageHistory = formattedUsageHistory.reversed.toList();
-        });
+            setState(() {
+              totalUsage = dashboardData[5][1];
+              usageHistory = formattedUsageHistory;
+            });
 
-        await _storeUsageDataInFirestore(totalUsage, usageHistory);
+            await _storeUsageDataInFirestore(totalUsage, usageHistory);
+          } else {
+            print("Failed to navigate to the usage table.");
+          }
+        } else {
+          print("Failed to navigate through to the dashboard.");
+        }
       } else {
-        setState(() {
-          totalUsage = "12,000";
-        });
+        print("❌ Login failed! Check credentials.");
       }
-    } catch (error) {
-      setState(() {
-        totalUsage = "12,000";
-      });
+    } catch (e) {
+      print("Error: $e");
+    } finally {
+      client.close();
     }
   }
+
+// **Extracts session cookie from response headers**
+  String _extractSessionCookie(http.Response response) {
+    if (response.headers.containsKey('set-cookie')) {
+      var rawCookies = response.headers['set-cookie']!;
+      var match = RegExp(r'ci_session=[^;]+').firstMatch(rawCookies);
+      if (match != null) {
+        return match.group(0)!; // "ci_session=..."
+      }
+    }
+    return ''; // No session found
+  }
+
+  // Future<void> _fetchInternetUsage(String username, String password) async {
+  //   final url = Uri.parse('http://127.0.0.1:8000/api/get-usage/');
+
+  //   try {
+  //     final response = await http.post(
+  //       url,
+  //       headers: <String, String>{
+  //         'Content-Type': 'application/json; charset=UTF-8'
+  //       },
+  //       body: json.encode({'username': username, 'password': password}),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final data = json.decode(response.body);
+  //       var minutesUsed = data['usage'][0].toString();
+
+  //       if (minutesUsed.length == 4) {
+  //         minutesUsed =
+  //             '${minutesUsed[0]},${minutesUsed[1]}${minutesUsed[2]}${minutesUsed[3]}';
+  //       } else if (minutesUsed.length == 5) {
+  //         minutesUsed =
+  //             '${minutesUsed[0]}${minutesUsed[1]},${minutesUsed[2]}${minutesUsed[3]}${minutesUsed[4]}';
+  //       }
+
+  //       List<Map<String, dynamic>> formattedUsageHistory =
+  //           List<Map<String, dynamic>>.from(
+  //               (data['usage'].sublist(1) as List).map((item) => {
+  //                     'start': item[0],
+  //                     'end': item[1],
+  //                     'duration': item[2],
+  //                     'mb': item[3],
+  //                     'location': item[4],
+  //                     'mac': item[5],
+  //                   }));
+
+  //       setState(() {
+  //         totalUsage = minutesUsed;
+  //         usageHistory = formattedUsageHistory.reversed.toList();
+  //       });
+
+  //       await _storeUsageDataInFirestore(totalUsage, usageHistory);
+  //     } else {
+  //       setState(() {
+  //         totalUsage = "12,000";
+  //       });
+  //     }
+  //   } catch (error) {
+  //     setState(() {
+  //       totalUsage = "12,000";
+  //     });
+  //   }
+  // }
 
   Future<void> fetchInternetCredsFromFirestore() async {
     setState(() {
