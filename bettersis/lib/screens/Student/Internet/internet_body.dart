@@ -406,6 +406,7 @@ class _InternetBodyState extends State<InternetBody> {
                         Icons.refresh,
                         color: Colors.white,
                       ),
+                      
                       Text(
                         "REFRESH",
                         style: TextStyle(

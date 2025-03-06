@@ -112,15 +112,42 @@ class _AccountCreatorState extends State<AccountCreator> {
     }
   }
 
+  // void generateEmail() {
+  //   if (name != null && name!.isNotEmpty) {
+  //     var parts = name!.split(" ");
+  //     if (parts.length > 1) {
+  //       email =
+  //           "${parts[0].toLowerCase()}${parts[1].toLowerCase()}@iut-dhaka.edu";
+  //     } else {
+  //       email = "${parts[0].toLowerCase()}@iut-dhaka.edu";
+  //     }
+  //     setState(() {});
+  //   }
+  // }
+
+   // Function to check and generate a unique email
+  String checkAndGenerateEmail(String baseEmail) {
+    int count = 1;
+    String uniqueEmail = baseEmail;
+    
+    // Loop to find the first non-existing email
+    while (storedUsers.any((user) => user['email'] == uniqueEmail)) {
+      uniqueEmail = baseEmail.replaceFirst('@', '$count@');
+      count++;
+    }
+
+    return uniqueEmail;
+  }
+
+  // Update generateEmail function to use the new checkAndGenerateEmail
   void generateEmail() {
     if (name != null && name!.isNotEmpty) {
       var parts = name!.split(" ");
-      if (parts.length > 1) {
-        email =
-            "${parts[0].toLowerCase()}${parts[1].toLowerCase()}@iut-dhaka.edu";
-      } else {
-        email = "${parts[0].toLowerCase()}@iut-dhaka.edu";
-      }
+      String baseEmail = parts.length > 1
+          ? "${parts[0].toLowerCase()}${parts[1].toLowerCase()}@iut-dhaka.edu"
+          : "${parts[0].toLowerCase()}@iut-dhaka.edu";
+      
+      email = checkAndGenerateEmail(baseEmail);  // Generate unique email
       setState(() {});
     }
   }
