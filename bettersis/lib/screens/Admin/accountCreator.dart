@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img; // For image manipulation
 import '../../../modules/bettersis_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bettersis/screens/Misc/appdrawer.dart';
 import 'package:bettersis/utils/themes.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class AccountCreator extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -49,27 +51,62 @@ class _AccountCreatorState extends State<AccountCreator> {
   };
 
   final Map<int, String> semesterPrefixes = {
-    1: '23', 2: '23',
-    3: '22', 4: '22',
-    5: '21', 6: '21',
-    7: '20', 8: '20'
+    1: '23',
+    2: '23',
+    3: '22',
+    4: '22',
+    5: '21',
+    6: '21',
+    7: '20',
+    8: '20'
   };
 
   final Map<String, String> programPrefixes = {
-    'MPE': '1', 'SWE': '5',
-    'EEE': '2', 'IPE': '6',
-    'CEE': '3', 'BTM': '7',
+    'MPE': '1',
+    'SWE': '5',
+    'EEE': '2',
+    'IPE': '6',
+    'CEE': '3',
+    'BTM': '7',
     'CSE': '4'
   };
 
   File? _selectedImage;
 
   Future<void> pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+
+      // Load image and check if it's a PNG
+      img.Image? image = img.decodeImage(imageFile.readAsBytesSync());
+      if (image == null ||
+          pickedFile.path.split('.').last.toLowerCase() != 'png') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Please select a valid PNG image")),
+        );
+        return;
+      }
+
+      // Resize the image to 300x300 pixels
+      img.Image resizedImage = img.copyResize(image, width: 300, height: 300);
+
+      // Save the resized image to a temporary file
+      final resizedFile =
+          await imageFile.writeAsBytes(img.encodePng(resizedImage));
+
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        _selectedImage = resizedFile;
       });
+    }
+  }
+
+  Future<void> uploadImage() async {
+    if (_selectedImage != null) {
+      final storagePath = '${id}.png';
+      final storageRef = FirebaseStorage.instance.ref().child(storagePath);
+      await storageRef.putFile(_selectedImage!);
     }
   }
 
@@ -77,7 +114,8 @@ class _AccountCreatorState extends State<AccountCreator> {
     if (name != null && name!.isNotEmpty) {
       var parts = name!.split(" ");
       if (parts.length > 1) {
-        email = "${parts[0].toLowerCase()}${parts[1].toLowerCase()}@iut-dhaka.edu";
+        email =
+            "${parts[0].toLowerCase()}${parts[1].toLowerCase()}@iut-dhaka.edu";
       } else {
         email = "${parts[0].toLowerCase()}@iut-dhaka.edu";
       }
@@ -86,11 +124,11 @@ class _AccountCreatorState extends State<AccountCreator> {
   }
 
   Future<void> createAccount() async {
-    try{
-      
-    }
-    catch(error){
-
+    try {
+      await uploadImage();
+      // Add the account creation logic here (e.g., saving data to Firestore)
+    } catch (error) {
+      print('Error creating account: $error');
     }
   }
 
@@ -114,8 +152,7 @@ class _AccountCreatorState extends State<AccountCreator> {
     ThemeData theme = AppTheme.getTheme('admin');
 
     return Scaffold(
-      appBar:
-      BetterSISAppBar(
+      appBar: BetterSISAppBar(
         onLogout: widget.onLogout,
         theme: theme,
         title: 'Create Account',
@@ -183,7 +220,8 @@ class _AccountCreatorState extends State<AccountCreator> {
                     child: DropdownButtonFormField(
                       hint: Text("Semester"),
                       items: List.generate(8, (index) {
-                        return DropdownMenuItem(value: index + 1, child: Text("${index + 1}"));
+                        return DropdownMenuItem(
+                            value: index + 1, child: Text("${index + 1}"));
                       }),
                       onChanged: (value) {
                         setState(() {
@@ -199,7 +237,8 @@ class _AccountCreatorState extends State<AccountCreator> {
                       hint: Text("Section"),
                       items: department != null
                           ? sections[department]!.map((sec) {
-                              return DropdownMenuItem(value: sec, child: Text(sec));
+                              return DropdownMenuItem(
+                                  value: sec, child: Text(sec));
                             }).toList()
                           : [],
                       onChanged: (value) {
@@ -230,7 +269,10 @@ class _AccountCreatorState extends State<AccountCreator> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text("Email: $email", style: TextStyle(fontSize: 16, color:theme.primaryColor),),
+                child: Text(
+                  "Email: $email",
+                  style: TextStyle(fontSize: 16, color: theme.primaryColor),
+                ),
               ),
               Row(
                 children: [
@@ -266,13 +308,14 @@ class _AccountCreatorState extends State<AccountCreator> {
                     createAccount();
                   },
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
+                    backgroundColor: theme.primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                  child: Text("Create Account", style: TextStyle(fontSize: 18, color: Colors.white)),
-                ), 
+                  ),
+                  child: Text("Create Account",
+                      style: TextStyle(fontSize: 18, color: Colors.white)),
+                ),
               ),
             ]
           ],
