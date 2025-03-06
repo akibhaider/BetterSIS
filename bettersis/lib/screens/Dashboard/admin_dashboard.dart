@@ -4,8 +4,7 @@ import 'package:bettersis/screens/Teacher/Classes/classes.dart';
 import 'package:bettersis/screens/Admin/accountCreator.dart';
 import 'package:bettersis/screens/Admin/Course/addCourse.dart';
 import 'package:bettersis/screens/Admin/Course/mainCoursePage.dart';
-import 'package:bettersis/screens/Admin/Course/deleteCourse.dart';
-import 'package:bettersis/screens/Admin/Course/editCourse.dart';
+import 'package:bettersis/screens/Admin/accountCreator.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 import '../../utils/themes.dart';
@@ -63,7 +62,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   void _navigateToAccountCreation() {
-    // Add Submit Result page navigation here
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => 
+          AccountCreator(onLogout: _logout, userData: widget.userData),
+      )    
+    );
   }
 
   void _navigateToCourse() {
