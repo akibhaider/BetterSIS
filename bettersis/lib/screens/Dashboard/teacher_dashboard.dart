@@ -9,6 +9,7 @@ import '../Misc/login_page.dart';
 import '../../modules/bettersis_appbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:bettersis/screens/Teacher/Academics/Course_book_manage.dart';
 
 class TeacherDashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -149,7 +150,15 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   }
 
   void _navigateToAcademics() {
-    // Add Academics page navigation here
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CourseBookManagePage(
+          onLogout: _logout,
+          userDept: widget.userData['dept'],
+        ),
+      ),
+    );
   }
 
   void _navigateToComplain() {
