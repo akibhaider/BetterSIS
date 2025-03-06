@@ -32,11 +32,14 @@ class _AccountCreatorState extends State<AccountCreator> {
   bool isCR = false;
   int? semester;
   String? id;
+  String? formatid;
   String email = "";
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController idController = TextEditingController();
+
+    List<Map<String,dynamic>> storedUsers = [];
 
   final departments = ['MPE', 'EEE', 'CEE', 'CSE', 'BTM'];
   final programs = ['MPE', 'EEE', 'CEE', 'CSE', 'SWE', 'IPE', 'BTM'];
@@ -123,10 +126,26 @@ class _AccountCreatorState extends State<AccountCreator> {
     }
   }
 
-  Future<void> createAccount() async {
+  Future<void> createAccountStudent() async {
     try {
       await uploadImage();
       // Add the account creation logic here (e.g., saving data to Firestore)
+      String chosenSemester = semester.toString();
+
+      await FirebaseFirestore.instance
+        .collection('Users')
+        .add({
+          'cr' : isCR,
+          'dept': department,
+          'email': email,
+          'id' : idController.text.trim(),
+          'name': name,
+          'phone': phoneController.text.trim(),
+          'program': program,
+          'section': section,
+          'semester': chosenSemester,
+          'type': 'student',
+        });
     } catch (error) {
       print('Error creating account: $error');
     }
@@ -141,11 +160,35 @@ class _AccountCreatorState extends State<AccountCreator> {
     }
   }
 
-  Future<List<String>> fetchExistingIds() async {
-    // Fetch the list of existing IDs from Firestore or any backend service
-    // This function should be implemented once the backend is available
-    return [];
+  Future<void> fetchExistingIds() async {
+    try{
+      QuerySnapshot userDoc = await FirebaseFirestore.instance
+        .collection('Users')
+        //.doc()
+        .get();
+
+      for(var users in userDoc.docs){
+        if(users['type'] == 'student'){
+          storedUsers.add(users.data() as Map<String,dynamic>);
+        }
+      }
+
+      for(var users in storedUsers){
+        print('\n\n\n ${users['id']} ---- ${users['email']} \n\n\n');
+      }
+      
+    }
+    catch(error){
+      print('\n\n Error fetching \n\n');
+    }
   }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchExistingIds();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -193,7 +236,7 @@ class _AccountCreatorState extends State<AccountCreator> {
                       onChanged: (value) {
                         setState(() {
                           department = value as String;
-                          updateIdFormat();
+                          
                         });
                       },
                     ),
@@ -208,6 +251,7 @@ class _AccountCreatorState extends State<AccountCreator> {
                       onChanged: (value) {
                         setState(() {
                           program = value as String;
+                          updateIdFormat();
                         });
                       },
                     ),
@@ -305,7 +349,7 @@ class _AccountCreatorState extends State<AccountCreator> {
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    createAccount();
+                    createAccountStudent();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.primaryColor,
