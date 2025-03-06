@@ -259,13 +259,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
                       _buildServiceButton(
-                        icon: Icons.assignment,
-                        label: "Admin Test Button",
-                        themeData: theme,
-                        onTap: _navigateToAdminTest,
-                        fontSize: 14 * scaleFactor,
-                      ),
-                      _buildServiceButton(
                         icon: Icons.account_circle_rounded,
                         label: "Create Account",
                         themeData: theme,

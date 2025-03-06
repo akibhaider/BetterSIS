@@ -315,13 +315,6 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
                       _buildServiceButton(
-                        icon: Icons.assignment,
-                        label: "Submit Result",
-                        themeData: theme,
-                        onTap: _navigateToSubmitResult,
-                        fontSize: 14 * scaleFactor,
-                      ),
-                      _buildServiceButton(
                         icon: Icons.check,
                         label: "Attendance",
                         themeData: theme,
