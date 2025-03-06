@@ -106,7 +106,7 @@ class _AccountCreatorState extends State<AccountCreator> {
 
   Future<void> uploadImage() async {
     if (_selectedImage != null) {
-      final storagePath = '${id}.png';
+      final storagePath = '${idController.text.trim()}.png';
       final storageRef = FirebaseStorage.instance.ref().child(storagePath);
       await storageRef.putFile(_selectedImage!);
     }
@@ -200,7 +200,7 @@ class _AccountCreatorState extends State<AccountCreator> {
           children: [
             DropdownButtonFormField(
               hint: Text("Choose Type"),
-              items: ['Student', 'Teacher'].map((type) {
+              items: ['Student'].map((type) {
                 return DropdownMenuItem(value: type, child: Text(type));
               }).toList(),
               onChanged: (value) {
@@ -340,15 +340,47 @@ class _AccountCreatorState extends State<AccountCreator> {
               SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
-                  onPressed: createAccountStudent,
+                  onPressed: () async {
+                    // Show the confirmation dialog
+                    bool? confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text("Confirm Account Creation"),
+                        content: Text("Are you sure you want to create the account with ID: ${idController.text.trim()}?"),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(false); // No
+                            },
+                            child: Text("No"),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(true); // Yes
+                            },
+                            child: Text("Yes"),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    // If confirmed, create the account
+                    if (confirmed == true) {
+                      await createAccountStudent();
+                    } else {
+                      // Show confirmation message if not confirmed
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Account creation cancelled")),
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  child: Text("Create Account",
-                      style: TextStyle(fontSize: 18, color: Colors.white)),
+                  child: Text("Create Account", style: TextStyle(fontSize: 18, color: Colors.white)),
                 ),
               ),
             ]

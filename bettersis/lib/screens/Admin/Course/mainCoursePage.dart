@@ -42,18 +42,6 @@ class _mainCoursePageState extends State<mainCoursePage> {
         }
       },
       {
-        'label': 'Edit Course',
-        'icon': Icons.edit_rounded,
-        'onPressed': () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => EditCoursePage(), // Implement EditCoursePage
-          //   ),
-          // );
-        }
-      },
-      {
         'label': 'Delete Course',
         'icon': Icons.delete_rounded,
         'onPressed': () {
