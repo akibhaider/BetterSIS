@@ -15,6 +15,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:bettersis/screens/Admin/libraryCatalog.dart';
 import 'package:bettersis/screens/Admin/manageRoutine.dart';
+import 'package:bettersis/screens/Admin/examSeatPlan.dart';
 
 class AdminDashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -97,6 +98,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
       context,
       MaterialPageRoute(
         builder: (context) => ManageRoutinePage(
+          onLogout: _logout,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToExamSeatPlan() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ExamSeatPlanPage(
           onLogout: _logout,
         ),
       ),
@@ -267,6 +279,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         label: "Manage Routine",
                         themeData: theme,
                         onTap: _navigateToManageRoutine,
+                        fontSize: 14 * scaleFactor,
+                      ),
+                      _buildServiceButton(
+                        icon: Icons.event_seat,
+                        label: "Exam SeatPlan",
+                        themeData: theme,
+                        onTap: _navigateToExamSeatPlan,
                         fontSize: 14 * scaleFactor,
                       ),
                     ],
