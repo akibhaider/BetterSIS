@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 import 'package:bettersis/modules/show_message.dart';
+import 'package:bettersis/screens/Admin/removeBook.dart';
 
 class LibraryCatalogPage extends StatefulWidget {
   final VoidCallback onLogout;
@@ -100,6 +101,17 @@ class _LibraryCatalogPageState extends State<LibraryCatalogPage> {
     });
   }
 
+  void _navigateToRemoveBook() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RemoveBookPage(
+          onLogout: widget.onLogout,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = AppTheme.getTheme('admin');
@@ -112,87 +124,115 @@ class _LibraryCatalogPageState extends State<LibraryCatalogPage> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _bookNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Book Name',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value?.isEmpty ?? true ? 'Please enter book name' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _authorController,
-                decoration: const InputDecoration(
-                  labelText: 'Author',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value?.isEmpty ?? true ? 'Please enter author name' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _editionController,
-                decoration: const InputDecoration(
-                  labelText: 'Edition',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value?.isEmpty ?? true ? 'Please enter edition' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _categoryController,
-                decoration: const InputDecoration(
-                  labelText: 'Category',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value?.isEmpty ?? true ? 'Please enter category' : null,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: _pickImage,
-                icon: const Icon(Icons.image),
-                label: const Text('Select Book Cover Image'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.primaryColor,
-                  padding: const EdgeInsets.all(16),
-                ),
-              ),
-              if (_selectedImage != null) ...[
-                const SizedBox(height: 16),
-                Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: theme.primaryColor),
-                    borderRadius: BorderRadius.circular(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  onPressed: _clearForm,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Reset Form'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.primaryColor,
                   ),
-                  child: Image.file(
-                    _selectedImage!,
-                    fit: BoxFit.contain,
+                ),
+                const SizedBox(width: 16),
+                TextButton.icon(
+                  onPressed: _navigateToRemoveBook,
+                  icon: const Icon(Icons.delete_forever),
+                  label: const Text('Remove Books'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red,
                   ),
                 ),
               ],
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _isUploading ? null : _uploadBook,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.primaryColor,
-                  padding: const EdgeInsets.all(16),
-                ),
-                child: _isUploading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Upload Book'),
+            ),
+            const SizedBox(height: 16),
+            Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextFormField(
+                    controller: _bookNameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Book Name',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter book name' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _authorController,
+                    decoration: const InputDecoration(
+                      labelText: 'Author',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter author name' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _editionController,
+                    decoration: const InputDecoration(
+                      labelText: 'Edition',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter edition' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _categoryController,
+                    decoration: const InputDecoration(
+                      labelText: 'Category',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter category' : null,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: _pickImage,
+                    icon: const Icon(Icons.image),
+                    label: const Text('Select Book Cover Image'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.primaryColor,
+                      padding: const EdgeInsets.all(16),
+                    ),
+                  ),
+                  if (_selectedImage != null) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: theme.primaryColor),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Image.file(
+                        _selectedImage!,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: _isUploading ? null : _uploadBook,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.primaryColor,
+                      padding: const EdgeInsets.all(16),
+                    ),
+                    child: _isUploading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text('Upload Book'),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
