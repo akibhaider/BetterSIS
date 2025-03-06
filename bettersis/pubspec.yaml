@@ -62,6 +62,7 @@ dependencies:
   table_calendar: ^3.1.2
   bkash: ^0.0.2
   shared_preferences: ^2.5.2
+  image: ^4.3.0
 
 dev_dependencies:
   flutter_test:

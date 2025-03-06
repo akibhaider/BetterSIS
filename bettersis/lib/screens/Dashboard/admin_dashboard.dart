@@ -4,8 +4,7 @@ import 'package:bettersis/screens/Teacher/Classes/classes.dart';
 import 'package:bettersis/screens/Admin/accountCreator.dart';
 import 'package:bettersis/screens/Admin/Course/addCourse.dart';
 import 'package:bettersis/screens/Admin/Course/mainCoursePage.dart';
-import 'package:bettersis/screens/Admin/Course/deleteCourse.dart';
-import 'package:bettersis/screens/Admin/Course/editCourse.dart';
+import 'package:bettersis/screens/Admin/accountCreator.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 import '../../utils/themes.dart';
@@ -16,6 +15,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:bettersis/screens/Admin/libraryCatalog.dart';
 import 'package:bettersis/screens/Admin/manageRoutine.dart';
+import 'package:bettersis/screens/Admin/examSeatPlan.dart';
 
 class AdminDashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -63,11 +63,23 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   void _navigateToAccountCreation() {
-    // Add Submit Result page navigation here
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => 
+          AccountCreator(onLogout: _logout, userData: widget.userData),
+      )    
+    );
   }
 
   void _navigateToCourse() {
-    // Add Submit Result page navigation here
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => 
+          mainCoursePage(onLogout: _logout, userData: widget.userData),
+      )
+    );
   }
 
   void _navigateToLibraryCatalog() {
@@ -86,6 +98,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
       context,
       MaterialPageRoute(
         builder: (context) => ManageRoutinePage(
+          onLogout: _logout,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToExamSeatPlan() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ExamSeatPlanPage(
           onLogout: _logout,
         ),
       ),
@@ -256,6 +279,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         label: "Manage Routine",
                         themeData: theme,
                         onTap: _navigateToManageRoutine,
+                        fontSize: 14 * scaleFactor,
+                      ),
+                      _buildServiceButton(
+                        icon: Icons.event_seat,
+                        label: "Exam SeatPlan",
+                        themeData: theme,
+                        onTap: _navigateToExamSeatPlan,
                         fontSize: 14 * scaleFactor,
                       ),
                     ],
