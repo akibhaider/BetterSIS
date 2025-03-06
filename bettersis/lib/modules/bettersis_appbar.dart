@@ -1,4 +1,6 @@
+import 'package:bettersis/screens/Dashboard/admin_dashboard.dart';
 import 'package:bettersis/screens/Dashboard/dashboard.dart';
+import 'package:bettersis/screens/Dashboard/teacher_dashboard.dart';
 import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -18,12 +20,34 @@ class BetterSISAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     void navigateToDashboard() {
       Map<String, dynamic> userData = Utils.getUser();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Dashboard(userData: userData),
-        ),
-      );
+      switch (userData['type']) {
+        case 'student':
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Dashboard(userData: userData),
+            ),
+          );
+          break;
+        case 'teacher':
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TeacherDashboard(userData: userData),
+            ),
+          );
+          break;
+        case 'admin':
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AdminDashboard(userData: userData),
+            ),
+          );
+          break;
+        default:
+          break;
+      }
     }
 
     return Container(
