@@ -21,14 +21,16 @@ class _AddCoursePageState extends State<AddCoursePage> {
   final TextEditingController _courseNameController = TextEditingController();
   final TextEditingController _courseCodeController = TextEditingController();
   final TextEditingController _courseCreditController = TextEditingController();
-  final TextEditingController _courseShortFormController = TextEditingController();
+  final TextEditingController _courseShortFormController =
+      TextEditingController();
 
   bool _isElectiveEnabled = false;
   String? _selectedElective;
   String? _chosenDepartment;
   int? _chosenSemester;
 
-  bool get _isFormEnabled => _chosenDepartment != null && _chosenSemester != null;
+  bool get _isFormEnabled =>
+      _chosenDepartment != null && _chosenSemester != null;
 
   Future<void> addCourse() async {
     try {
@@ -46,7 +48,10 @@ class _AddCoursePageState extends State<AddCoursePage> {
       int elective;
       String? electiveStr = _selectedElective;
 
-      if (courseName.isEmpty || courseCode.isEmpty || courseCreditStr.isEmpty || courseShortForm.isEmpty) {
+      if (courseName.isEmpty ||
+          courseCode.isEmpty ||
+          courseCreditStr.isEmpty ||
+          courseShortForm.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Please fill all fields.')),
         );
@@ -57,7 +62,8 @@ class _AddCoursePageState extends State<AddCoursePage> {
       double? courseCredit = double.tryParse(courseCreditStr);
       if (courseCredit == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid course credit. Enter a numeric value.')),
+          SnackBar(
+              content: Text('Invalid course credit. Enter a numeric value.')),
         );
         return;
       }
@@ -77,10 +83,13 @@ class _AddCoursePageState extends State<AddCoursePage> {
       // Validate course code format
       String expectedPrefix = "${_chosenDepartment!}-4${_chosenSemester}";
       RegExp codeFormat = RegExp(r'^[A-Z]+-4\d{3}$');
-      
-      if (!codeFormat.hasMatch(courseCode) || !courseCode.startsWith(expectedPrefix)) {
+
+      if (!codeFormat.hasMatch(courseCode) ||
+          !courseCode.startsWith(expectedPrefix)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid course code. Expected format: ${expectedPrefix}XX')),
+          SnackBar(
+              content: Text(
+                  'Invalid course code. Expected format: ${expectedPrefix}XX')),
         );
         return;
       }
@@ -118,10 +127,10 @@ class _AddCoursePageState extends State<AddCoursePage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     ThemeData theme = AppTheme.getTheme('admin');
+    var screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: BetterSISAppBar(
@@ -129,207 +138,202 @@ class _AddCoursePageState extends State<AddCoursePage> {
         theme: theme,
         title: 'Add Course',
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Department Dropdown
-            Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Department Dropdown
+              _buildDropdownRow(
+                label: 'Choose Department',
+                dropdown: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _chosenDepartment,
+                    hint: const Text('Select'),
+                    dropdownColor: theme.secondaryHeaderColor,
+                    items: ['CSE', 'EEE', 'MPE', 'CEE', 'BTM'].map((dept) {
+                      return DropdownMenuItem(
+                        value: dept,
+                        child: Text(dept, style: const TextStyle(fontSize: 18)),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _chosenDepartment = value;
+                      });
+                    },
+                  ),
+                ),
+                screenWidth: screenWidth,
+              ),
+              const SizedBox(height: 10),
+
+              // Semester Dropdown
+              _buildDropdownRow(
+                label: 'Choose Semester',
+                dropdown: DropdownButtonHideUnderline(
+                  child: DropdownButton<int>(
+                    value: _chosenSemester,
+                    hint: const Text('Select'),
+                    dropdownColor: theme.secondaryHeaderColor,
+                    items: List.generate(8, (index) {
+                      int semester = index + 1;
+                      return DropdownMenuItem(
+                        value: semester,
+                        child: Text('Semester $semester',
+                            style: const TextStyle(fontSize: 18)),
+                      );
+                    }),
+                    onChanged: (value) {
+                      setState(() {
+                        _chosenSemester = value;
+                      });
+                    },
+                  ),
+                ),
+                screenWidth: screenWidth,
+              ),
+              const SizedBox(height: 10),
+
+              // Course Fields (Enabled only if department and semester are selected)
+              if (_isFormEnabled) ...[
+                _buildInputField('Course Name', _courseNameController,
+                    screenWidth: screenWidth),
+                _buildInputField('Course Code', _courseCodeController,
+                    screenWidth: screenWidth),
+                _buildInputField('Course Credit', _courseCreditController,
+                    isNumeric: true, screenWidth: screenWidth),
+                _buildInputField(
+                    'Course Short Form', _courseShortFormController,
+                    screenWidth: screenWidth),
+                const SizedBox(height: 10),
+
+                // Toggle Elective Button
+                Row(
                   children: [
-                    Text(
-                      'Choose Department',
-                      style: TextStyle(
-                        color: const Color.fromARGB(255, 42, 42, 41),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _isElectiveEnabled = !_isElectiveEnabled;
+                            if (!_isElectiveEnabled) _selectedElective = null;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.primaryColor,
+                        ),
+                        child: Text(
+                          _isElectiveEnabled
+                              ? "Disable Elective"
+                              : "Enable Elective",
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 16),
+                        ),
                       ),
                     ),
-                    DropdownButtonHideUnderline(
+                    const SizedBox(width: 10),
+                    // Elective Dropdown (Disabled by default)
+                    IgnorePointer(
+                      ignoring: !_isElectiveEnabled,
                       child: DropdownButton<String>(
-                        value: _chosenDepartment,
-                        hint: const Text(
-                          'Select',
-                          style: TextStyle(color: Color.fromARGB(255, 32, 31, 31), fontSize: 16),
-                        ),
-                        dropdownColor: theme.secondaryHeaderColor,
-                        style: const TextStyle(color: Color.fromARGB(255, 62, 60, 60), fontSize: 16),
-                        items: ['CSE', 'EEE', 'MPE', 'CEE', 'BTM'].map((dept) {
+                        value: _selectedElective,
+                        hint: const Text('Select Elective'),
+                        onChanged: _isElectiveEnabled
+                            ? (value) {
+                                setState(() {
+                                  _selectedElective = value;
+                                });
+                              }
+                            : null,
+                        items: ['Elective - 1', 'Elective - 2'].map((e) {
                           return DropdownMenuItem(
-                            value: dept,
-                            child: Text(dept, style: const TextStyle(fontSize: 18)),
+                            value: e,
+                            child: Text(e),
                           );
                         }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _chosenDepartment = value;
-                          });
-                        },
                       ),
                     ),
                   ],
                 ),
-            SizedBox(height: 10),
+                const SizedBox(height: 10),
 
-            // Semester Dropdown
-            // Row(
-            //   children: [
-            //     Expanded(
-            //       child: DropdownButton<int>(
-            //         value: _chosenSemester,
-            //         hint: Text('Select Semester'),
-            //         onChanged: (value) {
-            //           setState(() {
-            //             _chosenSemester = value;
-            //           });
-            //         },
-            //         items: List.generate(8, (index) {
-            //           int semester = index + 1;
-            //           return DropdownMenuItem(
-            //             value: semester,
-            //             child: Text('Semester $semester'),
-            //           );
-            //         }).toList(),
-            //       ),
-            //     ),
-            //   ],
-            // ),
-            Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Choose Semester',
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 20, 20, 20),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                // Create Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: addCourse,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    DropdownButtonHideUnderline(
-                      child: DropdownButton<int>(
-                        value: _chosenSemester,
-                        hint: const Text(
-                          'Select',
-                          style: TextStyle(color: Color.fromARGB(255, 53, 52, 52), fontSize: 16),
-                        ),
-                        dropdownColor: theme.secondaryHeaderColor,
-                        style: const TextStyle(color: Color.fromARGB(255, 54, 53, 53), fontSize: 16),
-                        items: List.generate(8, (index) {
-                          int semester = index + 1;
-                          return DropdownMenuItem(
-                            value: semester,
-                            child: Text('Semester $semester', style: const TextStyle(fontSize: 18)),
-                          );
-                        }),
-                        onChanged: (value) {
-                          setState(() {
-                            _chosenSemester = value;
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-            ),
-            SizedBox(height: 10),
-
-            // Course Fields (Enabled only if department and semester are selected)
-            if (_isFormEnabled) ...[
-              _buildInputField('Course Name', _courseNameController),
-              _buildInputField('Course Code', _courseCodeController),
-              _buildInputField('Course Credit', _courseCreditController, isNumeric: true),
-              _buildInputField('Course Short Form', _courseShortFormController),
-
-              SizedBox(height: 10),
-
-              // Toggle Elective Button
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _isElectiveEnabled = !_isElectiveEnabled;
-                          if (!_isElectiveEnabled) _selectedElective = null;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.primaryColor,
-                      ),
-                      child: Text(_isElectiveEnabled ? "Disable Elective" : "Enable Elective",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ),
+                    child: const Text('Create',
+                        style: TextStyle(fontSize: 18, color: Colors.white)),
                   ),
-                  SizedBox(width: 10),
-                  // Elective Dropdown (Disabled by default)
-                  IgnorePointer(
-                    ignoring: !_isElectiveEnabled,
-                    child: DropdownButton<String>(
-                      value: _selectedElective,
-                      hint: Text('Select Elective'),
-                      onChanged: _isElectiveEnabled
-                          ? (value) {
-                              setState(() {
-                                _selectedElective = value;
-                              });
-                            }
-                          : null,
-                      items: ['Elective - 1', 'Elective - 2'].map((e) {
-                        return DropdownMenuItem(
-                          value: e,
-                          child: Text(e),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 10),
-
-              // Create Button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: addCourse,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: Text('Create', style: TextStyle(fontSize: 18, color: Colors.white)),
                 ),
-              ),
-            ] else ...[
-              Center(
-                child: Text(
-                  'Please select department and semester first.',
-                  style: TextStyle(color: theme.primaryColorDark, fontSize: 16),
+              ] else ...[
+                Center(
+                  child: Text(
+                    'Please select department and semester first.',
+                    style:
+                        TextStyle(color: theme.primaryColorDark, fontSize: 16),
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 
   // Input Field Builder
-  Widget _buildInputField(String label, TextEditingController controller, {bool isNumeric = false}) {
+  Widget _buildInputField(String label, TextEditingController controller,
+      {bool isNumeric = false, required double screenWidth}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextField(
-        controller: controller,
-        keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(),
+      child: SizedBox(
+        width: screenWidth > 600
+            ? screenWidth * 0.5
+            : double.infinity, // Adjust width based on screen size
+        child: TextField(
+          controller: controller,
+          keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
+          decoration: InputDecoration(
+            labelText: label,
+            border: OutlineInputBorder(),
+          ),
         ),
       ),
     );
   }
-}
 
+  // Dropdown Row Builder
+  Widget _buildDropdownRow(
+      {required String label,
+      required Widget dropdown,
+      required double screenWidth}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color.fromARGB(255, 42, 42, 41),
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(
+          width: screenWidth > 600
+              ? screenWidth * 0.5
+              : 150, // Adjust dropdown width based on screen size
+          child: dropdown,
+        ),
+      ],
+    );
+  }
+}
