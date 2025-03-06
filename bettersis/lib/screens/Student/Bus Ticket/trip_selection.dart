@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'seat_selection_screen.dart';
+import 'dart:async';
 
 class TripSelectionPage extends StatefulWidget {
   final String userId;
@@ -32,12 +33,13 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
   String? selectedTripType = null;
   DateTime today = DateTime.now();
 
- // late SeatProvider _seatProvider;
+  // late SeatProvider _seatProvider;
 
   @override
   void initState() {
     super.initState();
     _scheduleDateUpdate();
+    _scheduleTimeUpdates();
     // Initialize the SeatProvider
     //_seatProvider = SeatProvider(widget.userId, selectedTripType ?? '');
   }
@@ -51,6 +53,15 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
         today = DateTime.now();
       });
       _scheduleDateUpdate();
+    });
+  }
+
+  void _scheduleTimeUpdates() {
+    // Update every minute to check if we've crossed 7:00 AM
+    Timer.periodic(Duration(minutes: 1), (timer) {
+      setState(() {
+        // This will rebuild the UI and update the dropdown options
+      });
     });
   }
 
@@ -210,6 +221,23 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
     ThemeData theme = AppTheme.getTheme(widget.userDept);
+    // Filter out Uttara-IUT option after 7:00 AM
+    DateTime now = DateTime.now();
+    bool isAfter7AM = now.hour > 7 || (now.hour == 7 && now.minute > 0);
+
+    List<String> availableItems = isAfter7AM
+        ? items.where((item) => item != 'One Way (Uttara - IUT)').toList()
+        : items;
+
+    // Reset selected value if it's no longer available
+    if (isAfter7AM && value == 'One Way (Uttara - IUT)') {
+      Future.microtask(() {
+        setState(() {
+          selectedTripType = null;
+        });
+      });
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -233,7 +261,7 @@ class _TripSelectionPageState extends State<TripSelectionPage> {
             dropdownColor: theme.primaryColor,
             isExpanded: true,
             underline: SizedBox(),
-            items: items.map((String item) {
+            items: availableItems.map((String item) {
               return DropdownMenuItem<String>(
                 value: item,
                 child: Text(item,
