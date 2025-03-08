@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:bettersis/modules/loading_spinner.dart';
+import 'package:bettersis/modules/show_message.dart';
 import 'package:bettersis/screens/Student/Internet/usage_details_modal.dart';
 import 'package:bettersis/utils/themes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -52,11 +53,8 @@ class _InternetBodyState extends State<InternetBody> {
       var loginPageUrl = Uri.parse("http://10.220.20.12/index.php/home/login");
       var loginPageResponse = await client.get(loginPageUrl);
 
-      print("Login Page Status: ${loginPageResponse.statusCode}");
-
       // **Step 1.1: Extract Session Cookie**
       sessionCookie = _extractSessionCookie(loginPageResponse);
-      print("Extracted Session Cookie: $sessionCookie");
 
       // **Step 2: Submit Login Form**
       var loginUrl =
@@ -67,7 +65,7 @@ class _InternetBodyState extends State<InternetBody> {
           'Content-Type': 'application/x-www-form-urlencoded',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
           'Referer': 'http://10.220.20.12/index.php/home/login',
-          'Cookie': sessionCookie, // Attach session cookie
+          'Cookie': sessionCookie,
         },
         body: {
           'username': username,
@@ -87,17 +85,14 @@ class _InternetBodyState extends State<InternetBody> {
           'Cookie': sessionCookie,
         });
 
-        print("Dashboard Response Status: ${dashboardResponse.statusCode}");
         if (dashboardResponse.statusCode == 200) {
           final html1 = parser.parse(dashboardResponse.body);
           final scrap1 = html1.querySelectorAll('tbody').toList();
-          print("total Usage: $scrap1");
 
           List<List<String>> dashboardData = [];
 
           for (var tbody in scrap1) {
             var rows = tbody.querySelectorAll('tr');
-
             for (var row in rows) {
               var cells = row.querySelectorAll('td');
               List<String> rowData =
@@ -109,11 +104,10 @@ class _InternetBodyState extends State<InternetBody> {
           var usageTableUrl =
               Uri.parse("http://10.220.20.12/index.php/home/usageTable");
           var usageTableResponse = await client.get(usageTableUrl, headers: {
-            'Cookie': sessionCookie, // Use session cookie
+            'Cookie': sessionCookie,
           });
 
           if (usageTableResponse.statusCode == 200) {
-            print("Navigated to usage table successfully.");
             final html2 = parser.parse(usageTableResponse.body);
 
             final scrap2 = html2.querySelectorAll('tbody').toList();
@@ -122,7 +116,6 @@ class _InternetBodyState extends State<InternetBody> {
 
             for (var tbody in scrap2) {
               var rows = tbody.querySelectorAll('tr');
-
               for (var row in rows) {
                 var cells = row.querySelectorAll('td');
                 List<String> rowData =
@@ -133,6 +126,7 @@ class _InternetBodyState extends State<InternetBody> {
 
             // **Sorting the 2D array based on the first column**
             tableData.sort((a, b) => b[0].compareTo(a[0]));
+
             List<Map<String, dynamic>> formattedUsageHistory =
                 List<Map<String, dynamic>>.from(tableData.map((item) => {
                       'start': item[0],
@@ -144,22 +138,23 @@ class _InternetBodyState extends State<InternetBody> {
                     }));
 
             setState(() {
-              totalUsage = dashboardData[5][1];
+              totalUsage = dashboardData[5][1].split(" ")[0];
               usageHistory = formattedUsageHistory;
             });
 
             await _storeUsageDataInFirestore(totalUsage, usageHistory);
           } else {
-            print("Failed to navigate to the usage table.");
+            ShowMessage.error(context, "Something went wrong!");
           }
         } else {
-          print("Failed to navigate through to the dashboard.");
+          ShowMessage.error(context, "Something went wrong!");
         }
       } else {
-        print("❌ Login failed! Check credentials.");
+        ShowMessage.error(context, "Wrong credentials.");
       }
     } catch (e) {
-      print("Error: $e");
+      ShowMessage.error(context,
+          "Something went wrong! Make sure you are connected to IUTWLAN.");
     } finally {
       client.close();
     }
@@ -250,7 +245,8 @@ class _InternetBodyState extends State<InternetBody> {
         await _fetchInternetUsage(username, password);
       }
     } catch (e) {
-      print('Error fetching tokens: $e');
+      ShowMessage.error(
+          context, 'Couldn\'t fint user credentials. Make sure you set them.');
     } finally {
       setState(() {
         isLoading = false;
@@ -281,7 +277,7 @@ class _InternetBodyState extends State<InternetBody> {
         }
       }
     } catch (e) {
-      print("Error fetching data: $e");
+      ShowMessage.error(context, "Error fetching data: $e");
     } finally {
       setState(() {
         isLoading = false;
@@ -406,7 +402,6 @@ class _InternetBodyState extends State<InternetBody> {
                         Icons.refresh,
                         color: Colors.white,
                       ),
-                      
                       Text(
                         "REFRESH",
                         style: TextStyle(
