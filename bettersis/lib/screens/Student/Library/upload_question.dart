@@ -1,39 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/utils/themes.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:http/http.dart' as http;
 import 'package:bettersis/modules/show_message.dart';
-import 'package:bettersis/screens/Student/Library/upload_question.dart';
 
-class QuestionBankPage extends StatefulWidget {
+class UploadQuestionPage extends StatefulWidget {
   final String userDept;
   final VoidCallback onLogout;
-  final bool isCr;
 
-  const QuestionBankPage({
+  const UploadQuestionPage({
     Key? key,
     required this.userDept,
     required this.onLogout,
-    required this.isCr,
   }) : super(key: key);
 
   @override
-  _QuestionBankPageState createState() => _QuestionBankPageState();
+  _UploadQuestionPageState createState() => _UploadQuestionPageState();
 }
 
-class _QuestionBankPageState extends State<QuestionBankPage> {
+class _UploadQuestionPageState extends State<UploadQuestionPage> {
   String? _selectedDepartment;
   String? _selectedProgram;
   String? _selectedSemester;
   String? _selectedYear;
   String? _selectedExam;
   String? _selectedCourse;
+  File? _selectedImage;
+  bool _isUploading = false;
   String? _existingQuestionUrl;
-  bool _isCheckingQuestion = false;
 
   final Map<String, List<String>> programsByDept = {
     'cse': ['cse', 'swe'],
@@ -64,6 +60,7 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
       _selectedYear = null;
       _selectedExam = null;
       _selectedCourse = null;
+      _selectedImage = null;
       _existingQuestionUrl = null;
     });
   }
@@ -82,6 +79,111 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
     return coursesByDeptAndSemester[_selectedDepartment]?[_selectedProgram]?[_selectedSemester] ?? [];
   }
 
+  Future<void> _checkExistingQuestion() async {
+    if (_selectedDepartment == null || 
+        _selectedProgram == null || 
+        _selectedSemester == null ||
+        _selectedYear == null ||
+        _selectedExam == null ||
+        _selectedCourse == null) {
+      return;
+    }
+
+    try {
+      final storagePath = 'Library/questions/${_selectedDepartment}/${_selectedProgram}/${_selectedSemester}/${_selectedYear}/${_selectedExam}/${_selectedCourse}/question.jpg';
+      final storageRef = FirebaseStorage.instance.ref().child(storagePath);
+      
+      final url = await storageRef.getDownloadURL();
+      setState(() {
+        _existingQuestionUrl = url;
+      });
+    } catch (e) {
+      setState(() {
+        _existingQuestionUrl = null;
+      });
+    }
+  }
+
+  Future<void> _pickImage() async {
+    if (_selectedDepartment == null || 
+        _selectedProgram == null || 
+        _selectedSemester == null ||
+        _selectedYear == null ||
+        _selectedExam == null ||
+        _selectedCourse == null) {
+      ShowMessage.error(context, 'Please fill all fields before selecting an image');
+      return;
+    }
+
+    if (_existingQuestionUrl != null) {
+      final shouldOverwrite = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Warning'),
+          content: const Text('A question paper already exists. Do you want to overwrite it?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Overwrite'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldOverwrite != true) return;
+    }
+
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    
+    if (image != null) {
+      setState(() {
+        _selectedImage = File(image.path);
+      });
+    }
+  }
+
+  Future<void> _uploadQuestion() async {
+    if (_selectedDepartment == null || 
+        _selectedProgram == null || 
+        _selectedSemester == null ||
+        _selectedYear == null ||
+        _selectedExam == null ||
+        _selectedCourse == null || 
+        _selectedImage == null) {
+      ShowMessage.error(context, 'Please fill all fields and select an image');
+      return;
+    }
+
+    setState(() {
+      _isUploading = true;
+    });
+
+    try {
+      final storagePath = 'Library/questions/${_selectedDepartment}/${_selectedProgram}/${_selectedSemester}/${_selectedYear}/${_selectedExam}/${_selectedCourse}';
+      
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('$storagePath/question.jpg');
+      
+      await storageRef.putFile(_selectedImage!);
+
+      ShowMessage.success(context, 'Question paper uploaded successfully');
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error uploading question: $e');
+      ShowMessage.error(context, 'Error uploading question paper');
+    } finally {
+      setState(() {
+        _isUploading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = AppTheme.getTheme(widget.userDept);
@@ -90,7 +192,7 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
       appBar: BetterSISAppBar(
         onLogout: widget.onLogout,
         theme: theme,
-        title: 'Question Bank',
+        title: 'Upload Question Paper',
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -109,6 +211,8 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // Department Dropdown
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
                 labelText: 'Department',
@@ -134,6 +238,8 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
               },
             ),
             const SizedBox(height: 16),
+
+            // Program Dropdown
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
                 labelText: 'Program',
@@ -157,6 +263,8 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
               },
             ),
             const SizedBox(height: 16),
+
+            // Semester Dropdown
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
                 labelText: 'Semester',
@@ -179,6 +287,8 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
               },
             ),
             const SizedBox(height: 16),
+
+            // Year Dropdown
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
                 labelText: 'Year',
@@ -200,6 +310,8 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
               },
             ),
             const SizedBox(height: 16),
+
+            // Exam Dropdown
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
                 labelText: 'Exam',
@@ -220,6 +332,8 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
               },
             ),
             const SizedBox(height: 16),
+
+            // Course Dropdown
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
                 labelText: 'Course',
@@ -236,155 +350,90 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
                 setState(() {
                   _selectedCourse = value;
                 });
-                fetchImageUrl();
+                _checkExistingQuestion();
               },
             ),
             const SizedBox(height: 24),
-            
-            // Question Preview or Loading indicator or "No question" message
-            if (_isCheckingQuestion) ...[
-              const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ] else if (_existingQuestionUrl != null) ...[
-              Column(
-                children: [
-                  Container(
-                    height: 300,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: theme.primaryColor),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Image.network(
-                      _existingQuestionUrl!,
-                      fit: BoxFit.contain,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Center(child: CircularProgressIndicator());
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: downloadImage,
-                    icon: const Icon(Icons.download),
-                    label: const Text('Download Question Paper'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.primaryColor,
-                      padding: const EdgeInsets.all(16),
-                    ),
-                  ),
-                ],
-              )
-            ] else if (_selectedCourse != null) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
+
+            // Existing Question Preview
+            if (_existingQuestionUrl != null) ...[
+              const Text(
+                'Current Question Paper:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
-                child: const Text(
-                  'No question paper found',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
-                  ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                height: 300,
+                decoration: BoxDecoration(
+                  border: Border.all(color: theme.primaryColor),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Image.network(
+                  _existingQuestionUrl!,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+
+            // Select Image Button
+            ElevatedButton.icon(
+              onPressed: _pickImage,
+              icon: const Icon(Icons.image),
+              label: const Text('Select Question Paper'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.primaryColor,
+                padding: const EdgeInsets.all(16),
+              ),
+            ),
+
+            // New Image Preview
+            if (_selectedImage != null) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'New Question Paper:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                height: 300,
+                decoration: BoxDecoration(
+                  border: Border.all(color: theme.primaryColor),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Image.file(
+                  _selectedImage!,
+                  fit: BoxFit.contain,
                 ),
               ),
             ],
+
+            const SizedBox(height: 24),
+
+            // Upload Button
+            ElevatedButton(
+              onPressed: _isUploading || _selectedImage == null ? null : _uploadQuestion,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.primaryColor,
+                padding: const EdgeInsets.all(16),
+              ),
+              child: _isUploading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('Upload Question Paper'),
+            ),
           ],
         ),
       ),
-      floatingActionButton:
-          FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UploadQuestionPage(
-                      userDept: widget.userDept,
-                      onLogout: widget.onLogout,
-                    ),
-                  ),
-                );
-              },
-              child: const Icon(Icons.add, color: Colors.white),
-              backgroundColor: theme.primaryColor,
-            )
     );
-  }
-
-  Future<void> fetchImageUrl() async {
-    if (_selectedDepartment == null ||
-        _selectedProgram == null ||
-        _selectedSemester == null ||
-        _selectedYear == null ||
-        _selectedExam == null ||
-        _selectedCourse == null) return;
-
-    setState(() {
-      _isCheckingQuestion = true;
-    });
-
-    try {
-      // Update the path structure to match the storage
-      final path = 'Library/questions/${_selectedDepartment}/${_selectedProgram}/${_selectedSemester}/${_selectedYear}/${_selectedExam}/${_selectedCourse}/question.jpg';
-      print('Fetching image URL for path: $path');
-
-      final ref = FirebaseStorage.instance.ref().child(path);
-      _existingQuestionUrl = await ref.getDownloadURL();
-      setState(() {
-        _isCheckingQuestion = false;
-      });
-    } catch (e) {
-      print('Error fetching image URL: $e');
-      _existingQuestionUrl = null;
-      setState(() {
-        _isCheckingQuestion = false;
-      });
-    }
-  }
-
-  Future<void> downloadImage() async {
-    if (_existingQuestionUrl == null) return;
-
-    try {
-      // Request permission to access storage
-      final status = await Permission.storage.request();
-      if (!status.isGranted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Storage permission is required to download files')),
-        );
-        return;
-      }
-
-      // Get directory to save the file
-      final directory = await getExternalStorageDirectory();
-      if (directory == null) {
-        ShowMessage.error(context, 'Failed to access storage');
-        return;
-      }
-
-      final customPath = Directory(
-          '${directory.parent.parent.parent.parent.path}/Download/BetterSIS/Questions');
-
-      if (!await customPath.exists()) {
-        await customPath.create(recursive: true);
-      }
-
-      final filePath = '${customPath.path}/${_selectedCourse}_${_selectedExam}_${_selectedYear}.png';
-
-      // Download the image
-      final response = await http.get(Uri.parse(_existingQuestionUrl!));
-      final file = File(filePath);
-      await file.writeAsBytes(response.bodyBytes);
-
-      ShowMessage.success(context, 'Question paper downloaded to: $filePath');
-    } catch (e) {
-      print('Error downloading image: $e');
-      ShowMessage.error(context, 'Failed to download question paper');
-    }
   }
 }

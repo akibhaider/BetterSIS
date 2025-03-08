@@ -5,6 +5,7 @@ import 'package:bettersis/screens/Student/Library/course_materials.dart';
 import 'package:bettersis/screens/Student/Library/course_outline.dart';
 import 'package:bettersis/screens/Student/Library/lecture_notes.dart';
 import 'package:bettersis/screens/Student/Library/engineering_village.dart';
+import 'package:bettersis/screens/Student/Library/upload_notes.dart';
 import 'package:flutter/material.dart';
 import 'package:bettersis/utils/themes.dart';
 
@@ -30,27 +31,56 @@ class Library extends StatelessWidget {
     if (section == "Question_Bank") {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => QuestionBankPage(userDept: userDept, onLogout: onLogout)),
+        MaterialPageRoute(
+          builder: (context) => QuestionBankPage(
+            userDept: userDept,
+            onLogout: onLogout,
+            isCr: isCr,
+          ),
+        ),
       );
     } else if (section == "Course_Materials") {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => CourseMaterialsPage(userDept: userDept, onLogout: onLogout, isCr: isCr)),
+        MaterialPageRoute(
+          builder: (context) => CourseMaterialsPage(
+            userDept: userDept,
+            onLogout: onLogout,
+            isCr: isCr,
+          ),
+        ),
       );
     } else if (section == "Course_Outlines") {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => CourseOutlinePage(userDept: userDept, onLogout: onLogout)),
+        MaterialPageRoute(
+          builder: (context) => ViewCourseOutlinePage(
+            userDept: userDept,
+            onLogout: onLogout,
+            isCr: isCr,
+          ),
+        ),
       );
     } else if (section == "Lecture_Notes") {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => LectureNotesPage(userDept: userDept, onLogout: onLogout)),
+        MaterialPageRoute(
+          builder: (context) => LectureNotesPage(
+            userDept: userDept,
+            onLogout: onLogout,
+            isCr: isCr,
+          ),
+        ),
       );
     } else if (section == "Engineering_Village") {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) =>EngineeringVillagePage(userDept: userDept, onLogout: onLogout)),
+        MaterialPageRoute(
+          builder: (context) => EngineeringVillagePage(
+            userDept: userDept,
+            onLogout: onLogout,
+          ),
+        ),
       );
     } else {
       Navigator.push(
