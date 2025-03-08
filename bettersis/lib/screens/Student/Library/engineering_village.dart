@@ -25,12 +25,21 @@ class EngineeringVillagePage extends StatefulWidget {
 
 class _EngineeringVillagePageState extends State<EngineeringVillagePage> {
   final TextEditingController _searchController = TextEditingController();
-  bool hasSearched = false;
-  List<Map<String, String>> filteredBooks = [];
-  List<Map<String, String>> books = [];
   bool _isLoading = true;
+  List<Map<String, dynamic>> books = [];
+  List<Map<String, dynamic>> filteredBooks = [];
+  String? _selectedDepartment;
+  String? _filterDepartment;
 
-  Map<String, String> bookImageUrls = {};
+  final List<String> departments = ['cse', 'eee', 'cee', 'mpe', 'btm'];
+
+  Map<String, Color> deptColors = {
+    'cse': Colors.blue.shade700,
+    'eee': Colors.amber.shade700,
+    'cee': Colors.green.shade700,
+    'mpe': Colors.red.shade700,
+    'btm': Colors.purple.shade700,
+  };
 
   @override
   void initState() {
@@ -55,57 +64,97 @@ class _EngineeringVillagePageState extends State<EngineeringVillagePage> {
         books = snapshot.docs.map((doc) {
           final data = doc.data();
           return {
+            'id': doc.id,
             'title': data['title'] as String,
             'author': data['author'] as String,
             'edition': data['edition'] as String,
             'category': data['category'] as String,
-            'imagePath': data['imagePath'] as String,
             'imageUrl': data['imageUrl'] as String,
+            'departments': (data['departments'] as List<dynamic>?)?.cast<String>() ?? [],
+            'url': data['url'] as String?,
           };
         }).toList();
-        filteredBooks = books;
+        filteredBooks = List.from(books);
         _isLoading = false;
       });
     } catch (e) {
       print('Error loading books: $e');
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _loadBookImage(Map<String, String> book) async {
-    try {
-      final ref = FirebaseStorage.instance.ref().child(book['imagePath']!);
-      final url = await ref.getDownloadURL();
-      setState(() {
-        bookImageUrls[book['title']!] = url;
-      });
-    } catch (e) {
-      print('Error loading image for ${book['title']}: $e');
-    }
-  }
-
-  void searchBooks(String query) {
+  void _searchBooks(String query) {
     setState(() {
-      hasSearched = true;
-      if (query.isEmpty) {
+      if (query.isEmpty && _filterDepartment == null) {
         filteredBooks = books;
       } else {
         filteredBooks = books.where((book) {
-          final titleMatch = book['title']!.toLowerCase().contains(query.toLowerCase());
-          final authorMatch = book['author']!.toLowerCase().contains(query.toLowerCase());
-          final categoryMatch = book['category']!.toLowerCase().contains(query.toLowerCase());
-          return titleMatch || authorMatch || categoryMatch;
+          bool matchesSearch = true;
+          if (query.isNotEmpty) {
+            final titleMatch = book['title'].toString().toLowerCase().contains(query.toLowerCase());
+            final authorMatch = book['author'].toString().toLowerCase().contains(query.toLowerCase());
+            final categoryMatch = book['category'].toString().toLowerCase().contains(query.toLowerCase());
+            matchesSearch = titleMatch || authorMatch || categoryMatch;
+          }
+
+          bool matchesDepartment = true;
+          if (_filterDepartment != null) {
+            matchesDepartment = (book['departments'] as List<String>).contains(_filterDepartment);
+          }
+
+          return matchesSearch && matchesDepartment;
         }).toList();
       }
     });
   }
 
+  void _showDepartmentFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Filter by Department'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('Show All'),
+                leading: Radio<String?>(
+                  value: null,
+                  groupValue: _filterDepartment,
+                  onChanged: (value) {
+                    setState(() {
+                      _filterDepartment = value;
+                      Navigator.pop(context);
+                      _searchBooks(_searchController.text);
+                    });
+                  },
+                ),
+              ),
+              ...departments.map((dept) => ListTile(
+                title: Text(dept.toUpperCase()),
+                leading: Radio<String?>(
+                  value: dept,
+                  groupValue: _filterDepartment,
+                  onChanged: (value) {
+                    setState(() {
+                      _filterDepartment = value;
+                      Navigator.pop(context);
+                      _searchBooks(_searchController.text);
+                    });
+                  },
+                ),
+              )),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = AppTheme.getTheme(widget.userDept);
-    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: BetterSISAppBar(
@@ -113,149 +162,222 @@ class _EngineeringVillagePageState extends State<EngineeringVillagePage> {
         theme: theme,
         title: 'Engineering Village',
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: theme.primaryColor),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: const InputDecoration(
-                        hintText: 'Search by title, author, or category...',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
-                      ),
-                      onSubmitted: (value) => searchBooks(value),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () => searchBooks(_searchController.text),
-                    color: theme.primaryColor,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (hasSearched && filteredBooks.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(4.0),
-                ),
-                child: const Text(
-                  'Book not found',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: filteredBooks.length,
-                itemBuilder: (context, index) {
-                  final book = filteredBooks[index];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 3,
-                    child: IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Book cover image
-                          ClipRRect(
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(12),
-                              bottomLeft: Radius.circular(12),
-                            ),
-                            child: SizedBox(
-                              width: 100,
-                              child: Image.network(
-                                book['imageUrl'] ?? '',
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: Colors.grey.shade200,
-                                    child: const Icon(Icons.book, size: 40),
-                                  );
-                                },
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Container(
-                                    color: Colors.grey.shade200,
-                                    child: const Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          // Book details
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    book['title']!,
-                                    style: TextStyle(
-                                      fontSize: screenWidth * 0.045,
-                                      color: theme.primaryColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    "Author: ${book['author']}",
-                                    style: TextStyle(color: Colors.grey.shade800),
-                                  ),
-                                  Text(
-                                    "Edition: ${book['edition']}",
-                                    style: TextStyle(color: Colors.grey.shade800),
-                                  ),
-                                  Text(
-                                    "Category: ${book['category']}",
-                                    style: TextStyle(color: Colors.grey.shade800),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          // Download button
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            child: IconButton(
-                              icon: const Icon(Icons.download),
-                              onPressed: () async {
-                                if (await _requestStoragePermission()) {
-                                  downloadBook(book);
-                                } else {
-                                  ShowMessage.error(context, 'Storage permission is required to download files');
-                                }
+            // Search and Filter Row
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search books...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                _searchBooks('');
                               },
-                              color: theme.primaryColor,
+                            )
+                          : null,
+                    ),
+                    onChanged: _searchBooks,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: IconButton(
+                    icon: Stack(
+                      children: [
+                        const Icon(Icons.filter_list),
+                        if (_filterDepartment != null)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: theme.primaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 8,
+                                minHeight: 8,
+                              ),
                             ),
                           ),
-                        ],
+                      ],
+                    ),
+                    onPressed: _showDepartmentFilterDialog,
+                    tooltip: 'Filter by Department',
+                  ),
+                ),
+              ],
+            ),
+
+            // Active Filter Indicator
+            if (_filterDepartment != null) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Filtered by: ${_filterDepartment!.toUpperCase()}',
+                      style: TextStyle(
+                        color: theme.primaryColor,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  );
-                },
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: Icon(Icons.close, size: 16, color: theme.primaryColor),
+                      onPressed: () {
+                        setState(() {
+                          _filterDepartment = null;
+                          _searchBooks(_searchController.text);
+                        });
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 20,
+                        minHeight: 20,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+            ],
+
+            const SizedBox(height: 16),
+
+            // Book List
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : filteredBooks.isEmpty
+                      ? const Center(child: Text('No books found'))
+                      : ListView.builder(
+                          itemCount: filteredBooks.length,
+                          itemBuilder: (context, index) {
+                            final book = filteredBooks[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+                                leading: Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: theme.primaryColor),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.network(
+                                      book['imageUrl'],
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          const Icon(Icons.book),
+                                    ),
+                                  ),
+                                ),
+                                title: Container(
+                                  width: MediaQuery.of(context).size.width * 0.5,
+                                  child: Text(
+                                    book['title'],
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                subtitle: Container(
+                                  width: MediaQuery.of(context).size.width * 0.5,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Author: ${book['author']}'),
+                                      const SizedBox(height: 4),
+                                      SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          children: [
+                                            for (String dept in book['departments'])
+                                              Padding(
+                                                padding: const EdgeInsets.only(right: 8),
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(4),
+                                                  decoration: BoxDecoration(
+                                                    color: deptColors[dept],
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.bookmark,
+                                                        color: Colors.white,
+                                                        size: 16,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                trailing: Container(
+                                  width: 48,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      PopupMenuButton<String>(
+                                        icon: const Icon(Icons.more_vert),
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(
+                                          minHeight: 36,
+                                        ),
+                                        onSelected: (value) {
+                                          if (value == 'download') {
+                                            _downloadBook(book);
+                                          }
+                                        },
+                                        itemBuilder: (context) => [
+                                          const PopupMenuItem(
+                                            value: 'download',
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.download),
+                                                SizedBox(width: 8),
+                                                Text('Download'),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
             ),
           ],
         ),
@@ -263,48 +385,44 @@ class _EngineeringVillagePageState extends State<EngineeringVillagePage> {
     );
   }
 
-  Future<void> downloadBook(Map<String, String> book) async {
+  Future<void> _downloadBook(Map<String, dynamic> book) async {
+    if (book['url'] == null) {
+      ShowMessage.error(context, 'No download URL available for this book');
+      return;
+    }
+
     try {
-      // Request storage permission
-      if (await _requestStoragePermission()) {
-        final directory = await getExternalStorageDirectory();
-        if (directory == null) {
-          ShowMessage.error(context, 'Failed to access storage');
-          return;
-        }
-
-        final customPath = Directory(
-            '${directory.parent.parent.parent.parent.path}/Download/BetterSIS/Books');
-
-        if (!await customPath.exists()) {
-          await customPath.create(recursive: true);
-        }
-
-        final fileName = '${book['title']}_${book['author']}.jpg'.replaceAll(RegExp(r'[^\w\s.-]'), '_');
-        final filePath = '${customPath.path}/$fileName';
-
-        // Download the image
-        final response = await http.get(Uri.parse(book['imageUrl']!));
-        final file = File(filePath);
-        await file.writeAsBytes(response.bodyBytes);
-
-        ShowMessage.success(context, 'Book cover downloaded to Downloads/BetterSIS/Books');
+      final status = await Permission.storage.request();
+      if (!status.isGranted) {
+        ShowMessage.error(context, 'Storage permission is required to download files');
+        return;
       }
+
+      final directory = await getExternalStorageDirectory();
+      if (directory == null) {
+        ShowMessage.error(context, 'Failed to access storage');
+        return;
+      }
+
+      final customPath = Directory(
+          '${directory.parent.parent.parent.parent.path}/Download/BetterSIS/Engineering Village');
+
+      if (!await customPath.exists()) {
+        await customPath.create(recursive: true);
+      }
+
+      final safeTitle = book['title'].toString().replaceAll(RegExp(r'[^\w\s\-\.]'), '_');
+      final safeAuthor = book['author'].toString().replaceAll(RegExp(r'[^\w\s\-\.]'), '_');
+      final filePath = '${customPath.path}/${safeTitle}_${safeAuthor}.pdf';
+
+      final response = await http.get(Uri.parse(book['url']));
+      final file = File(filePath);
+      await file.writeAsBytes(response.bodyBytes);
+
+      ShowMessage.success(context, 'Book downloaded successfully');
     } catch (e) {
       print('Error downloading book: $e');
-      ShowMessage.error(context, 'Failed to download book cover');
+      ShowMessage.error(context, 'Failed to download book');
     }
-  }
-
-  Future<bool> _requestStoragePermission() async {
-    if (Platform.isAndroid) {
-      final status = await Permission.storage.status;
-      if (status.isDenied) {
-        final result = await Permission.storage.request();
-        return result.isGranted;
-      }
-      return status.isGranted;
-    }
-    return true; // For iOS, return true as we handle it differently
   }
 }
