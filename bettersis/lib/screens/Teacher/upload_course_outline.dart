@@ -6,95 +6,66 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import 'package:bettersis/modules/show_message.dart';
 
-class ExamSeatPlanPage extends StatefulWidget {
+class UploadCourseOutlinePage extends StatefulWidget {
+  final String userDept;
   final VoidCallback onLogout;
 
-  const ExamSeatPlanPage({
+  const UploadCourseOutlinePage({
     Key? key,
+    required this.userDept,
     required this.onLogout,
   }) : super(key: key);
 
   @override
-  _ExamSeatPlanPageState createState() => _ExamSeatPlanPageState();
+  _UploadCourseOutlinePageState createState() => _UploadCourseOutlinePageState();
 }
 
-class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
-  String? _selectedYear;
-  String? _selectedSemester;
-  String? _selectedExam;
+class _UploadCourseOutlinePageState extends State<UploadCourseOutlinePage> {
+  String? _selectedCourse;
   File? _selectedImage;
-  String? _existingImageUrl;
   bool _isUploading = false;
+  String? _existingOutlineUrl;
 
-  final List<String> academicYears = [
-    '2020-21',
-    '2021-22',
-    '2022-23',
-    '2023-24',
-    '2024-25',
-    '2025-26',
-    '2026-27',
-    '2027-28',
-    '2028-29',
-    '2029-30'
-  ];
-  final List<String> semesters = ['winter', 'summer'];
-  final List<String> exams = ['mid', 'final'];
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  final List<String> courses = ['CSE 4501', 'CSE 4503', 'CSE 4511', 'CSE 4513'];
 
   void _resetForm() {
     setState(() {
-      _selectedYear = null;
-      _selectedSemester = null;
-      _selectedExam = null;
+      _selectedCourse = null;
       _selectedImage = null;
-      _existingImageUrl = null;
+      _existingOutlineUrl = null;
     });
   }
 
-  Future<void> _checkExistingSeatPlan() async {
-    if (_selectedYear == null ||
-        _selectedSemester == null ||
-        _selectedExam == null) {
-      return;
-    }
+  Future<void> _checkExistingOutline() async {
+    if (_selectedCourse == null) return;
 
     try {
-      final storagePath =
-          'ExamSeatPlan/${_selectedYear}/${_selectedSemester}/${_selectedExam}/seat_plan.jpg';
+      final storagePath = 'Library/course_outlines/${_selectedCourse}/outline.jpg';
       final storageRef = FirebaseStorage.instance.ref().child(storagePath);
-
+      
       final url = await storageRef.getDownloadURL();
       setState(() {
-        _existingImageUrl = url;
+        _existingOutlineUrl = url;
       });
     } catch (e) {
       setState(() {
-        _existingImageUrl = null;
+        _existingOutlineUrl = null;
       });
     }
   }
 
   Future<void> _pickImage() async {
-    if (_selectedYear == null ||
-        _selectedSemester == null ||
-        _selectedExam == null) {
-      ShowMessage.error(
-          context, 'Please fill all fields before selecting an image');
+    if (_selectedCourse == null) {
+      ShowMessage.error(context, 'Please select a course first');
       return;
     }
 
-    if (_existingImageUrl != null) {
+    if (_existingOutlineUrl != null) {
       final shouldOverwrite = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Warning'),
-          content: const Text(
-              'A seat plan already exists for this selection. Do you want to overwrite it?'),
+          content: const Text('A file already exists. Do you want to overwrite it?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -113,7 +84,7 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
 
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-
+    
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
@@ -121,12 +92,9 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
     }
   }
 
-  Future<void> _uploadSeatPlan() async {
-    if (_selectedYear == null ||
-        _selectedSemester == null ||
-        _selectedExam == null ||
-        _selectedImage == null) {
-      ShowMessage.error(context, 'Please fill all fields and select an image');
+  Future<void> _uploadOutline() async {
+    if (_selectedCourse == null || _selectedImage == null) {
+      ShowMessage.error(context, 'Please select both course and image');
       return;
     }
 
@@ -135,16 +103,16 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
     });
 
     try {
-      final storagePath =
-          'ExamSeatPlan/${_selectedYear}/${_selectedSemester}/${_selectedExam}/seat_plan.jpg';
+      final storagePath = 'Library/course_outlines/${_selectedCourse}/outline.jpg';
       final storageRef = FirebaseStorage.instance.ref().child(storagePath);
-
+      
       await storageRef.putFile(_selectedImage!);
 
-      ShowMessage.success(context, 'Seat plan uploaded successfully');
-      _resetForm();
+      ShowMessage.success(context, 'File uploaded successfully');
+      Navigator.pop(context);
     } catch (e) {
-      ShowMessage.error(context, 'Error uploading seat plan: $e');
+      print('Error uploading File: $e');
+      ShowMessage.error(context, 'Error uploading File');
     } finally {
       setState(() {
         _isUploading = false;
@@ -154,19 +122,20 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = AppTheme.getTheme('admin');
+    final theme = AppTheme.getTheme(widget.userDept);
 
     return Scaffold(
       appBar: BetterSISAppBar(
         onLogout: widget.onLogout,
         theme: theme,
-        title: 'Exam Seat Plan',
+        title: 'Upload File',
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Reset Button
             Align(
               alignment: Alignment.topRight,
               child: TextButton.icon(
@@ -180,79 +149,32 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
             ),
             const SizedBox(height: 16),
 
-            // Academic Year Dropdown
+            // Course Dropdown
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
-                labelText: 'Academic Year',
+                labelText: 'Course',
                 border: OutlineInputBorder(),
               ),
-              value: _selectedYear,
-              items: academicYears.map((year) {
+              value: _selectedCourse,
+              items: courses.map((course) {
                 return DropdownMenuItem(
-                  value: year,
-                  child: Text(year),
+                  value: course,
+                  child: Text(course),
                 );
               }).toList(),
               onChanged: (value) {
                 setState(() {
-                  _selectedYear = value;
-                  _selectedImage = null;
+                  _selectedCourse = value;
                 });
-                _checkExistingSeatPlan();
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Semester Dropdown
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(
-                labelText: 'Semester',
-                border: OutlineInputBorder(),
-              ),
-              value: _selectedSemester,
-              items: semesters.map((semester) {
-                return DropdownMenuItem(
-                  value: semester,
-                  child: Text(semester),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedSemester = value;
-                  _selectedImage = null;
-                });
-                _checkExistingSeatPlan();
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Exam Dropdown
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(
-                labelText: 'Exam',
-                border: OutlineInputBorder(),
-              ),
-              value: _selectedExam,
-              items: exams.map((exam) {
-                return DropdownMenuItem(
-                  value: exam,
-                  child: Text(exam.toUpperCase()),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedExam = value;
-                  _selectedImage = null;
-                });
-                _checkExistingSeatPlan();
+                _checkExistingOutline();
               },
             ),
             const SizedBox(height: 24),
 
-            // Existing Seat Plan Preview
-            if (_existingImageUrl != null) ...[
+            // Existing Outline Preview
+            if (_existingOutlineUrl != null) ...[
               const Text(
-                'Current Seat Plan:',
+                'Current File:',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -266,14 +188,11 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Image.network(
-                  _existingImageUrl!,
+                  _existingOutlineUrl!,
                   fit: BoxFit.contain,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return const Center(child: CircularProgressIndicator());
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(child: Text('Error loading image'));
                   },
                 ),
               ),
@@ -282,13 +201,9 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
 
             // Select Image Button
             ElevatedButton.icon(
-              onPressed: _selectedYear != null &&
-                      _selectedSemester != null &&
-                      _selectedExam != null
-                  ? _pickImage
-                  : null,
+              onPressed: _pickImage,
               icon: const Icon(Icons.image),
-              label: const Text('Select Seat Plan Image'),
+              label: const Text('Select a File'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.primaryColor,
                 padding: const EdgeInsets.all(16),
@@ -299,7 +214,7 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
             if (_selectedImage != null) ...[
               const SizedBox(height: 16),
               const Text(
-                'New Seat Plan:',
+                'New File:',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -323,20 +238,18 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
 
             // Upload Button
             ElevatedButton(
-              onPressed: _isUploading || _selectedImage == null
-                  ? null
-                  : _uploadSeatPlan,
+              onPressed: _isUploading || _selectedImage == null ? null : _uploadOutline,
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.primaryColor,
                 padding: const EdgeInsets.all(16),
               ),
               child: _isUploading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Upload Seat Plan'),
+                  : const Text('Upload File'),
             ),
           ],
         ),
       ),
     );
   }
-}
+} 

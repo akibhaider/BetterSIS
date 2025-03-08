@@ -4,9 +4,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 import '../../../modules/bettersis_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:bettersis/screens/Misc/appdrawer.dart';
-import 'package:bettersis/utils/themes.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // For Firebase Authentication
+import 'package:bettersis/utils/themes.dart';
 
 class AccountCreator extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -75,13 +75,12 @@ class _AccountCreatorState extends State<AccountCreator> {
 
   File? _selectedImage;
 
+  // Pick and resize image
   Future<void> pickImage() async {
     final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       File imageFile = File(pickedFile.path);
-
-      // Load image and check if it's a PNG
       img.Image? image = img.decodeImage(imageFile.readAsBytesSync());
       if (image == null ||
           pickedFile.path.split('.').last.toLowerCase() != 'png') {
@@ -91,10 +90,8 @@ class _AccountCreatorState extends State<AccountCreator> {
         return;
       }
 
-      // Resize the image to 300x300 pixels
+      // Resize image
       img.Image resizedImage = img.copyResize(image, width: 300, height: 300);
-
-      // Save the resized image to a temporary file
       final resizedFile =
           await imageFile.writeAsBytes(img.encodePng(resizedImage));
 
@@ -104,59 +101,52 @@ class _AccountCreatorState extends State<AccountCreator> {
     }
   }
 
-  Future<void> uploadImage() async {
-    if (_selectedImage != null) {
-      final storagePath = '${idController.text.trim()}.png';
-      final storageRef = FirebaseStorage.instance.ref().child(storagePath);
-      await storageRef.putFile(_selectedImage!);
-    }
-  }
-
-  // void generateEmail() {
-  //   if (name != null && name!.isNotEmpty) {
-  //     var parts = name!.split(" ");
-  //     if (parts.length > 1) {
-  //       email =
-  //           "${parts[0].toLowerCase()}${parts[1].toLowerCase()}@iut-dhaka.edu";
-  //     } else {
-  //       email = "${parts[0].toLowerCase()}@iut-dhaka.edu";
-  //     }
-  //     setState(() {});
-  //   }
-  // }
-
-   // Function to check and generate a unique email
-  String checkAndGenerateEmail(String baseEmail) {
-    int count = 1;
-    String uniqueEmail = baseEmail;
-    
-    // Loop to find the first non-existing email
-    while (storedUsers.any((user) => user['email'] == uniqueEmail)) {
-      uniqueEmail = baseEmail.replaceFirst('@', '$count@');
-      count++;
-    }
-
-    return uniqueEmail;
-  }
-
-  // Update generateEmail function to use the new checkAndGenerateEmail
+  // Generate email based on the name
   void generateEmail() {
     if (name != null && name!.isNotEmpty) {
       var parts = name!.split(" ");
       String baseEmail = parts.length > 1
           ? "${parts[0].toLowerCase()}${parts[1].toLowerCase()}@iut-dhaka.edu"
           : "${parts[0].toLowerCase()}@iut-dhaka.edu";
-      
-      email = checkAndGenerateEmail(baseEmail);  // Generate unique email
+
+      email = baseEmail;
       setState(() {});
     }
   }
 
-  Future<void> createAccountStudent() async {
-    try {
-      await uploadImage();
-      String chosenSemester = semester.toString();
+  // Generate password based on the last name + 123
+  String generatePassword(String fullName) {
+    List<String> parts = fullName.split(" ");
+    String lastName = parts.length > 1
+        ? parts.last
+        : parts[0]; // Use last name or first name if only one part
+    return "${lastName.toLowerCase()}123"; // e.g., "meheran123"
+  }
 
+  // Create Firebase Authentication Account
+  Future<void> createAuthAccount(String email, String password) async {
+    try {
+      await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+    } catch (error) {
+      print("Error creating Firebase Auth account: $error");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to create Firebase Auth account.")),
+      );
+    }
+  }
+
+  // Create Account for Student in Firestore
+  Future<void> createAccountStudent() async {
+    String password =
+        generatePassword(name!); // Generate password based on last name
+    await createAuthAccount(email, password);
+
+    try {
+      // Upload image to Firebase Storage
+      await uploadImage();
+
+      String chosenSemester = semester.toString();
       await FirebaseFirestore.instance.collection('Users').add({
         'cr': isCR,
         'dept': department,
@@ -169,50 +159,71 @@ class _AccountCreatorState extends State<AccountCreator> {
         'semester': chosenSemester,
         'type': 'student',
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("User account created successfully!")),
+      );
     } catch (error) {
       print('Error creating account: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to create user account in Firestore.")),
+      );
     }
   }
 
-  void updateIdFormat() {
-    if (semester != null && program != null && section != null) {
-      String semPrefix = semesterPrefixes[semester!] ?? 'XX';
-      String programCode = (programs.indexOf(program!) + 1).toString();
-      id = "${semPrefix}00${programCode}1${section}XX";
-      setState(() {});
+  // Upload Image to Firebase Storage
+  Future<void> uploadImage() async {
+    if (_selectedImage != null) {
+      final storagePath = '${idController.text.trim()}.png';
+      final storageRef = FirebaseStorage.instance.ref().child(storagePath);
+      await storageRef.putFile(_selectedImage!);
     }
   }
 
-  Future<void> fetchExistingIds() async {
-    try {
-      QuerySnapshot userDoc =
-          await FirebaseFirestore.instance.collection('Users').get();
-
-      for (var users in userDoc.docs) {
-        if (users['type'] == 'student') {
-          storedUsers.add(users.data() as Map<String, dynamic>);
-        }
-      }
-
-      for (var users in storedUsers) {
-        print('\n\n\n ${users['id']} ---- ${users['email']} \n\n\n');
-      }
-    } catch (error) {
-      print('\n\n Error fetching \n\n');
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchExistingIds();
+  // Show a preview dialog before account creation
+  Future<void> showPreviewDialog() async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Preview Account"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Name: $name"),
+              Text("Email: $email"),
+              Text("Phone: ${phoneController.text.trim()}"),
+              Text("Department: $department"),
+              Text("Program: $program"),
+              Text("Semester: $semester"),
+              Text("Section: $section"),
+              Text("CR: ${isCR ? "Yes" : "No"}"),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await createAccountStudent(); // Create account after preview
+              },
+              child: Text("Create"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     ThemeData theme = AppTheme.getTheme('admin');
-    var screenWidth = MediaQuery.of(context).size.width;
-    var isTablet = screenWidth > 600; // Threshold for larger devices
 
     return Scaffold(
       appBar: BetterSISAppBar(
@@ -368,38 +379,8 @@ class _AccountCreatorState extends State<AccountCreator> {
               Center(
                 child: ElevatedButton(
                   onPressed: () async {
-                    // Show the confirmation dialog
-                    bool? confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text("Confirm Account Creation"),
-                        content: Text("Are you sure you want to create the account with ID: ${idController.text.trim()}?"),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(false); // No
-                            },
-                            child: Text("No"),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(true); // Yes
-                            },
-                            child: Text("Yes"),
-                          ),
-                        ],
-                      ),
-                    );
-
-                    // If confirmed, create the account
-                    if (confirmed == true) {
-                      await createAccountStudent();
-                    } else {
-                      // Show confirmation message if not confirmed
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Account creation cancelled")),
-                      );
-                    }
+                    // Show the user preview before account creation
+                    await showPreviewDialog();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.primaryColor,
@@ -407,7 +388,8 @@ class _AccountCreatorState extends State<AccountCreator> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  child: Text("Create Account", style: TextStyle(fontSize: 18, color: Colors.white)),
+                  child: Text("Create Account",
+                      style: TextStyle(fontSize: 18, color: Colors.white)),
                 ),
               ),
             ]
@@ -415,5 +397,14 @@ class _AccountCreatorState extends State<AccountCreator> {
         ),
       ),
     );
+  }
+
+  void updateIdFormat() {
+    if (semester != null && program != null && section != null) {
+      String semPrefix = semesterPrefixes[semester!] ?? 'XX';
+      String programCode = (programs.indexOf(program!) + 1).toString();
+      id = "${semPrefix}00${programCode}1${section}XX";
+      setState(() {});
+    }
   }
 }

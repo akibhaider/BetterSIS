@@ -10,6 +10,7 @@ import '../../modules/bettersis_appbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:bettersis/screens/Teacher/Academics/Course_book_manage.dart';
+import 'package:bettersis/screens/Teacher/upload_course_outline.dart';
 
 class TeacherDashboard extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -169,6 +170,18 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
               onLogout: _logout,
               userDept: widget.userData['dept'],
               userId: widget.userData['id'])),
+    );
+  }
+
+  void _navigateToCoPoUpload(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UploadCourseOutlinePage(
+          userDept: widget.userData['dept'],
+          onLogout: _logout,
+        ),
+      ),
     );
   }
 
@@ -346,7 +359,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                       ),
                       _buildServiceButton(
                         icon: Icons.book,
-                        label: "Academics",
+                        label: "Book Manage",
                         themeData: theme,
                         onTap: _navigateToAcademics,
                         fontSize: 14 * scaleFactor,
@@ -356,6 +369,13 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                         label: "Complain",
                         themeData: theme,
                         onTap: _navigateToComplain,
+                        fontSize: 14 * scaleFactor,
+                      ),
+                      _buildServiceButton(
+                        icon: Icons.assessment,
+                        label: "CO-PO Upload",
+                        themeData: theme,
+                        onTap: () => _navigateToCoPoUpload(context),
                         fontSize: 14 * scaleFactor,
                       ),
                     ],
