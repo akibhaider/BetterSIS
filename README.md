@@ -2,19 +2,66 @@
 
 ![Contributors](https://img.shields.io/github/contributors/akibhaider/BetterSIS?color=darkgreen) ![Forks](https://img.shields.io/github/forks/akibhaider/BetterSIS?style=social) ![Stargazers](https://img.shields.io/github/stars/akibhaider/BetterSIS?style=social) ![Issues](https://img.shields.io/github/issues/akibhaider/BetterSIS?color=brown)
 
-## Features
+## Introduction
+BetterSIS is a Student Information System designed specifically for Islamic University of Technoogy(IUT) to simplify student data management and streamline academic processes. Below are necessary instructions provided to run all the source codes (for developers) and to deply and run the appication (for users).
 
+## Features and Services
+Extensively, there are three targetted user base for this applications. (Features are explained in separate sections)
+
+1.0 ***Student***
+- **Academic Result**:  
+i) Detail marks of all enrolled courses of all academic semesters
+ii) Semester wise CGPA graph and evaluation report 
+iii) AI generated personalized feedback for further improvement(based on exam performance data, regularity of class attendance and some other parameters)  
+- **Smart Student Wallet**: 
+i) Smart Card recharge system from within the app using online payment systems (Bkash online payment).
+ii) All transaction histories and balance used in various services(Transportation, Meal Token, Printing etc
+iii) Integrating AB Direct for transactions between bank to system (Developement in progress, future release)
+- **Academics**: 
+i) Register into courses and see details of enrolled courses for each semester
+ii) Admit card and class routine view and download automatically from dashboard
+iii) See important announcements of academic activities
+iv) Get notified of upcoming exams and seat plan 
+v) Google Classroom codes and online class information from course teacher
+vi) Course Feedback and Teacher Evaluation report (Developement in progress, future release) 
+- **Meal Token**: 
+i) Buy Cafeteria Meal token using Smart Wallet or other Digital payment method (Bkash)
+ii) Buy and Transfer token to other users of the system (students, teachers or stuffs)
+iii) Smart refund policy of buying token (Based on the expected number of meals planned for students)
+- **Library**:
+i) Question Bank of all previous academic years (sorted department, program and semester wise)
+ii) Course Materials and necessary lecture notes shared by others
+iii) Course Outlines and Outcomes
+iv) Access books from Library
+v) Contribute materials in library to help others and grow the community
+- **Transportation**:
+i) Bus ticket purchasing with detailed schedules and plan ahead!
+- **Internet Usage**:
+i) Location wise internet usage history (integrated third party application and helper program like netman)
+ii) Connected Device details (TCP/IP layer protocol addresses) and Connection Timing details (daily start and end times) 
+iii) Alert System for when the Internet Limit is exceeded
+- **Class Attendance**:
+i) Notify students, take course attendance and keeps track of previous attendance history
+- **Complain and Feedback**:
+i) Submit complain to any issues and propose any improvements to the authority
+
+1.1 ***Class Representatives***
+Additional features of CRs are:
+i) Create Announcements for other students
+ii) Upload necessary course materials
+
+2 ***Teachers***
+
+
+3 ***Admins***
+
+
+
+****Exciting Features****
 - **IUT Email Verification**: Access to IUT SIS 2.0 will be exclusively available to IUT students. Account creation and system login will be restricted to those using an official IUT email address.
 - **Revamped Dashboard Experience**: IUT SIS 2.0 will feature a redesigned dashboard with an intuitive interface, providing a clear and organized view of all student details.
 - **Department Themed Interface**: The app will feature a customized theme for each department, reflecting their official colors. For example, CSE students will have a blue-themed interface.
-- **Course Registration with Detailed Info**: A modified Course Registration Section where you can see the detailed informations about the course you are about to enrolled.
-- **Enhanced Result Section**: An amazing and user friendly Result Section with some additional features.
 - **Resources with Restricted Access**: Study materials, including book PDFs, lecture slides, and recordings, will be stored in a secure database. Access to these resources will be granted only to authorized students, ensuring controlled and limited availability.
-- **Announcements Section**: Important announcements, including those related to administration, holidays, events, and notices, will be delivered directly to all students through the app, ensuring timely communication.
-- **Internet Usage Limit Alerts**: Students will receive immediate alerts when their internet usage approaches a predetermined limit, set by themselves, to prevent any potential fines for exceeding the limit.
-- **Wallet Recharge**: Smart Card can be recharged from within the app using online payment systems.
-- **Cafeteria Token System**: Students can buy cafeteria tokens from the app to generate a one time QR code which will be read by the staff to provide food.
-- **IUT Bus Ticket System**: Bus tickets can be purchased through IUT SIS 2.0, which provides detailed schedules and displays the number of available tickets for the selected time.
 - **Tution Fees Status**: Students will receive updates on their tuition fee status (paid or outstanding), with the amount shown in both USD and BDT, based on the current exchange rate.
 
 ## Expected Customers
@@ -90,3 +137,11 @@
 ## Sprint Backlog
 
 - Here you can find the sprint backlog for this project: https://docs.google.com/spreadsheets/d/1RDhU2heGX9ymsFlywrJ08rLO7RbqRG4N989avHTFXds/edit?usp=sharing
+
+### Installation and Setup
+
+## Clone the Repository:
+```bash
+git clone https://github.com/akibhaider/BetterSIS.git
+cd BetterSIS
+
