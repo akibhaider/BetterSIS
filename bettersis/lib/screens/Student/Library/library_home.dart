@@ -14,6 +14,7 @@ class Library extends StatelessWidget {
   final String userName;
   final VoidCallback onLogout;
   final ThemeData themeData;
+  final bool isCr;
 
   const Library({
     Key? key,
@@ -22,6 +23,7 @@ class Library extends StatelessWidget {
     required this.userName,
     required this.onLogout,
     required this.themeData,
+    required this.isCr,
   }) : super(key: key);
 
   void _navigateToSection(BuildContext context, String section) {
@@ -33,7 +35,7 @@ class Library extends StatelessWidget {
     } else if (section == "Course_Materials") {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => CourseMaterialsPage(userDept: userDept, onLogout: onLogout)),
+        MaterialPageRoute(builder: (context) => CourseMaterialsPage(userDept: userDept, onLogout: onLogout, isCr: isCr)),
       );
     } else if (section == "Course_Outlines") {
       Navigator.push(

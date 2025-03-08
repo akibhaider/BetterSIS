@@ -120,7 +120,7 @@ class _LibraryCatalogPageState extends State<LibraryCatalogPage> {
       appBar: BetterSISAppBar(
         onLogout: widget.onLogout,
         theme: theme,
-        title: 'Library Catalogue',
+        title: 'Manage Library',
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

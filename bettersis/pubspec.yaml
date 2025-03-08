@@ -61,7 +61,7 @@ dependencies:
   excel: ^4.0.6
   table_calendar: ^3.1.2
   bkash: ^0.0.2
-  shared_preferences: ^2.5.2
+  shared_preferences: ^2.2.2
   image: ^4.3.0
 
 dev_dependencies:

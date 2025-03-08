@@ -135,6 +135,7 @@ class _DashboardState extends State<Dashboard> {
           userName: widget.userData['name'],
           onLogout: _logout,
           themeData: themeData, // Pass the theme data
+          isCr: widget.userData['cr'],
         ),
       ),
     );

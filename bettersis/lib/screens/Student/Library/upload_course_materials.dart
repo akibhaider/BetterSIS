@@ -1,37 +1,33 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:bettersis/modules/bettersis_appbar.dart';
 import 'package:bettersis/utils/themes.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:http/http.dart' as http;
+import 'dart:io';
 import 'package:bettersis/modules/show_message.dart';
-import 'package:bettersis/screens/Student/Library/upload_course_materials.dart';
 
-class CourseMaterialsPage extends StatefulWidget {
+class UploadCourseMaterialsPage extends StatefulWidget {
   final String userDept;
   final VoidCallback onLogout;
-  final bool isCr;
 
-  const CourseMaterialsPage({
+  const UploadCourseMaterialsPage({
     Key? key,
     required this.userDept,
     required this.onLogout,
-    required this.isCr,
   }) : super(key: key);
 
   @override
-  _CourseMaterialsPageState createState() => _CourseMaterialsPageState();
+  _UploadCourseMaterialsPageState createState() => _UploadCourseMaterialsPageState();
 }
 
-class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
+class _UploadCourseMaterialsPageState extends State<UploadCourseMaterialsPage> {
   String? _selectedDepartment;
   String? _selectedProgram;
   String? _selectedSemester;
   String? _selectedCourse;
+  File? _selectedImage;
+  bool _isUploading = false;
   String? _existingMaterialUrl;
-  bool _isCheckingMaterial = false; // Add this flag to track when we're checking for materials
 
   final Map<String, List<String>> programsByDept = {
     'cse': ['cse', 'swe'],
@@ -59,8 +55,8 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
       _selectedProgram = null;
       _selectedSemester = null;
       _selectedCourse = null;
+      _selectedImage = null;
       _existingMaterialUrl = null;
-      _isCheckingMaterial = false;
     });
   }
 
@@ -86,10 +82,6 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
       return;
     }
 
-    setState(() {
-      _isCheckingMaterial = true; // Set flag to true when starting to check
-    });
-
     try {
       final storagePath = 'Library/course_materials/${_selectedDepartment}/${_selectedProgram}/${_selectedSemester}/${_selectedCourse}/material.jpg';
       final storageRef = FirebaseStorage.instance.ref().child(storagePath);
@@ -97,49 +89,87 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
       final url = await storageRef.getDownloadURL();
       setState(() {
         _existingMaterialUrl = url;
-        _isCheckingMaterial = false; // Reset flag after checking
       });
     } catch (e) {
       setState(() {
         _existingMaterialUrl = null;
-        _isCheckingMaterial = false; // Reset flag after checking
       });
     }
   }
 
-  Future<void> _downloadMaterial() async {
-    if (_existingMaterialUrl == null) return;
+  Future<void> _pickImage() async {
+    if (_selectedDepartment == null || 
+        _selectedProgram == null || 
+        _selectedSemester == null || 
+        _selectedCourse == null) {
+      ShowMessage.error(context, 'Please fill all fields before selecting an image');
+      return;
+    }
+
+    if (_existingMaterialUrl != null) {
+      final shouldOverwrite = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Warning'),
+          content: const Text('A course material already exists. Do you want to overwrite it?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Overwrite'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldOverwrite != true) return;
+    }
+
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    
+    if (image != null) {
+      setState(() {
+        _selectedImage = File(image.path);
+      });
+    }
+  }
+
+  Future<void> _uploadMaterial() async {
+    if (_selectedDepartment == null || 
+        _selectedProgram == null || 
+        _selectedSemester == null || 
+        _selectedCourse == null || 
+        _selectedImage == null) {
+      ShowMessage.error(context, 'Please fill all fields and select an image');
+      return;
+    }
+
+    setState(() {
+      _isUploading = true;
+    });
 
     try {
-      final status = await Permission.storage.request();
-      if (!status.isGranted) {
-        ShowMessage.error(context, 'Storage permission is required to download files');
-        return;
-      }
+      final storagePath = 'Library/course_materials/${_selectedDepartment}/${_selectedProgram}/${_selectedSemester}/${_selectedCourse}';
+      
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('$storagePath/material.jpg');
+      
+      await storageRef.putFile(_selectedImage!);
 
-      final directory = await getExternalStorageDirectory();
-      if (directory == null) {
-        ShowMessage.error(context, 'Failed to access storage');
-        return;
-      }
-
-      final customPath = Directory(
-          '${directory.parent.parent.parent.parent.path}/Download/BetterSIS/Course Materials');
-
-      if (!await customPath.exists()) {
-        await customPath.create(recursive: true);
-      }
-
-      final filePath = '${customPath.path}/${_selectedDepartment}_${_selectedProgram}_${_selectedSemester}_${_selectedCourse}.jpg';
-
-      final response = await http.get(Uri.parse(_existingMaterialUrl!));
-      final file = File(filePath);
-      await file.writeAsBytes(response.bodyBytes);
-
-      ShowMessage.success(context, 'Course material downloaded successfully');
+      ShowMessage.success(context, 'Course material uploaded successfully');
+      Navigator.pop(context); // Return to previous screen after successful upload
     } catch (e) {
-      print('Error downloading material: $e');
-      ShowMessage.error(context, 'Failed to download course material');
+      print('Error uploading material: $e');
+      ShowMessage.error(context, 'Error uploading material');
+    } finally {
+      setState(() {
+        _isUploading = false;
+      });
     }
   }
 
@@ -151,7 +181,7 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
       appBar: BetterSISAppBar(
         onLogout: widget.onLogout,
         theme: theme,
-        title: 'Course Materials',
+        title: 'Upload Course Material',
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -263,12 +293,16 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
             ),
             const SizedBox(height: 24),
 
-            // Material Preview or Loading indicator or "No materials" message
-            if (_isCheckingMaterial) ...[
-              const Center(
-                child: CircularProgressIndicator(),
+            // Existing Material Preview
+            if (_existingMaterialUrl != null) ...[
+              const Text(
+                'Current Material:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ] else if (_existingMaterialUrl != null) ...[
+              const SizedBox(height: 8),
               Container(
                 height: 300,
                 decoration: BoxDecoration(
@@ -285,53 +319,59 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: _downloadMaterial,
-                icon: const Icon(Icons.download),
-                label: const Text('Download Material'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.primaryColor,
-                  padding: const EdgeInsets.all(16),
+            ],
+
+            // Select Image Button
+            ElevatedButton.icon(
+              onPressed: _pickImage,
+              icon: const Icon(Icons.image),
+              label: const Text('Select Material Image'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.primaryColor,
+                padding: const EdgeInsets.all(16),
+              ),
+            ),
+
+            // New Image Preview
+            if (_selectedImage != null) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'New Material:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ] else if (_selectedCourse != null) ...[
+              const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.all(16),
-                alignment: Alignment.center,
+                height: 300,
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: theme.primaryColor),
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
-                child: const Text(
-                  'No materials uploaded by CR',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
-                  ),
+                child: Image.file(
+                  _selectedImage!,
+                  fit: BoxFit.contain,
                 ),
               ),
             ],
+
+            const SizedBox(height: 24),
+
+            // Upload Button
+            ElevatedButton(
+              onPressed: _isUploading || _selectedImage == null ? null : _uploadMaterial,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.primaryColor,
+                padding: const EdgeInsets.all(16),
+              ),
+              child: _isUploading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('Upload Material'),
+            ),
           ],
         ),
       ),
-      floatingActionButton: widget.isCr
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UploadCourseMaterialsPage(
-                      userDept: widget.userDept,
-                      onLogout: widget.onLogout,
-                    ),
-                  ),
-                );
-              },
-              child: const Icon(Icons.add, color: Colors.white),
-              backgroundColor: theme.primaryColor,
-            )
-          : null,
     );
   }
-}
+} 
