@@ -274,7 +274,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       ),
                       _buildServiceButton(
                         icon: Icons.library_books,
-                        label: "Library Catalogue",
+                        label: "Add Book",
                         themeData: theme,
                         onTap: _navigateToLibraryCatalog,
                         fontSize: 14 * scaleFactor,

@@ -13,7 +13,7 @@ class SeatProvider with ChangeNotifier {
 
   SeatProvider(this.userId, this.tripType) {
     _initializeTodayDocument();
-    _checkAndResetIfAfter1130AM();
+    _checkAndResetIfAfter830AM();
     _scheduleDailyReset();
   }
 
@@ -33,22 +33,24 @@ class SeatProvider with ChangeNotifier {
         return;
       }
 
-      await _checkAndResetIfAfter1130AM();
+      await _checkAndResetIfAfter830AM(); // Updated method name
     } catch (e) {
       print("Error checking reset status: $e");
     }
   }
 
   // Check if current time is after 11:30 AM and reset if needed
-  Future<void> _checkAndResetIfAfter1130AM() async {
+  // 1. Rename the method for clarity
+  Future<void> _checkAndResetIfAfter830AM() async {
     final now = DateTime.now();
-    final elevenThirtyAM = DateTime(now.year, now.month, now.day, 11, 30);
+    // Change from 11:30 to 8:30
+    final eightThirtyAM = DateTime(now.year, now.month, now.day, 8, 30);
 
     print("Checking time: Current time is ${now.hour}:${now.minute}");
 
-    if (now.isAfter(elevenThirtyAM) && !_hasResetToday) {
+    if (now.isAfter(eightThirtyAM) && !_hasResetToday) {
       print(
-          "Current time is after 11:30 AM. Automatically resetting seats with tripTypeValue 1");
+          "Current time is after 8:30 AM. Automatically resetting seats with tripTypeValue 1");
       // Wait for seats to be loaded
       await Future.delayed(Duration(seconds: 1));
       await resetSeatsWithTripTypeValue(1);
@@ -62,7 +64,7 @@ class SeatProvider with ChangeNotifier {
       print("Reset completed and date saved in preferences: $today");
     } else {
       print(
-          "Current time is before 11:30 AM or reset already done today. No reset needed");
+          "Current time is before 8:30 AM or reset already done today. No reset needed");
     }
   }
 
@@ -342,19 +344,19 @@ class SeatProvider with ChangeNotifier {
       _scheduleDailyReset();
     });
 
-    // Schedule resetSeatsWithTripTypeValue to run every day after 11:30 AM
-    final elevenThirtyAM = DateTime(now.year, now.month, now.day, 11, 30);
-    final timeUntilElevenThirtyAM = elevenThirtyAM.isAfter(now)
-        ? elevenThirtyAM.difference(now)
-        : elevenThirtyAM.add(Duration(days: 1)).difference(now);
+    // Schedule resetSeatsWithTripTypeValue to run every day at 8:30 AM
+    final eightThirtyAM = DateTime(
+        now.year, now.month, now.day, 8, 30); // Changed from 11:30 to 8:30
+    final timeUntilEightThirtyAM = eightThirtyAM.isAfter(now)
+        ? eightThirtyAM.difference(now)
+        : eightThirtyAM.add(Duration(days: 1)).difference(now);
 
-    Future.delayed(timeUntilElevenThirtyAM, () async {
+    Future.delayed(timeUntilEightThirtyAM, () async {
       // Only reset if we haven't already reset today
       if (!_hasResetToday) {
         print(
             "Scheduled daily reset of seats with tripTypeValue 1 triggered at ${DateTime.now()}");
-        await resetSeatsWithTripTypeValue(
-            1); // Reset seats with tripTypeValue 1
+        await resetSeatsWithTripTypeValue(1);
         _hasResetToday = true;
       } else {
         print("Daily reset already performed today, skipping scheduled reset");

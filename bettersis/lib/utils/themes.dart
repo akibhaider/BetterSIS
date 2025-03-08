@@ -30,8 +30,8 @@ class AppTheme {
         );
       case 'admin':
         return ThemeData(
-          primaryColor: const Color(0xFF1F1C2C),
-          secondaryHeaderColor: const Color(0x102542),
+          primaryColor: Colors.black38,
+          secondaryHeaderColor: Colors.blueGrey, 
         );
       default:
         // Default theme if no department matches

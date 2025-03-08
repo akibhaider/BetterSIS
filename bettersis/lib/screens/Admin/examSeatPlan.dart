@@ -27,8 +27,16 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
   bool _isUploading = false;
 
   final List<String> academicYears = [
-    '2020-21', '2021-22', '2022-23', '2023-24', '2024-25',
-    '2025-26', '2026-27', '2027-28', '2028-29', '2029-30'
+    '2020-21',
+    '2021-22',
+    '2022-23',
+    '2023-24',
+    '2024-25',
+    '2025-26',
+    '2026-27',
+    '2027-28',
+    '2028-29',
+    '2029-30'
   ];
   final List<String> semesters = ['winter', 'summer'];
   final List<String> exams = ['mid', 'final'];
@@ -49,16 +57,17 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
   }
 
   Future<void> _checkExistingSeatPlan() async {
-    if (_selectedYear == null || 
-        _selectedSemester == null || 
+    if (_selectedYear == null ||
+        _selectedSemester == null ||
         _selectedExam == null) {
       return;
     }
 
     try {
-      final storagePath = 'ExamSeatPlan/${_selectedYear}/${_selectedSemester}/${_selectedExam}/seat_plan.jpg';
+      final storagePath =
+          'ExamSeatPlan/${_selectedYear}/${_selectedSemester}/${_selectedExam}/seat_plan.jpg';
       final storageRef = FirebaseStorage.instance.ref().child(storagePath);
-      
+
       final url = await storageRef.getDownloadURL();
       setState(() {
         _existingImageUrl = url;
@@ -71,10 +80,11 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
   }
 
   Future<void> _pickImage() async {
-    if (_selectedYear == null || 
-        _selectedSemester == null || 
+    if (_selectedYear == null ||
+        _selectedSemester == null ||
         _selectedExam == null) {
-      ShowMessage.error(context, 'Please fill all fields before selecting an image');
+      ShowMessage.error(
+          context, 'Please fill all fields before selecting an image');
       return;
     }
 
@@ -83,7 +93,8 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Warning'),
-          content: const Text('A seat plan already exists for this selection. Do you want to overwrite it?'),
+          content: const Text(
+              'A seat plan already exists for this selection. Do you want to overwrite it?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -102,7 +113,7 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
 
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    
+
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
@@ -111,9 +122,9 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
   }
 
   Future<void> _uploadSeatPlan() async {
-    if (_selectedYear == null || 
-        _selectedSemester == null || 
-        _selectedExam == null || 
+    if (_selectedYear == null ||
+        _selectedSemester == null ||
+        _selectedExam == null ||
         _selectedImage == null) {
       ShowMessage.error(context, 'Please fill all fields and select an image');
       return;
@@ -124,9 +135,10 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
     });
 
     try {
-      final storagePath = 'ExamSeatPlan/${_selectedYear}/${_selectedSemester}/${_selectedExam}/seat_plan.jpg';
+      final storagePath =
+          'ExamSeatPlan/${_selectedYear}/${_selectedSemester}/${_selectedExam}/seat_plan.jpg';
       final storageRef = FirebaseStorage.instance.ref().child(storagePath);
-      
+
       await storageRef.putFile(_selectedImage!);
 
       ShowMessage.success(context, 'Seat plan uploaded successfully');
@@ -271,8 +283,8 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
             // Select Image Button
             ElevatedButton.icon(
               onPressed: _selectedYear != null &&
-                        _selectedSemester != null &&
-                        _selectedExam != null
+                      _selectedSemester != null &&
+                      _selectedExam != null
                   ? _pickImage
                   : null,
               icon: const Icon(Icons.image),
@@ -311,7 +323,9 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
 
             // Upload Button
             ElevatedButton(
-              onPressed: _isUploading || _selectedImage == null ? null : _uploadSeatPlan,
+              onPressed: _isUploading || _selectedImage == null
+                  ? null
+                  : _uploadSeatPlan,
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.primaryColor,
                 padding: const EdgeInsets.all(16),
@@ -325,4 +339,4 @@ class _ExamSeatPlanPageState extends State<ExamSeatPlanPage> {
       ),
     );
   }
-} 
+}

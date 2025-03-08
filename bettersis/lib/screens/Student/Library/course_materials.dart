@@ -7,15 +7,18 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:bettersis/modules/show_message.dart';
+import 'package:bettersis/screens/Student/Library/upload_course_materials.dart';
 
 class CourseMaterialsPage extends StatefulWidget {
   final String userDept;
   final VoidCallback onLogout;
+  final bool isCr;
 
   const CourseMaterialsPage({
     Key? key,
     required this.userDept,
     required this.onLogout,
+    required this.isCr,
   }) : super(key: key);
 
   @override
@@ -27,25 +30,28 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
   String? _selectedProgram;
   String? _selectedSemester;
   String? _selectedCourse;
-  String? _selectedBook;
-  String? imageUrl;
+  String? _existingMaterialUrl;
+  bool _isCheckingMaterial = false; // Add this flag to track when we're checking for materials
 
-  final List<String> departments = ['cse', 'eee', 'mpe', 'cee', 'btm'];
-  final Map<String, List<String>> departmentPrograms = {
+  final Map<String, List<String>> programsByDept = {
     'cse': ['cse', 'swe'],
     'eee': ['eee'],
     'mpe': ['me', 'ipe'],
     'cee': ['cee'],
     'btm': ['btm'],
   };
-  final List<String> semesters = [
-    'semester 1', 'semester 2', 'semester 3', 'semester 4',
-    'semester 5', 'semester 6', 'semester 7', 'semester 8'
-  ];
 
-  List<String> currentPrograms = [];
-  List<String> currentCourses = [];
-  List<String> currentBooks = [];
+  final List<String> departments = ['cse', 'eee', 'mpe', 'cee', 'btm'];
+  final List<String> semesters = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'];
+
+  // Predefined courses (add more as needed)
+  final Map<String, Map<String, Map<String, List<String>>>> coursesByDeptAndSemester = {
+    'cse': {
+      'cse': {
+        '5th': ['CSE 4513'],
+      }
+    }
+  };
 
   void _resetForm() {
     setState(() {
@@ -53,224 +59,61 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
       _selectedProgram = null;
       _selectedSemester = null;
       _selectedCourse = null;
-      _selectedBook = null;
-      imageUrl = null;
-      currentPrograms = [];
-      currentCourses = [];
-      currentBooks = [];
+      _existingMaterialUrl = null;
+      _isCheckingMaterial = false;
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = AppTheme.getTheme(widget.userDept);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    return Scaffold(
-      appBar: BetterSISAppBar(
-        onLogout: widget.onLogout,
-        theme: theme,
-        title: 'Course Materials',
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.05),
-        child: ListView(
-          children: [
-            Align(
-              alignment: Alignment.topRight,
-              child: TextButton.icon(
-                onPressed: _resetForm,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Reset Form'),
-                style: TextButton.styleFrom(
-                  foregroundColor: theme.primaryColor,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: 'Department',
-                border: const OutlineInputBorder(),
-              ),
-              value: _selectedDepartment,
-              items: departments.map((department) {
-                return DropdownMenuItem<String>(
-                  value: department,
-                  child: Text(department.toUpperCase()),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedDepartment = value;
-                  _selectedProgram = null;
-                  currentPrograms = departmentPrograms[value!] ?? [];
-                });
-              },
-            ),
-            SizedBox(height: screenHeight * 0.02),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: 'Program',
-                border: const OutlineInputBorder(),
-              ),
-              value: _selectedProgram,
-              items: currentPrograms.map((program) {
-                return DropdownMenuItem<String>(
-                  value: program,
-                  child: Text(program.toUpperCase()),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedProgram = value;
-                });
-              },
-              isExpanded: true,
-              isDense: true,
-            ),
-            SizedBox(height: screenHeight * 0.02),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: 'Semester',
-                border: const OutlineInputBorder(),
-              ),
-              value: _selectedSemester,
-              items: semesters.map((semester) {
-                return DropdownMenuItem<String>(
-                  value: semester,
-                  child: Text(semester.toUpperCase()),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedSemester = value;
-                  _selectedCourse = null;
-                  _selectedBook = null;
-
-                  // Placeholder logic for updating courses based on selections
-                  if (_selectedDepartment == 'cse' &&
-                      _selectedProgram == 'cse' &&
-                      _selectedSemester == 'semester 2') {
-                    currentCourses = ['cse 4203'];
-                  } else {
-                    currentCourses = [];
-                  }
-                  currentBooks = []; // Reset books
-                });
-              },
-            ),
-            SizedBox(height: screenHeight * 0.02),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: 'Course',
-                border: const OutlineInputBorder(),
-              ),
-              value: _selectedCourse,
-              items: currentCourses.map((course) {
-                return DropdownMenuItem<String>(
-                  value: course,
-                  child: Text(course.toUpperCase()),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedCourse = value;
-                  if (_selectedCourse == 'cse 4203') {
-                    currentBooks = ['kenneth_rosen_8th_ed'];
-                  }
-                });
-              },
-            ),
-            SizedBox(height: screenHeight * 0.02),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: 'Books',
-                border: const OutlineInputBorder(),
-              ),
-              value: _selectedBook,
-              items: currentBooks.map((book) {
-                return DropdownMenuItem<String>(
-                  value: book,
-                  child: Text(book.toUpperCase()),
-                );
-              }).toList(),
-              onChanged: (value) async {
-                setState(() {
-                  _selectedBook = value;
-                });
-                imageUrl = await getImageUrl(value);
-                setState(() {}); // Refresh UI to display the image
-              },
-            ),
-            SizedBox(height: screenHeight * 0.02),
-            if (imageUrl != null)
-              Column(
-                children: [
-                  Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: theme.primaryColor),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Image.network(
-                      imageUrl!,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.02),
-                  ElevatedButton.icon(
-                    onPressed: downloadImage,
-                    icon: const Icon(Icons.download),
-                    label: const Text('Download'),
-                  ),
-                ],
-              )
-            else
-              Container(
-                height: 200,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  border: Border.all(color: theme.primaryColor),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: const Text('No Image Available'),
-              ),
-          ],
-        ),
-      ),
-    );
+  List<String> _getPrograms() {
+    return _selectedDepartment != null 
+        ? programsByDept[_selectedDepartment]! 
+        : [];
   }
 
-  Future<String?> getImageUrl(String? bookTitle) async {
-    if (_selectedDepartment == null ||
-        _selectedProgram == null ||
-        _selectedSemester == null ||
-        _selectedCourse == null ||
-        bookTitle == null) return null;
+  List<String> _getCourses() {
+    if (_selectedDepartment == null || 
+        _selectedProgram == null || 
+        _selectedSemester == null) return [];
 
-    final path = 'Library/Books/${_selectedDepartment!}/${_selectedProgram!}/${_selectedSemester!}/${_selectedCourse!}/$bookTitle.png';
-    print('Fetching image URL for path: $path');
+    return coursesByDeptAndSemester[_selectedDepartment]?[_selectedProgram]?[_selectedSemester] ?? [];
+  }
+
+  Future<void> _checkExistingMaterial() async {
+    if (_selectedDepartment == null || 
+        _selectedProgram == null || 
+        _selectedSemester == null || 
+        _selectedCourse == null) {
+      return;
+    }
+
+    setState(() {
+      _isCheckingMaterial = true; // Set flag to true when starting to check
+    });
 
     try {
-      final ref = FirebaseStorage.instance.ref().child(path);
-      return await ref.getDownloadURL();
+      final storagePath = 'Library/course_materials/${_selectedDepartment}/${_selectedProgram}/${_selectedSemester}/${_selectedCourse}/material.jpg';
+      final storageRef = FirebaseStorage.instance.ref().child(storagePath);
+      
+      final url = await storageRef.getDownloadURL();
+      setState(() {
+        _existingMaterialUrl = url;
+        _isCheckingMaterial = false; // Reset flag after checking
+      });
     } catch (e) {
-      print('Error fetching image URL: $e');
-      return null;
+      setState(() {
+        _existingMaterialUrl = null;
+        _isCheckingMaterial = false; // Reset flag after checking
+      });
     }
   }
 
-  Future<void> downloadImage() async {
-    if (imageUrl == null) return;
+  Future<void> _downloadMaterial() async {
+    if (_existingMaterialUrl == null) return;
 
     try {
       final status = await Permission.storage.request();
       if (!status.isGranted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Storage permission is required to download files')),
-        );
+        ShowMessage.error(context, 'Storage permission is required to download files');
         return;
       }
 
@@ -287,16 +130,208 @@ class _CourseMaterialsPageState extends State<CourseMaterialsPage> {
         await customPath.create(recursive: true);
       }
 
-      final filePath = '${customPath.path}/${_selectedCourse}_${_selectedBook}.png';
+      final filePath = '${customPath.path}/${_selectedDepartment}_${_selectedProgram}_${_selectedSemester}_${_selectedCourse}.jpg';
 
-      final response = await http.get(Uri.parse(imageUrl!));
+      final response = await http.get(Uri.parse(_existingMaterialUrl!));
       final file = File(filePath);
       await file.writeAsBytes(response.bodyBytes);
 
-      ShowMessage.success(context, 'Course material downloaded to: $filePath');
+      ShowMessage.success(context, 'Course material downloaded successfully');
     } catch (e) {
-      print('Error downloading image: $e');
+      print('Error downloading material: $e');
       ShowMessage.error(context, 'Failed to download course material');
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = AppTheme.getTheme(widget.userDept);
+
+    return Scaffold(
+      appBar: BetterSISAppBar(
+        onLogout: widget.onLogout,
+        theme: theme,
+        title: 'Course Materials',
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: TextButton.icon(
+                onPressed: _resetForm,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Reset Form'),
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.primaryColor,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Department Dropdown
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Department',
+                border: OutlineInputBorder(),
+              ),
+              value: _selectedDepartment,
+              items: departments.map((dept) {
+                return DropdownMenuItem(
+                  value: dept,
+                  child: Text(dept.toUpperCase()),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedDepartment = value;
+                  _selectedProgram = null;
+                  _selectedSemester = null;
+                  _selectedCourse = null;
+                  _existingMaterialUrl = null;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Program Dropdown
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Program',
+                border: OutlineInputBorder(),
+              ),
+              value: _selectedProgram,
+              items: _getPrograms().map((program) {
+                return DropdownMenuItem(
+                  value: program,
+                  child: Text(program.toUpperCase()),
+                );
+              }).toList(),
+              onChanged: _selectedDepartment == null ? null : (value) {
+                setState(() {
+                  _selectedProgram = value;
+                  _selectedSemester = null;
+                  _selectedCourse = null;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Semester Dropdown
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Semester',
+                border: OutlineInputBorder(),
+              ),
+              value: _selectedSemester,
+              items: semesters.map((semester) {
+                return DropdownMenuItem(
+                  value: semester,
+                  child: Text(semester),
+                );
+              }).toList(),
+              onChanged: _selectedProgram == null ? null : (value) {
+                setState(() {
+                  _selectedSemester = value;
+                  _selectedCourse = null;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Course Dropdown
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Course',
+                border: OutlineInputBorder(),
+              ),
+              value: _selectedCourse,
+              items: _getCourses().map((course) {
+                return DropdownMenuItem(
+                  value: course,
+                  child: Text(course),
+                );
+              }).toList(),
+              onChanged: _selectedSemester == null ? null : (value) {
+                setState(() {
+                  _selectedCourse = value;
+                });
+                _checkExistingMaterial();
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // Material Preview or Loading indicator or "No materials" message
+            if (_isCheckingMaterial) ...[
+              const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ] else if (_existingMaterialUrl != null) ...[
+              Container(
+                height: 300,
+                decoration: BoxDecoration(
+                  border: Border.all(color: theme.primaryColor),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Image.network(
+                  _existingMaterialUrl!,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _downloadMaterial,
+                icon: const Icon(Icons.download),
+                label: const Text('Download Material'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.primaryColor,
+                  padding: const EdgeInsets.all(16),
+                ),
+              ),
+            ] else if (_selectedCourse != null) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'No materials uploaded by CR',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      floatingActionButton: widget.isCr
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UploadCourseMaterialsPage(
+                      userDept: widget.userDept,
+                      onLogout: widget.onLogout,
+                    ),
+                  ),
+                );
+              },
+              child: const Icon(Icons.add, color: Colors.white),
+              backgroundColor: theme.primaryColor,
+            )
+          : null,
+    );
   }
 }
