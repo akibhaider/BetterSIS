@@ -1,3 +1,4 @@
+import 'package:bettersis/screens/Admin/complainDetails.dart';
 import 'package:bettersis/screens/Complain/complain_page.dart';
 import 'package:bettersis/screens/Teacher/Attendance/attendance.dart';
 import 'package:bettersis/screens/Teacher/Classes/classes.dart';
@@ -121,6 +122,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
       context,
       MaterialPageRoute(
         builder: (context) => InternetUsageHistory(
+          onLogout: _logout,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToComplainDetails() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ComplainDetailsPage(
           onLogout: _logout,
         ),
       ),
@@ -298,6 +310,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         label: "Internet Usage",
                         themeData: theme,
                         onTap: _navigateToInternetUsage,
+                        fontSize: 14 * scaleFactor,
+                      ),
+                       _buildServiceButton(
+                        icon: Icons.report_problem,
+                        label: "Complain Details",
+                        themeData: theme,
+                        onTap: _navigateToComplainDetails,
                         fontSize: 14 * scaleFactor,
                       ),
                     ],

@@ -65,6 +65,7 @@ dependencies:
   image: ^4.3.0
   android_intent_plus: ^4.0.3
   platform: ^3.1.4
+  cloud_functions: ^5.3.4
 
 dev_dependencies:
   flutter_test:
