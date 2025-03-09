@@ -145,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                     arguments: {
                       'android.intent.extra.EMAIL': ['ict@iut-dhaka.edu'],
                       'android.intent.extra.SUBJECT': 'BetterSIS Support Request',
-                      'android.intent.extra.TEXT': '\n\nSent from: $email',
+                      'android.intent.extra.TEXT': '',  // Empty body
                     },
                     package: 'com.google.android.gm',  // Gmail package
                   );
@@ -157,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                     path: 'ict@iut-dhaka.edu',
                     queryParameters: {
                       'subject': 'BetterSIS Support Request',
-                      'body': '\n\nSent from: $email',
+                      'body': '',  // Empty body
                     },
                   );
 
