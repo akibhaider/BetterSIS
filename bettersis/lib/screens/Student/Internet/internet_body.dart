@@ -137,10 +137,19 @@ class _InternetBodyState extends State<InternetBody> {
                       'mac': item[5],
                     }));
 
+            String t = dashboardData[5][1].split(" ")[0];
+            if (t.length == 4) {
+              t = '${t[0]},${t[1]}${t[2]}${t[3]}';
+            } else if (t.length == 5) {
+              t = '${t[0]}${t[1]},${t[2]}${t[3]}${t[4]}';
+            }
+
             setState(() {
-              totalUsage = dashboardData[5][1].split(" ")[0];
+              totalUsage = t;
               usageHistory = formattedUsageHistory;
             });
+
+            ShowMessage.success(context, 'Refreshed successfully.');
 
             await _storeUsageDataInFirestore(totalUsage, usageHistory);
           } else {
@@ -479,13 +488,6 @@ class _InternetBodyState extends State<InternetBody> {
                               ),
                             );
                           },
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          'View More >>',
-                          style: TextStyle(color: theme.primaryColor),
                         ),
                       ),
                     ],
