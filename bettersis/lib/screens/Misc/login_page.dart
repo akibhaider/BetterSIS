@@ -3,10 +3,13 @@ import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:platform/platform.dart';
 import '../Dashboard/dashboard.dart';
 import '../Dashboard/teacher_dashboard.dart';
 import '../../modules/custom_appbar.dart';
+import '../../modules/show_message.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,6 +21,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController _senderEmailController = TextEditingController();
   bool isLoading = false;
   String errorMessage = '';
 
@@ -99,12 +103,85 @@ class _LoginPageState extends State<LoginPage> {
 
   // Function to contact ICT Center via email
   Future<void> _contactICTCenter() async {
-    const url = 'mailto:ict@iut-dhaka.edu';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Contact ICT Center'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Please enter your Gmail address:'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _senderEmailController,
+              decoration: const InputDecoration(
+                hintText: 'your.email@gmail.com',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final email = _senderEmailController.text.trim();
+              if (email.isEmpty || !email.endsWith('@gmail.com')) {
+                ShowMessage.error(context, 'Please enter a valid Gmail address');
+                return;
+              }
+
+              Navigator.pop(context);
+
+              try {
+                if (LocalPlatform().isAndroid) {
+                  final intent = AndroidIntent(
+                    action: 'android.intent.action.SEND',
+                    type: 'message/rfc822',
+                    arguments: {
+                      'android.intent.extra.EMAIL': ['ict@iut-dhaka.edu'],
+                      'android.intent.extra.SUBJECT': 'BetterSIS Support Request',
+                      'android.intent.extra.TEXT': '\n\nSent from: $email',
+                    },
+                    package: 'com.google.android.gm',  // Gmail package
+                  );
+                  await intent.launch();
+                } else {
+                  // For iOS and other platforms
+                  final Uri emailLaunchUri = Uri(
+                    scheme: 'mailto',
+                    path: 'ict@iut-dhaka.edu',
+                    queryParameters: {
+                      'subject': 'BetterSIS Support Request',
+                      'body': '\n\nSent from: $email',
+                    },
+                  );
+
+                  if (await canLaunchUrlString(emailLaunchUri.toString())) {
+                    await launchUrlString(
+                      emailLaunchUri.toString(),
+                      mode: LaunchMode.externalApplication,
+                    );
+                  } else {
+                    ShowMessage.error(context, 'Could not launch email client');
+                  }
+                }
+              } catch (e) {
+                ShowMessage.error(context, 'Failed to open email client');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+            ),
+            child: const Text('Send Email'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -167,5 +244,13 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _senderEmailController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }
