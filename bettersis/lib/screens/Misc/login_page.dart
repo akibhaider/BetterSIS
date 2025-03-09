@@ -21,7 +21,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController _senderEmailController = TextEditingController();
   bool isLoading = false;
   String errorMessage = '';
 
@@ -103,85 +102,35 @@ class _LoginPageState extends State<LoginPage> {
 
   // Function to contact ICT Center via email
   Future<void> _contactICTCenter() async {
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Contact ICT Center'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Please enter your Gmail address:'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _senderEmailController,
-              decoration: const InputDecoration(
-                hintText: 'your.email@gmail.com',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final email = _senderEmailController.text.trim();
-              if (email.isEmpty || !email.endsWith('@gmail.com')) {
-                ShowMessage.error(context, 'Please enter a valid Gmail address');
-                return;
-              }
+    try {
+      if (LocalPlatform().isAndroid) {
+        final intent = AndroidIntent(
+          action: 'android.intent.action.SENDTO',
+          data: 'mailto:ict@iut-dhaka.edu?subject=BetterSIS Support Request',
+        );
+        await intent.launch();
+      } else {
+        // For iOS and other platforms
+        final Uri emailLaunchUri = Uri(
+          scheme: 'mailto',
+          path: 'ict@iut-dhaka.edu',
+          queryParameters: {
+            'subject': 'BetterSIS Support Request',
+          },
+        );
 
-              Navigator.pop(context);
-
-              try {
-                if (LocalPlatform().isAndroid) {
-                  final intent = AndroidIntent(
-                    action: 'android.intent.action.SEND',
-                    type: 'message/rfc822',
-                    arguments: {
-                      'android.intent.extra.EMAIL': ['ict@iut-dhaka.edu'],
-                      'android.intent.extra.SUBJECT': 'BetterSIS Support Request',
-                      'android.intent.extra.TEXT': '',  // Empty body
-                    },
-                    package: 'com.google.android.gm',  // Gmail package
-                  );
-                  await intent.launch();
-                } else {
-                  // For iOS and other platforms
-                  final Uri emailLaunchUri = Uri(
-                    scheme: 'mailto',
-                    path: 'ict@iut-dhaka.edu',
-                    queryParameters: {
-                      'subject': 'BetterSIS Support Request',
-                      'body': '',  // Empty body
-                    },
-                  );
-
-                  if (await canLaunchUrlString(emailLaunchUri.toString())) {
-                    await launchUrlString(
-                      emailLaunchUri.toString(),
-                      mode: LaunchMode.externalApplication,
-                    );
-                  } else {
-                    ShowMessage.error(context, 'Could not launch email client');
-                  }
-                }
-              } catch (e) {
-                ShowMessage.error(context, 'Failed to open email client');
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-            ),
-            child: const Text('Send Email'),
-          ),
-        ],
-      ),
-    );
+        if (await canLaunchUrlString(emailLaunchUri.toString())) {
+          await launchUrlString(
+            emailLaunchUri.toString(),
+            mode: LaunchMode.externalApplication,
+          );
+        } else {
+          ShowMessage.error(context, 'Could not launch email client');
+        }
+      }
+    } catch (e) {
+      ShowMessage.error(context, 'Failed to open email client');
+    }
   }
 
   @override
@@ -248,7 +197,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    _senderEmailController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
