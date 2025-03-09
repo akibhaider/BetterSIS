@@ -1,3 +1,4 @@
+import 'package:bettersis/screens/Misc/settings_page.dart';
 import 'package:bettersis/screens/Student/Bus%20Ticket/view_bus_tokens.dart';
 import 'package:bettersis/screens/Student/Notice/notice_board.dart';
 import 'package:bettersis/utils/utils.dart';
@@ -21,7 +22,7 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
   late Animation<Offset> _slideAnimation;
   late Map<String, dynamic> userData;
 
-  String balance = "Fetching..."; 
+  String balance = "Fetching...";
 
   @override
   void initState() {
@@ -37,13 +38,13 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
       end: const Offset(-1.5, 0),
     ).animate(_controller);
 
-    _fetchUserBalance(); 
+    _fetchUserBalance();
   }
 
   // Function to fetch the balance from Firestore
   Future<void> _fetchUserBalance() async {
     try {
-      String userId = userData['id']; 
+      String userId = userData['id'];
 
       DocumentSnapshot financeDoc = await FirebaseFirestore.instance
           .collection('Finance')
@@ -52,7 +53,7 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
 
       if (financeDoc.exists && financeDoc.data() != null) {
         setState(() {
-          balance = '৳${financeDoc['Balance']}'; 
+          balance = '৳${financeDoc['Balance']}';
         });
       } else {
         setState(() {
@@ -61,7 +62,7 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
       }
     } catch (e) {
       setState(() {
-        balance = "Error"; 
+        balance = "Error";
       });
     }
   }
@@ -127,7 +128,8 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(15.0),
-                      border: Border.all(color: Colors.white, width: borderWidth),
+                      border:
+                          Border.all(color: Colors.white, width: borderWidth),
                     ),
                     height: screenHeight * 0.07,
                     width: screenWidth * 0.35,
@@ -201,7 +203,7 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
                       builder: (context) => ViewTokens(userData: userData),
                     ));
               }),
-            ListTile(
+          ListTile(
               leading: const Icon(Icons.qr_code),
               title: Text(
                 'My Bus Tokens',
@@ -213,7 +215,7 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
                     MaterialPageRoute(
                       builder: (context) => ViewBusTokens(userData: userData),
                     ));
-              }),  
+              }),
           ListTile(
             leading: const Icon(Icons.settings),
             title: Text(
@@ -222,6 +224,15 @@ class _CustomAppDrawerState extends State<CustomAppDrawer>
             ),
             onTap: () {
               Navigator.of(context).pop();
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsPage(
+                      userId: userData['id'],
+                      userDept: userData['dept'],
+                      onLogout: Utils.getLogout(),
+                    ),
+                  ));
             },
           ),
         ],
