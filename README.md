@@ -234,17 +234,25 @@ flutter build web --release
 ### For Users 
 **(Android Version)**
 1. Download the App:
+
 -> Download the latest APK file from the Releases page
+
 -> Or install directly from Google Play Store (coming soon)
 
 2. Install the App:
+
 -> Enable "Install from Unknown Sources" in your device settings if downloading APK directly
+
 -> Open the downloaded APK file and follow the installation prompts
 
 3. Initial Setup for first-time users:
+
 -> Launch the BetterSIS app
+
 -> Log in with your credentials (Only registered IUTians can access though the app)
 
 **(Web Version)**
+
 -> Visit the web version (App will be hosted soon, Link will be updated); Compatible with all modern browsers 
+
 -> Rest of the parts are same as Android version (Read that first)
