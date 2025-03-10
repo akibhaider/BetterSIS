@@ -10,51 +10,115 @@ Extensively, there are three targetted user base for this applications. (Feature
 
 1.0 ***Student***
 - **Academic Result**:  
+
 i) Detail marks of all enrolled courses of all academic semesters
+
 ii) Semester wise CGPA graph and evaluation report 
+
 iii) AI generated personalized feedback for further improvement(based on exam performance data, regularity of class attendance and some other parameters)  
+
 - **Smart Student Wallet**: 
+
 i) Smart Card recharge system from within the app using online payment systems (Bkash online payment).
+
 ii) All transaction histories and balance used in various services(Transportation, Meal Token, Printing etc
+
 iii) Integrating AB Direct for transactions between bank to system (Developement in progress, future release)
+
 - **Academics**: 
+
 i) Register into courses and see details of enrolled courses for each semester
+
 ii) Admit card and class routine view and download automatically from dashboard
+
 iii) See important announcements of academic activities
+
 iv) Get notified of upcoming exams and seat plan 
+
 v) Google Classroom codes and online class information from course teacher
+
 vi) Course Feedback and Teacher Evaluation report (Developement in progress, future release) 
+
 - **Meal Token**: 
+
 i) Buy Cafeteria Meal token using Smart Wallet or other Digital payment method (Bkash)
+
 ii) Buy and Transfer token to other users of the system (students, teachers or stuffs)
+
 iii) Smart refund policy of buying token (Based on the expected number of meals planned for students)
+
 - **Library**:
+
 i) Question Bank of all previous academic years (sorted department, program and semester wise)
+
 ii) Course Materials and necessary lecture notes shared by others
+
 iii) Course Outlines and Outcomes
+
 iv) Access books from Library
+
 v) Contribute materials in library to help others and grow the community
+
 - **Transportation**:
+
 i) Bus ticket purchasing with detailed schedules and plan ahead!
+
 - **Internet Usage**:
+
 i) Location wise internet usage history (integrated third party application and helper program like netman)
+
 ii) Connected Device details (TCP/IP layer protocol addresses) and Connection Timing details (daily start and end times) 
+
 iii) Alert System for when the Internet Limit is exceeded
+
 - **Class Attendance**:
+
 i) Notify students, take course attendance and keeps track of previous attendance history
+
 - **Complain and Feedback**:
+
 i) Submit complain to any issues and propose any improvements to the authority
 
 1.1 ***Class Representatives***
 Additional features of CRs are:
+
 i) Create Announcements for other students
+
 ii) Upload necessary course materials
 
 2 ***Teachers***
+- **Classroom Activities Management**:
 
+i) Digital attendance marking for tracking student presence
+
+ii) Google Classroom management and integration
+
+iii) Upload and share course materials with students
+
+- **Smart Wallet**:
+
+i) Manage university-related transactions
+
+ii) View transaction history
+
+iii) Process student fee-related activities
 
 3 ***Admins***
+- **Course Management**:
 
+i) Create, edit, and delete courses in the system
+
+ii) Assign teachers and students to specific courses
+
+iii) Manage semester-wise course offerings
+
+- **Library Management**:
+
+i) Maintain and update book records in the digital library
+
+ii) Track book borrowing and returns through the system
+
+iii) Manage student access to electronic resources
 
 
 ****Exciting Features****
@@ -138,10 +202,49 @@ ii) Upload necessary course materials
 
 - Here you can find the sprint backlog for this project: https://docs.google.com/spreadsheets/d/1RDhU2heGX9ymsFlywrJ08rLO7RbqRG4N989avHTFXds/edit?usp=sharing
 
-### Installation and Setup
+## Installation and Setup
 
-## Clone the Repository:
+### For Developers
+
+1. **Clone the Repository**:
 ```bash
 git clone https://github.com/akibhaider/BetterSIS.git
 cd BetterSIS
+```
+2. **Set up Flutter Development Environment**:
+```bash
+# Install dependencies
+flutter pub get
 
+# Configure Firebase
+# - Create a Firebase project
+# - Download and add google-services.json to android/app directory
+# - Add firebase_options.dart to lib/ directory
+```
+3. Run the Project:
+```bash
+flutter run
+
+# Build APK
+flutter build apk --release
+
+# Build for web
+flutter build web --release
+```
+### For Users 
+**(Android Version)**
+1. Download the App:
+-> Download the latest APK file from the Releases page
+-> Or install directly from Google Play Store (coming soon)
+
+2. Install the App:
+-> Enable "Install from Unknown Sources" in your device settings if downloading APK directly
+-> Open the downloaded APK file and follow the installation prompts
+
+3. Initial Setup for first-time users:
+-> Launch the BetterSIS app
+-> Log in with your credentials (Only registered IUTians can access though the app)
+
+**(Web Version)**
+-> Visit the web version (App will be hosted soon, Link will be updated); Compatible with all modern browsers 
+-> Rest of the parts are same as Android version (Read that first)
