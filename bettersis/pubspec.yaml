@@ -63,6 +63,9 @@ dependencies:
   bkash: ^0.0.2
   shared_preferences: ^2.2.2
   image: ^4.3.0
+  android_intent_plus: ^4.0.3
+  platform: ^3.1.4
+  cloud_functions: ^5.3.4
 
 dev_dependencies:
   flutter_test:

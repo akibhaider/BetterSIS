@@ -3,10 +3,13 @@ import 'package:bettersis/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:platform/platform.dart';
 import '../Dashboard/dashboard.dart';
 import '../Dashboard/teacher_dashboard.dart';
 import '../../modules/custom_appbar.dart';
+import '../../modules/show_message.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -99,11 +102,34 @@ class _LoginPageState extends State<LoginPage> {
 
   // Function to contact ICT Center via email
   Future<void> _contactICTCenter() async {
-    const url = 'mailto:ict@iut-dhaka.edu';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
+    try {
+      if (LocalPlatform().isAndroid) {
+        final intent = AndroidIntent(
+          action: 'android.intent.action.SENDTO',
+          data: 'mailto:ict@iut-dhaka.edu?subject=BetterSIS Support Request',
+        );
+        await intent.launch();
+      } else {
+        // For iOS and other platforms
+        final Uri emailLaunchUri = Uri(
+          scheme: 'mailto',
+          path: 'ict@iut-dhaka.edu',
+          queryParameters: {
+            'subject': 'BetterSIS Support Request',
+          },
+        );
+
+        if (await canLaunchUrlString(emailLaunchUri.toString())) {
+          await launchUrlString(
+            emailLaunchUri.toString(),
+            mode: LaunchMode.externalApplication,
+          );
+        } else {
+          ShowMessage.error(context, 'Could not launch email client');
+        }
+      }
+    } catch (e) {
+      ShowMessage.error(context, 'Failed to open email client');
     }
   }
 
@@ -167,5 +193,12 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }

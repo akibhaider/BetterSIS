@@ -7,14 +7,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:bettersis/modules/show_message.dart';
-import 'package:bettersis/screens/Student/Library/upload_course_materials.dart';
+import 'package:bettersis/screens/Student/Library/upload_notes.dart';
 
-class ViewCourseOutlinePage extends StatefulWidget {
+class LectureNotesPage extends StatefulWidget {
   final String userDept;
   final VoidCallback onLogout;
   final bool isCr;
 
-  const ViewCourseOutlinePage({
+  const LectureNotesPage({
     Key? key,
     required this.userDept,
     required this.onLogout,
@@ -22,10 +22,10 @@ class ViewCourseOutlinePage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ViewCourseOutlinePageState createState() => _ViewCourseOutlinePageState();
+  _LectureNotesPageState createState() => _LectureNotesPageState();
 }
 
-class _ViewCourseOutlinePageState extends State<ViewCourseOutlinePage> {
+class _LectureNotesPageState extends State<LectureNotesPage> {
   String? _selectedDepartment;
   String? _selectedProgram;
   String? _selectedSemester;
@@ -48,7 +48,7 @@ class _ViewCourseOutlinePageState extends State<ViewCourseOutlinePage> {
   final Map<String, Map<String, Map<String, List<String>>>> coursesByDeptAndSemester = {
     'cse': {
       'cse': {
-        '5th': ['CSE 4513'],
+        '5th': ['CSE 4501', 'CSE 4549'], 
       }
     }
   };
@@ -79,25 +79,30 @@ class _ViewCourseOutlinePageState extends State<ViewCourseOutlinePage> {
   }
 
   Future<void> _checkExistingMaterial() async {
-    if (_selectedCourse == null) return;
+    if (_selectedDepartment == null || 
+        _selectedProgram == null || 
+        _selectedSemester == null || 
+        _selectedCourse == null) {
+      return;
+    }
 
     setState(() {
-      _isCheckingMaterial = true;
+      _isCheckingMaterial = true; // Set flag to true when starting to check
     });
 
     try {
-      final storagePath = 'Library/course_outlines/${_selectedCourse}/outline.jpg';
+      final storagePath = 'Library/notes/${_selectedDepartment}/${_selectedProgram}/${_selectedSemester}/${_selectedCourse}/material.jpg';
       final storageRef = FirebaseStorage.instance.ref().child(storagePath);
       
       final url = await storageRef.getDownloadURL();
       setState(() {
         _existingMaterialUrl = url;
-        _isCheckingMaterial = false;
+        _isCheckingMaterial = false; // Reset flag after checking
       });
     } catch (e) {
       setState(() {
         _existingMaterialUrl = null;
-        _isCheckingMaterial = false;
+        _isCheckingMaterial = false; // Reset flag after checking
       });
     }
   }
@@ -119,22 +124,22 @@ class _ViewCourseOutlinePageState extends State<ViewCourseOutlinePage> {
       }
 
       final customPath = Directory(
-          '${directory.parent.parent.parent.parent.path}/Download/BetterSIS/Course Outlines');
+          '${directory.parent.parent.parent.parent.path}/Download/BetterSIS/Lecture Notes');
 
       if (!await customPath.exists()) {
         await customPath.create(recursive: true);
       }
 
-      final filePath = '${customPath.path}/${_selectedCourse}_outline.jpg';
+      final filePath = '${customPath.path}/${_selectedDepartment}_${_selectedProgram}_${_selectedSemester}_${_selectedCourse}.jpg';
 
       final response = await http.get(Uri.parse(_existingMaterialUrl!));
       final file = File(filePath);
       await file.writeAsBytes(response.bodyBytes);
 
-      ShowMessage.success(context, 'Course Outline downloaded successfully');
+      ShowMessage.success(context, 'Course material downloaded successfully');
     } catch (e) {
       print('Error downloading material: $e');
-      ShowMessage.error(context, 'Failed to download Course Outline');
+      ShowMessage.error(context, 'Failed to download course material');
     }
   }
 
@@ -146,7 +151,7 @@ class _ViewCourseOutlinePageState extends State<ViewCourseOutlinePage> {
       appBar: BetterSISAppBar(
         onLogout: widget.onLogout,
         theme: theme,
-        title: 'Course Outlines',
+        title: 'Lecture Notes',
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -298,7 +303,7 @@ class _ViewCourseOutlinePageState extends State<ViewCourseOutlinePage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
-                  'No CO-PO mapping found',
+                  'No notes found',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -310,13 +315,12 @@ class _ViewCourseOutlinePageState extends State<ViewCourseOutlinePage> {
           ],
         ),
       ),
-      floatingActionButton: widget.isCr
-          ? FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => UploadCourseMaterialsPage(
+                    builder: (context) => UploadNotesPage(
                       userDept: widget.userDept,
                       onLogout: widget.onLogout,
                     ),
@@ -326,7 +330,6 @@ class _ViewCourseOutlinePageState extends State<ViewCourseOutlinePage> {
               child: const Icon(Icons.add, color: Colors.white),
               backgroundColor: theme.primaryColor,
             )
-          : null,
     );
   }
 }
